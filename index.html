@@ -168,14 +168,21 @@ Integrations:"Jobber GraphQL API + OAuth; Resend email; Twilio SMS (v1.1)",
 "Build — Claude":"~95% — backend 48/48 tests; deployed (Render) + OAuth + daily cron + verified Resend email + APP_DISCONNECT webhook",
 "Build — you (human walls)":"Jobber dev account ✅, OAuth app ✅, 2FA ✅, marketplace submission ✅ (IN REVIEW); still: Stripe connect, later Twilio/A2P",
 Edge:"Decade of explicit forum demand; vendor-confirmed gap; makes customers money",
-"Next":"Jobber review (in queue) → Stripe billing → upgrade Render before free DB expires (~Jul 8) → first paying customer"
-}
+"Next":"Jobber review (in queue) → Stripe billing → finish Render→new-GitHub deploy link → upgrade Render before free DB expires (~Jul 8) → first paying customer",
+"Infra (2026-06-17)":"Code re-homed to the LLC GitHub (castingkarma/duebell-backend, private); getduebell.com support email corrected to support@getduebell.com; Render account secured (password + 2FA + recovery codes) and being repointed to the new repo."
+},
+links:[
+{label:"Live site — getduebell.com", url:"https://getduebell.com"},
+{label:"Support page", url:"https://getduebell.com/support"},
+{label:"Backend health (Render)", url:"https://maintenance-due-reminders.onrender.com/health"},
+{label:"Code repo — castingkarma/duebell-backend (private)", url:"https://github.com/castingkarma/duebell-backend"}
+]
 },
 {
 id:"ghl-field", group:"active", name:"Jobcast — Field-Service for GHL", platform:"GoHighLevel Marketplace",
 icon:`<svg viewBox="0 0 512 512" width="40" height="40" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0E2A47"/><g transform="translate(250,256) scale(5)" fill="none" stroke-linecap="round"><circle cx="-20" cy="0" r="8.5" fill="#fff"/><path d="M-9.7,-12.3 A16,16 0 0 1 -9.7,12.3" stroke="#FF7A1A" stroke-width="6"/><path d="M-2.6,-20.7 A27,27 0 0 1 -2.6,20.7" stroke="#FF7A1A" stroke-width="6"/><path d="M4.4,-29.1 A38,38 0 0 1 4.4,29.1" stroke="#FF7A1A" stroke-width="6"/></g></svg>`,
 status:"greenlit", mrr:0, customers:0, trials:0, source:"Step 1 de-risk ✅ · brand locked", potential:"4.5",
-note:"Build #3 — GREEN-LIT · Step 1 de-risk ✅ · branded Jobcast (usejobcast.com, domain pending)",
+note:"Build #3 — GREEN-LIT · Step 1 de-risk ✅ · branded Jobcast · usejobcast.com registered ✅ (site pending)",
 kpis:[{k:"Est. @ 6 mo",v:"$0.8–2.5k"},{k:"Est. @ 1 yr",v:"$2.5–8k"},{k:"Potential",v:"4.5/5",pot:true}],
 detail:{
 Solution:"GHL-native field-service layer for trades: scheduling/dispatch, tech GPS, 'on-my-way' SMS, before/after photos in a client portal, job-linked invoicing",
@@ -184,9 +191,9 @@ Solution:"GHL-native field-service layer for trades: scheduling/dispatch, tech G
 Integrations:"GoHighLevel API V2 (CRM, calendars, conversations/SMS, payments, custom objects, webhooks)",
 "Hosting (site / app)":"App runs INSIDE GoHighLevel (custom page) — we host the backend (Render) + a light marketing/docs site (Cloudflare). NO Stripe (GHL bills + pays via Tipalti); NO Twilio (SMS via client's GHL number).",
 "Build — Claude (~85%)":"OAuth + token store (reuse DueBell), dispatch board, tech view, arrival-SMS, photo capture/storage, client portal, invoicing (v1.1)",
-"Build — you (human walls)":"GHL dev account + Marketplace app (Client ID/Secret), GHL test acct (14-day trial), Tipalti payout reg, domain (~$10), submission, approvals",
+"Build — you (human walls)":"GHL dev account + Marketplace app (Client ID/Secret), GHL test acct (14-day trial), Tipalti payout reg, domain ✅ (usejobcast.com), submission, approvals",
 Distribution:"GHL Marketplace; agencies auto-bundle across ALL sub-accounts (1 sale → dozens of seats); 145-vote request = warm leads",
-"Status":"Step 1 COMPLETE 2026-06-11: scope locked from the 145-vote thread, 3 integrations de-risked (custom-page embed/SSO, conversations SMS, usage-based billing), FieldTask+WorkSyncer torn down, brand locked (Jobcast · usejobcast.com). Next: build on DueBell's OAuth/token-store bones.",
+"Status":"Step 1 COMPLETE 2026-06-11: scope locked from the 145-vote thread, 3 integrations de-risked (custom-page embed/SSO, conversations SMS, usage-based billing), FieldTask+WorkSyncer torn down, brand locked + domain registered (Jobcast · usejobcast.com ✅). Next: Step 2 build on DueBell's OAuth/token-store bones.",
 "⚠ Risk":"Contested (FieldTask, WorkSyncer) + GHL shipped a native Jobber integration (Sept 2025) — but it's contacts-sync only, NOT the job workflow. We win on the customer-facing layer (arrival SMS + photo portal) neither does."
 }
 },
@@ -417,7 +424,7 @@ function closeModal(){ document.getElementById("ov").classList.remove("show"); }
 
 document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString();
 document.getElementById("footer").innerHTML =
-"Active builds = monday Cert Tracker (in review) + DueBell (submitted to Jobber · in review) + GHL Field-Service (green-lit, prepping). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only.";
+"Active builds = monday Cert Tracker (in review) + DueBell (submitted to Jobber · in review) + Jobcast / GHL Field-Service (green-lit, domain registered). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only.";
 renderTiles(); renderTabs(); renderGrid();
 </script>
 </body>
