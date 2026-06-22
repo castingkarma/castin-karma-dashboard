@@ -314,7 +314,7 @@ id:"jobber-rem", group:"active", name:"DueBell — Service Reminders", platform:
 icon:`<svg viewBox="0 0 384 384" width="40" height="40" aria-hidden="true"><rect width="384" height="384" rx="84" fill="#d98a1f"/><path d="M251.2 73.1A140 140 0 1 1 132.8 73.1" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="18" stroke-linecap="round"/><polygon points="152.7,63.8 132.9,87.4 121.9,63.8" fill="#fff" fill-opacity=".5"/><g fill="#fff"><circle cx="192" cy="120" r="13"/><path d="M192 132C156 132 150 166 150 196 150 222 143 238 132 248L252 248C241 238 234 222 234 196 234 166 228 132 192 132Z"/><circle cx="192" cy="266" r="14"/></g></svg>`,
 status:"review", mrr:0, customers:0, trials:0, source:"Stripe (ours) — to be wired", potential:"4.6",
 website:"https://getduebell.com",
-note:"Build #2 — SUBMITTED to Jobber · IN REVIEW since 2026-06-09 (day 12, no reviewer reply yet) · check-in email to developers@getjobber.com drafted (awaiting send) · live backend + daily reminders ✅",
+note:"Build #2 — SUBMITTED to Jobber · IN REVIEW since 2026-06-09 · 📅 App Review call BOOKED with Liam Wilson — Thu Jul 2, 2:00 PM CT · ownership fix: jamin@castingkarmallc.com invited as Dev Center teammate (email verify pending) · live backend + daily reminders ✅ (latest 2026-06-21)",
 kpis:[{k:"Est. @ 6 mo",v:"$1.4–3.2k"},{k:"Est. @ 1 yr",v:"$4.5–9k"},{k:"Potential",v:"4.6/5",pot:true}],
 detail:{
 Solution:"Auto 'your annual service is due' reminders for repeat-service trades on Jobber (from last-visit + frequency)",
@@ -325,7 +325,7 @@ Integrations:"Jobber GraphQL API + OAuth; Resend email; Twilio SMS (v1.1)",
 "Build — Claude":"~95% — backend 48/48 tests; deployed (Render) + OAuth + daily cron + verified Resend email + APP_DISCONNECT webhook",
 "Build — you (human walls)":"Jobber dev account ✅, OAuth app ✅, 2FA ✅, marketplace submission ✅ (IN REVIEW); still: Stripe connect, later Twilio/A2P",
 Edge:"Decade of explicit forum demand; vendor-confirmed gap; makes customers money",
-"Next":"Jobber review (in queue) → Stripe billing → finish Render→new-GitHub deploy link → upgrade Render before free DB expires (~Jul 8) → first paying customer",
+"Next":"App Review 'Introduction' call with Liam Wilson booked Thu Jul 2, 2:00 PM CT → complete jamin@castingkarmallc.com Dev Center teammate email verification (pending) → Stripe billing → relink Render to castingkarma/duebell-backend + rotate Resend key → upgrade Render before free DB expires (~Jul 8) → first paying customer",
 "Infra (2026-06-17)":"Code re-homed to the LLC GitHub (castingkarma/duebell-backend, private); getduebell.com support email corrected to support@getduebell.com; Render account secured (password + 2FA + recovery codes) and being repointed to the new repo."
 },
 links:[
@@ -622,7 +622,7 @@ function closeModal(){ document.getElementById("ov").classList.remove("show"); }
 
 document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString();
 document.getElementById("footer").innerHTML =
-"Active builds = monday Cert Tracker (v4 live, in review · blocked on account lockout) + DueBell (submitted to Jobber · in review, day 12) + Jobcast / GHL Field-Service (v1.0.0 submitted · in GHL review · live install tested). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only.";
+"Active builds = monday Cert Tracker (v4 live, in review · blocked on account lockout) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (v1.0.0 submitted · in GHL review · live install tested) + TenderProof (P-4, green-lit · prototypes live). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only.";
 renderTiles(); renderTabs(); renderGrid();
 </script>
 </body>
