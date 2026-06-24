@@ -258,8 +258,8 @@ const PROJECTS = [
 {
 id:"tenderproof", group:"active", name:"TenderProof — Broker Defense File", platform:"Chrome extension + web app",
 icon:`<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><rect width="512" height="512" rx="116" fill="#13233a"/><path d="M256 104 L380 150 V268 C380 338 326 388 256 414 C186 388 132 338 132 268 V150 Z" fill="#f3f6fa"/><path d="M256 414 C326 388 380 338 380 268 V150 L256 104 L132 150 V268 C132 338 186 388 256 414 Z" fill="none" stroke="#c79a3a" stroke-width="7" stroke-opacity="0.6"/><path d="M199 262 L241 304 L325 212" fill="none" stroke="#12a85d" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-status:"greenlit", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.7 · GREEN-LIT 2026-06-21", potential:"4.7",
-note:"🆕 P-4 (4.7, highest Discovery score). Per-load ordinary-care defense file for freight brokers, triggered by the 9-0 SCOTUS Montgomery ruling (May 2026). BUILD UNDERWAY: domain tenderproof.io registered · engine built+tested (policy + tamper-evident freeze) · legal/attorney packet drafted · functional web-app MVP LIVE (see link).",
+status:"build", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.7 · build underway", potential:"4.7",
+note:"P-4 (4.7) · 2026-06-24: ✅✅ MULTI-TENANT LIVE — auth code pushed + 3 Supabase env vars set on Render → /api/health = multitenant:true (a real multi-tenant SaaS now). Web-app MVP + Chrome extension built; API live on Render; domain tenderproof.io registered; USPTO 'TENDERPROOF' search came back clear. Next: web-app login + first broker pilots. Per-load ordinary-care defense file for freight brokers (9-0 SCOTUS Montgomery ruling, May 2026).",
 kpis:[{k:"Est. @ 6 mo",v:"$5–35k"},{k:"Est. @ 1 yr",v:"$15k+"},{k:"Potential",v:"4.7/5",pot:true}],
 detail:{
 Solution:"Chrome extension + web app that, on every load tender, snapshots a carrier live FMCSA authority/insurance/safety data, scores it against the broker written carrier-selection policy, and freezes a timestamped, tamper-evident defense file proving ordinary care.",
@@ -270,11 +270,12 @@ Integrations:"FMCSA QCMobile API (free) + insurance/authority data; overlays DAT
 "Build — Claude":"Web app first (manual carrier lookup + policy engine + freeze-to-PDF + dashboard), extension second",
 "Build — you (human walls)":"Transportation-defense attorney (validate defense-file format), FMCSA WebKey, first insurer pilot LOI, domain + Chrome Web Store + Render/GitHub (Ops), spend approvals",
 Distribution:"Own the new Montgomery-compliance keyword + TIA webinar/Boot-camp + insurer mandate (one underwriter = a whole book)",
-"Status":"GREEN-LIT 2026-06-21; prototypes published live; handed to the P-4 build lane. Disciplines: record-never-vouch + attorney sign-off on all legal artifacts.",
+"Status":"MULTI-TENANT LIVE 2026-06-24 — ES256/JWKS auth code pushed (commit f06bf29, 35 tests green) + 3 Supabase env vars set on Render (tenderproof-api) → /api/health = multitenant:true. API live on Render; Supabase project tenderproof is the DB (Render tenderproof-db removed); domain tenderproof.io registered; USPTO 'TENDERPROOF' search clear. Green-lit 2026-06-21. Next: add login to the web app + first broker pilots. Disciplines: record-never-vouch + attorney sign-off on all legal artifacts.",
 "⚠ Risk":"A TMS bolts on a native Montgomery log before our evidence-archive + insurer moat compounds (kill-switch: 90-day insurer deal)"
 },
 links:[
 {label:"▶ Live web-app MVP (functional)", url:"https://castingkarma.github.io/tenderproof-prototype/app/"},
+{label:"Live API health (multitenant:true)", url:"https://tenderproof-api.onrender.com/api/health"},
 {label:"Live marketing site", url:"https://castingkarma.github.io/tenderproof-prototype/"},
 {label:"Live extension prototype", url:"https://castingkarma.github.io/tenderproof-prototype/extension-prototype.html"}
 ]
@@ -623,7 +624,7 @@ function closeModal(){ document.getElementById("ov").classList.remove("show"); }
 
 document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString();
 document.getElementById("footer").innerHTML =
-"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (v1.0.0 submitted · in GHL review · live install tested) + TenderProof (P-4, green-lit · prototypes live). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-23.";
+"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (disapproved 6/23 on a whitelabel detail, fixed + resubmitted same day · back in GHL re-review) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-24.";
 renderTiles(); renderTabs(); renderGrid();
 </script>
 </body>
