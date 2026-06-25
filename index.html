@@ -359,7 +359,92 @@ Distribution:"GHL Marketplace; agencies auto-bundle across ALL sub-accounts (1 s
 
 // ───────────── POSSIBLE PROJECTS (ordered by build-next priority) ─────────────
 {
-id:"shopguard", group:"possible", rank:1, name:"ShopGuard — TikTok Shop SPS Sentinel", platform:"Paid Chrome extension + organic TikTok",
+id:"wixconsent", group:"possible", rank:1, name:"Wix ConsentLog", platform:"Wix App Market (native billing)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.8", potential:"3.8",
+note:"🆕 v7 gem · faceless+passive PASS · best native-billing combo",
+kpis:[{k:"Est. @ 6 mo",v:"~$0.5k"},{k:"Est. @ 1 yr",v:"~$2k"},{k:"Potential",v:"3.8/5",pot:true}],
+sc:{
+plain:{what:"EU/US websites must show a cookie pop-up AND keep a record proving each visitor agreed before any tracking ran. Our Wix app does both, automatically.",problem:"No proof of consent = fines (up to millions). Cheap tools show a banner but keep no real proof. We keep the proof.",who:"Small businesses on Wix who need GDPR compliance — billed a few $/mo through Wix's own checkout."},
+cls:{industry:"Web privacy / compliance",customer:"B2B — site owners + agencies",lives:"Wix App Market",idea:"Marketplace app (native billing)"},
+price:"$8–15/mo",
+build:{we:"A consent banner + a tamper-evident consent logger + a tracker/vendor scanner + admin dashboard, on the Wix SDK.",you:"Create the Wix developer account, submit for Wix review, approve <$50/mo hosting. Wix bills the customer — no Stripe.",not:"No separate website, no per-customer legal work, no payment plumbing.",relies:"Wix App SDK + Wix billing + a consent-record store.",cost:"~3–5 weeks · <$50/mo"},
+market:{buyer:"Small businesses + agencies running Wix sites in the EU/EEA.",big:"Millions of live Wix business sites + a thin app catalog (~300–800) so a newcomer ranks. Need only ~150–400 for $1.5–4k MRR.",need:"~150 paying = ~$1.5k MRR; ~400 = ~$4k MRR — a tiny fraction of Wix's base.",why:"GDPR enforcement + EU Accessibility Act + ongoing CNIL fines = mandatory; owners search 'cookie consent / GDPR'.",day1:"Publish in the Wix App Market with a free tier + 'proof-of-consent' positioning; seed Wix forums/agency groups once.",budget:"App Market SEO (free) + free tier + answer 'Wix GDPR' in the Wix community + agency word-of-mouth. ~$0–100/mo."},
+barrier:"MEDIUM · 3/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",4],["Money potential",3],["Stays ours",2]],
+overall:"3.8",
+risk:"Wix ships native consent, OR Cookiebot/Enzuzo ports to Wix and out-trusts a no-name on a legal product."
+}
+},
+{
+id:"ytstudio", group:"possible", rank:2, name:"Better YouTube Studio", platform:"Chrome Web Store",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.8", potential:"3.8",
+note:"🆕 v7 gem · faceless+passive PASS · NewStudio proves faceless ranking",
+kpis:[{k:"Est. @ 6 mo",v:"~$2.5k"},{k:"Est. @ 1 yr",v:"$5–12k"},{k:"Potential",v:"3.8/5",pot:true}],
+sc:{
+plain:{what:"A Chrome extension that adds the bulk-edit tools YouTube Studio is missing — like editing 200 video descriptions or end-screens at once.",problem:"Creators with big back-catalogs waste hours editing one video at a time; Studio has no bulk tools.",who:"YouTubers with sizable libraries pay ~$8/mo to save hours."},
+cls:{industry:"Creator tools",customer:"B2C / prosumer",lives:"Chrome Web Store (overlay on YouTube Studio)",idea:"Browser extension"},
+price:"$8/mo",
+build:{we:"A content-script overlay on YouTube Studio + bulk-write via the YouTube Data API + accounts/billing (ExtensionPay).",you:"Chrome Web Store dev account ($5 once), a Google API project, approve ~$20–60/mo hosting.",not:"No website, no video hosting, no per-user support.",relies:"YouTube Data API (verify quota/ToS for bulk writes) + Chrome extension APIs + ExtensionPay.",cost:"~4–6 weeks · ~$20–60/mo"},
+market:{buyer:"YouTube creators with back-catalogs (+ small multi-channel managers).",big:"20M+ channels with editable libraries; the in-Studio-UX lane is open (TubeBuddy/vidIQ chase SEO, not bulk edit). Need ~600 for ~$58k/yr.",need:"~600 paying = ~$58k ARR; ~1,500 = ~$144k ARR.",why:"They search 'YouTube Studio bulk edit'. Live proof: NewStudio hit ~4k users, +1k/week, on store ranking alone.",day1:"Publish targeting 'YouTube Studio' keywords with a free tier; post a demo in creator subreddits/Discords once.",budget:"Web Store keyword optimization (free) + free tier + one demo video in r/NewTubers + creator Discords. ~$0–50/mo."},
+barrier:"LOW · 4/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",4],["Money potential",4],["Stays ours",2]],
+overall:"3.8",
+risk:"YouTube ships native bulk-edit; it's a DOM-maintenance treadmill. Verify the YouTube API allows bulk writes at scale first."
+}
+},
+{
+id:"hazcom", group:"possible", rank:3, name:"HazCom Co-Pilot (vertical)", platform:"SEO micro-SaaS (one trade)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.8", potential:"3.8",
+note:"🆕 v7 gem · faceless+passive PASS · best defensibility + a real deadline",
+kpis:[{k:"Est. @ 6 mo",v:"~$1.2k"},{k:"Est. @ 1 yr",v:"~$2.5k"},{k:"Potential",v:"3.8/5",pot:true}],
+sc:{
+plain:{what:"Shops that use chemicals (auto shops: motor oil, brake cleaner, antifreeze) must by law keep a safety sheet per chemical + label the containers. Our app stores it all and prints the label PDFs automatically.",problem:"It's annoying paperwork and OSHA fines you if it's missing. We make it a non-issue.",who:"Small shops that handle chemicals (auto shops, breweries, cleaners) pay ~$39/mo so they never get fined."},
+cls:{industry:"Workplace safety / compliance",customer:"B2B — small shops",lives:"Web app + free SEO pages",idea:"SEO-found micro-SaaS"},
+price:"$39/mo",
+build:{we:"A chemical + safety-sheet library (free PubChem data) + a label generator that outputs a print-ready PDF + accounts + Stripe subscription + the free SEO label pages.",you:"Create the Stripe account, buy the domain (~$12), approve ~$30–60/mo hosting, optional quick legal disclaimer review.",not:"NO hardware, NO printers — the shop prints the label PDF on its own printer. No manual data entry, no per-customer support, no inventory.",relies:"PubChem (free chemical data) + a PDF library + Stripe + a cheap web host.",cost:"~4–6 weeks · ~$30–60/mo"},
+market:{buyer:"US small shops that handle chemicals — starting with auto repair shops.",big:"~160,000 US auto-repair shops (+ breweries, cleaners, salons later). We need only ~250 for ~$10k/mo.",need:"~50 paying = ~$2k MRR; ~250 = ~$10k MRR — a tiny fraction of 160k.",why:"OSHA GHS Rev-7 update — a Nov-2026 deadline sends shops searching 'how do I comply?'.",day1:"Publish the free auto-shop label generator + ~50 chemical pages; post once in r/AutoRepair + shop FB groups.",budget:"Programmatic SEO (free) + free tool as the hook + answer trade-forum questions + pitch ONE supplier newsletter. ~$0–100/mo."},
+barrier:"LOW · 4/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",4],["Runs itself",4],["Money potential",3],["Stays ours",4]],
+overall:"3.8",
+risk:"A sharper rival (SafeSheet) exists — we only win by owning ONE trade's words (e.g. auto shop), not copying the broad tool."
+}
+},
+{
+id:"stockpo", group:"possible", rank:4, name:"StockPO — Stocky replacement", platform:"Shopify App Store",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.7", potential:"3.7",
+note:"🆕 v7 · faceless+passive PASS · dated Stocky-shutdown stampede",
+kpis:[{k:"Est. @ 6 mo",v:"~$1.2k"},{k:"Est. @ 1 yr",v:"$2.5–4k"},{k:"Potential",v:"3.7/5",pot:true}],
+sc:{
+plain:{what:"Shopify is shutting down its free inventory tool 'Stocky' on Aug 31 2026. StockPO is the simple replacement — purchase orders, receiving, reorder points.",problem:"Thousands of Shopify shops suddenly need a Stocky replacement and the alternatives are pricey/bloated. We're the cheap, simple one.",who:"Shopify retailers who manage their own inventory pay ~$29/mo."},
+cls:{industry:"E-commerce ops",customer:"B2B — Shopify merchants",lives:"Shopify App Store",idea:"Marketplace app"},
+price:"$29/mo",
+build:{we:"A Shopify-embedded app for POs, receiving, reorder points, supplier list; Shopify billing.",you:"Shopify Partner account, submit for app review, approve ~$30–60/mo hosting. Shopify bills.",not:"No warehouse, no hardware, no manual fulfillment.",relies:"Shopify Admin API + Shopify billing + a host.",cost:"~6–10 weeks · ~$30–60/mo"},
+market:{buyer:"Small/mid Shopify merchants who used Stocky.",big:"Stocky's large free install base is being stranded; millions of Shopify merchants overall. Reachable: the Stocky refugees searching now.",need:"~70 paying = ~$2k MRR; ~150 = ~$4.3k MRR.",why:"Shopify force-kills Stocky Aug 31 2026 → a dated migration stampede; merchants search 'Stocky alternative'.",day1:"Publish a 'Stocky alternative' listing + a free migration importer; one post in r/shopify.",budget:"App Store SEO + a comparison/migration landing page + r/shopify. ~$0–100/mo."},
+barrier:"MEDIUM · 3/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",5],["Cheap & fast to build",3],["Runs itself",4],["Money potential",3],["Stays ours",2]],
+overall:"3.7",
+risk:"The window peaks Aug 2026 and incumbents are already winning the migration race; Shopify could improve native inventory."
+}
+},
+{
+id:"orchid", group:"possible", rank:5, name:"Orchid Companion", platform:"App store + web (niche)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.7", potential:"3.7",
+note:"🆕 v7 · faceless+passive PASS · best passive-ops; real vacuum",
+kpis:[{k:"Est. @ 6 mo",v:"~$0.7k"},{k:"Est. @ 1 yr",v:"$2–4k"},{k:"Potential",v:"3.7/5",pot:true}],
+sc:{
+plain:{what:"A phone/web app that tracks each orchid's bloom cycle, care, and parentage — built for orchid lovers, with depth a generic plant app lacks.",problem:"Serious growers track collections in messy spreadsheets, and the one dedicated database (OrchidWiz) is a $250 desktop relic being retired.",who:"Orchid hobbyists (who already spend hundreds/yr on plants) pay a small subscription."},
+cls:{industry:"Hobby / horticulture",customer:"B2C enthusiast",lives:"App store + web",idea:"Niche vertical app (SEO + store)"},
+price:"$5–7/mo",
+build:{we:"A collection tracker + bloom-cycle reminders + orchid data/parentage + the app; subscription billing.",you:"App-store developer accounts ($), Stripe/store billing, approve hosting.",not:"No plants, no physical product, no per-user support.",relies:"Orchid data sources + app frameworks + billing + a host.",cost:"~6–8 weeks · <$50/mo"},
+market:{buyer:"Serious orchid hobbyists (the American Orchid Society sells paid orchid data → proven willingness to pay).",big:"A large global orchid-hobby community (AOS + big forums/FB groups). Reachable via the community + SEO.",need:"~350 paying = ~$1.7k MRR.",why:"OrchidWiz (the $250 incumbent) is being retired by its owner = a vacuum; growers search 'orchid care tracker / rebloom'.",day1:"Launch the app + SEO bloom-care pages; share once in r/orchids + orchid FB groups.",budget:"SEO + free tier + organic posts in r/orchids + AOS community. ~$0–50/mo."},
+barrier:"LOW-MED · 3/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",3],["Runs itself",5],["Money potential",3],["Stays ours",3]],
+overall:"3.7",
+risk:"Conservative base won't leave spreadsheets; a generalist plant app adds orchid depth."
+}
+},
+{
+id:"shopguard", group:"possible", rank:6, name:"ShopGuard — TikTok Shop SPS Sentinel", platform:"Paid Chrome extension + organic TikTok",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v4 · score 4.6", potential:"4.6",
 note:"#1 — highest-scoring candidate; defense wedge vs growth-only incumbents",
 kpis:[{k:"Est. @ 6 mo",v:"$0.5–3k"},{k:"Est. @ 1 yr",v:"$3–12k"},{k:"Potential",v:"4.6/5",pot:true}],
@@ -373,7 +458,7 @@ Distribution:"Organic TikTok demo videos into the seller ecosystem (no SEO-from-
 }
 ,
 {
-id:"auditready", group:"possible", rank:2, name:"AuditReady — Med-Spa Compliance", platform:"Vertical SaaS (medical aesthetics)",
+id:"auditready", group:"possible", rank:7, name:"AuditReady — Med-Spa Compliance", platform:"Vertical SaaS (medical aesthetics)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.5 · GATE-PASSED", potential:"4.5",
 note:"#2 — gate-passed, green-light proposed; existential demand",
 kpis:[{k:"Est. @ 6 mo",v:"$3–12k"},{k:"Est. @ 1 yr",v:"$15–40k"},{k:"Potential",v:"4.5/5",pot:true}],
@@ -387,7 +472,7 @@ Distribution:"AmSpa webinar/Boot-camp + compliance-attorney & GFE-vendor partner
 }
 ,
 {
-id:"modguard", group:"possible", rank:3, name:"ModGuard — Workers-Comp Overcharge Defense", platform:"AI vertical (P&C insurance agencies)",
+id:"modguard", group:"possible", rank:8, name:"ModGuard — Workers-Comp Overcharge Defense", platform:"AI vertical (P&C insurance agencies)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.4", potential:"4.4",
 note:"#3 — interest-alignment moat (carriers will never build it)",
 kpis:[{k:"Est. @ 6 mo",v:"$2–8k"},{k:"Est. @ 1 yr",v:"$10–30k"},{k:"Potential",v:"4.4/5",pot:true}],
@@ -401,7 +486,7 @@ Distribution:"Big I + state associations + agency clusters; free we-found-$X sam
 }
 ,
 {
-id:"renewaldesk", group:"possible", rank:4, name:"RenewalDesk — Insurance Renewal Packaging", platform:"Service-as-software (insurance)",
+id:"renewaldesk", group:"possible", rank:9, name:"RenewalDesk — Insurance Renewal Packaging", platform:"Service-as-software (insurance)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.4", potential:"4.4",
 note:"#4 — fastest to MRR (~3–6 wks to $1k)",
 kpis:[{k:"Est. @ 6 mo",v:"$1–4k"},{k:"Est. @ 1 yr",v:"$5–15k"},{k:"Potential",v:"4.4/5",pot:true}],
@@ -415,7 +500,7 @@ Distribution:"Warm IAOA + agency cluster communities; case-study outbound",
 }
 ,
 {
-id:"leadledger", group:"possible", rank:5, name:"LeadLedger — EPA Lead RRP Recordkeeping", platform:"Vertical SaaS (renovation/painting)",
+id:"leadledger", group:"possible", rank:10, name:"LeadLedger — EPA Lead RRP Recordkeeping", platform:"Vertical SaaS (renovation/painting)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.4", potential:"4.4",
 note:"#5 — $49,772/day penalties; Lowe-s decree published the spec",
 kpis:[{k:"Est. @ 6 mo",v:"$1–6k"},{k:"Est. @ 1 yr",v:"$6–20k"},{k:"Potential",v:"4.4/5",pot:true}],
@@ -429,7 +514,7 @@ Distribution:"Public certified-firm registries (direct outreach) + PCA/NARI + tr
 }
 ,
 {
-id:"seedledger", group:"possible", rank:6, name:"SeedLedger — TikTok Shop Seeding ROI", platform:"TikTok Shop sellers (community)",
+id:"seedledger", group:"possible", rank:11, name:"SeedLedger — TikTok Shop Seeding ROI", platform:"TikTok Shop sellers (community)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.3", potential:"4.3",
 note:"#6 — overlaps ShopGuard; evaluate as one TikTok-Shop suite",
 kpis:[{k:"Est. @ 6 mo",v:"$0.5–2.5k"},{k:"Est. @ 1 yr",v:"$3–10k"},{k:"Potential",v:"4.3/5",pot:true}],
@@ -443,7 +528,7 @@ Distribution:"Free seeding-ROI sheet into seller FB groups + Discords",
 }
 ,
 {
-id:"clawbackdental", group:"possible", rank:7, name:"ClawBack Dental — PPO Underpayment Recovery", platform:"Service-as-software (dental RCM)",
+id:"clawbackdental", group:"possible", rank:12, name:"ClawBack Dental — PPO Underpayment Recovery", platform:"Service-as-software (dental RCM)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.2", potential:"4.2",
 note:"#7 — paid from recovered money; payer/clearinghouse won-t build it",
 kpis:[{k:"Est. @ 6 mo",v:"$1–5k"},{k:"Est. @ 1 yr",v:"$6–20k"},{k:"Potential",v:"4.2/5",pot:true}],
@@ -457,7 +542,7 @@ Distribution:"DSO + clearinghouse partnerships; free we-found-$X audit hook",
 }
 ,
 {
-id:"inkdesk", group:"possible", rank:8, name:"InkDesk — Tattoo Intake/Booking OS", platform:"Vertical SaaS (tattoo artists)",
+id:"inkdesk", group:"possible", rank:13, name:"InkDesk — Tattoo Intake/Booking OS", platform:"Vertical SaaS (tattoo artists)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.2", potential:"4.2",
 note:"#8 — cheapest/fastest community build; launch into r/TattooArtists",
 kpis:[{k:"Est. @ 6 mo",v:"$0.4–1.5k"},{k:"Est. @ 1 yr",v:"$2–6k"},{k:"Potential",v:"4.2/5",pot:true}],
@@ -471,7 +556,7 @@ Distribution:"Post into r/TattooArtists + tattoo FB groups + IG; free-for-first-
 }
 ,
 {
-id:"cleanbooks", group:"possible", rank:9, name:"CleanBooks — HCP ↔ QuickBooks Repair", platform:"Housecall Pro + QuickBooks",
+id:"cleanbooks", group:"possible", rank:14, name:"CleanBooks — HCP ↔ QuickBooks Repair", platform:"Housecall Pro + QuickBooks",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v3 · score 4.0", potential:"4.0",
 note:"#9 — strongest demand quotes; no dedicated incumbent",
 kpis:[{k:"Est. @ 6 mo",v:"$0.6–2k"},{k:"Est. @ 1 yr",v:"$2–6k"},{k:"Potential",v:"4.0/5",pot:true}],
@@ -485,7 +570,7 @@ Distribution:"QuickBooks App Store + bookkeeper referral loop",
 }
 ,
 {
-id:"listinglock", group:"possible", rank:10, name:"ListingLock — Google Business Watchdog", platform:"Google Business Profile API",
+id:"listinglock", group:"possible", rank:15, name:"ListingLock — Google Business Watchdog", platform:"Google Business Profile API",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v3 · score 4.0", potential:"4.0",
 note:"#10 — agency multiplier; official Google webhook",
 kpis:[{k:"Est. @ 6 mo",v:"$0.5–1.8k"},{k:"Est. @ 1 yr",v:"$1.5–5k"},{k:"Potential",v:"4.0/5",pot:true}],
@@ -499,7 +584,7 @@ Distribution:"Sell to local-SEO agencies (1 buyer = dozens of locations) + SEO",
 }
 ,
 {
-id:"beatledger", group:"possible", rank:11, name:"BeatLedger — Beat-Seller License Ledger", platform:"Vertical SaaS (music producers)",
+id:"beatledger", group:"possible", rank:16, name:"BeatLedger — Beat-Seller License Ledger", platform:"Vertical SaaS (music producers)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.0", potential:"4.0",
 note:"#11 — loud community, open wedge, weak moat (borderline)",
 kpis:[{k:"Est. @ 6 mo",v:"$0.3–1.5k"},{k:"Est. @ 1 yr",v:"$2–6k"},{k:"Potential",v:"4.0/5",pot:true}],
@@ -529,7 +614,7 @@ function renderTiles(){
 const inReview = PROJECTS.filter(p=>p.status==="review").length;
 const inBuild = PROJECTS.filter(p=>p.status==="build").length;
 const greenlit = PROJECTS.filter(p=>p.status==="greenlit").length;
-const possible = PROJECTS.filter(p=>p.group==="possible").length;
+const _h=hiddenSet(); const possible = PROJECTS.filter(p=>p.group==="possible"&&!_h.has(p.id)).length;
 const tiles = [
 {k:"In review", v:inReview},
 {k:"In build", v:inBuild},
@@ -542,7 +627,7 @@ document.getElementById("tiles").innerHTML = tiles.map(t=>
 
 function renderTabs(){
 const nActive = PROJECTS.filter(p=>p.group==="active").length;
-const nPoss = PROJECTS.filter(p=>p.group==="possible").length;
+const _h2=hiddenSet(); const nPoss = PROJECTS.filter(p=>p.group==="possible"&&!_h2.has(p.id)).length;
 document.getElementById("tabs").innerHTML =
 `<button class="tab ${TAB==='active'?'active':''}" onclick="setTab('active')">Active Builds <span class="cnt">${nActive}</span></button>
 <button class="tab ${TAB==='possible'?'active':''}" onclick="setTab('possible')">Possible Projects <span class="cnt">${nPoss}</span></button>
@@ -579,15 +664,44 @@ const grid = document.getElementById("grid");
 const struct = document.getElementById("structure");
 if(TAB==="structure"){ struct.style.display="block"; grid.style.display="none"; return; }
 struct.style.display="none"; grid.style.display="";
-const items = PROJECTS.filter(p=>p.group===TAB);
-if(TAB==="possible") items.sort((a,b)=>(a.rank||99)-(b.rank||99));
+let items = PROJECTS.filter(p=>p.group===TAB);
+if(TAB==="possible"){ const h=hiddenSet(); items=items.filter(p=>!h.has(p.id)); items.sort((a,b)=>(a.rank||99)-(b.rank||99)); }
 grid.innerHTML = items.map(card).join("");
+if(TAB==="possible"){ const n=hiddenSet().size; if(n>0) grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--ink2);margin:-4px 0 4px">${n} hidden from your view · <a href="#" onclick="unhideAll();return false" style="color:var(--blue);font-weight:700">show all</a></div>` + grid.innerHTML; }
 }
 
+function hiddenSet(){try{return new Set(JSON.parse(localStorage.getItem("ck_hidden")||"[]"))}catch(e){return new Set()}}
+function saveHidden(x){localStorage.setItem("ck_hidden",JSON.stringify([...x]))}
+function hideProject(id){const x=hiddenSet();x.add(id);saveHidden(x);closeModal();renderTiles();renderTabs();renderGrid();}
+function unhideAll(){localStorage.removeItem("ck_hidden");renderTiles();renderTabs();renderGrid();}
+function barColor(v){return v>=4?"#3B6D34":v>=3?"#B07A1E":"#b23b3b";}
+function scHtml(s){
+var sc=s.score.map(function(r){return '<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><span style="font-size:12.5px;width:160px;color:var(--ink)">'+r[0]+'</span><div style="flex:1;height:8px;background:#efeadd;border-radius:4px;overflow:hidden"><div style="width:'+(r[1]*20)+'%;height:100%;background:'+barColor(r[1])+'"></div></div><span style="font-size:12.5px;font-weight:800;width:18px;text-align:right">'+r[1]+'</span></div>';}).join("");
+var bk=s.barrier.toLowerCase().indexOf("low")===0?"#e8f7ee":s.barrier.toLowerCase().indexOf("med")===0?"#fff7ed":"#fdecec";
+var bc=s.barrier.toLowerCase().indexOf("low")===0?"#0f8a3d":s.barrier.toLowerCase().indexOf("med")===0?"#B07A1E":"#b23b3b";
+function L(lab,val,col){return '<div style="font-size:12.5px;margin:5px 0;line-height:1.5"><span style="color:'+(col||"var(--ink2)")+';font-weight:700">'+lab+'</span> '+val+'</div>';}
+return ''
++'<div class="seclbl">In plain words</div>'
++L("What is it?",s.plain.what)+L("What problem?",s.plain.problem)+L("Who pays?",s.plain.who)
++'<div class="seclbl">Snapshot</div>'
++'<div class="mrow"><span>Industry</span><span>'+s.cls.industry+'</span></div>'
++'<div class="mrow"><span>Customer</span><span>'+s.cls.customer+'</span></div>'
++'<div class="mrow"><span>Where it lives</span><span>'+s.cls.lives+'</span></div>'
++'<div class="mrow"><span>Idea type</span><span>'+s.cls.idea+'</span></div>'
++'<div class="mrow"><span>Price</span><span>'+s.price+'</span></div>'
++'<div class="seclbl">What it takes to build</div>'
++L("We build:",s.build.we,"#3B6D34")+L("You do:",s.build.you,"#B07A1E")+L("We do NOT build:",s.build.not,"#b23b3b")+L("Relies on:",s.build.relies)+L("Cost:",s.build.cost)
++'<div class="seclbl">The market &amp; go-to-market</div>'
++L("Who's the buyer:",s.market.buyer)+L("How big:",s.market.big)+L("How many we need:",s.market.need)+L("Why now:",s.market.why)
++'<div style="font-size:12.5px;margin:7px 0"><span style="color:var(--ink2);font-weight:700">Barrier to entry:</span> <span style="background:'+bk+';color:'+bc+';font-weight:700;font-size:11px;padding:2px 9px;border-radius:999px">'+s.barrier+'</span> &nbsp; <span style="color:var(--ink2);font-weight:700">Faceless:</span> '+s.faceless+'</div>'
++L("Day-1 move:",s.market.day1)+L("$0–500/mo plan:",s.market.budget)
++'<div class="seclbl">The score — 6 pillars</div>'+sc
++'<div class="seclbl">Biggest risk</div><div style="font-size:12.5px;background:#fdecec;color:#9b2c2c;border-radius:9px;padding:10px 12px">'+s.risk+'</div>';
+}
 function openModal(id){
 const p = PROJECTS.find(x=>x.id===id);
 const [cls,label] = STATUS[p.status];
-const rows = Object.entries(p.detail).map(([k,v])=>
+const rows = p.sc ? scHtml(p.sc) : Object.entries(p.detail||{}).map(([k,v])=>
 `<div class="mrow"><span>${k}</span><span>${v}</span></div>`).join("");
 const k6 = (p.kpis.find(x=>/6 mo/.test(x.k))||{}).v || "—";
 const k12 = (p.kpis.find(x=>/1 yr/.test(x.k))||{}).v || "—";
@@ -617,6 +731,7 @@ ${p.funnel ? `<div class="seclbl">Most-realistic forecast · post-approval clock
 <table class="ftab"><tr><th>Period</th><th>Installs*</th><th>Active</th><th>Paying (S/G/P)</th><th>MRR (end)</th><th>Cash</th></tr>
 ${p.funnel.map(f=>`<tr><td>${f.period}</td><td>${f.installs}</td><td>${f.active}</td><td>${f.paying} (${f.tiers})</td><td>${f.mrr}</td><td>${f.cash}</td></tr>`).join("")}</table>` : ""}
 ${(p.links||[]).map(l=>`<a class="mlink" href="${l.url}" target="_blank" rel="noreferrer">${l.label} ↗</a>`).join("")}
+${p.group==="possible"?`<div style="margin-top:14px"><button onclick="hideProject('${p.id}')" style="border:1px solid var(--line);background:#fff;color:var(--ink2);padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:700;font-size:12.5px">✕ Hide from my view</button></div>`:""}
 <div class="cnote" style="margin-top:14px">${p.group==='possible'?'Possible project — researched, not committed. Revenue = mid-case modeled range (±50%); Potential = my overall rating, out of 5.':'Forecasts are mid-case modeled ranges (±50%), post-launch clock.'}<span class="src">${p.source}</span></div>`;
 document.getElementById("ov").classList.add("show");
 }
