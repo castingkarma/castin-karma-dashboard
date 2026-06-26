@@ -579,6 +579,7 @@ document.getElementById("tabs").innerHTML =
 `<button class="tab ${TAB==='build'?'active':''}" onclick="setTab('build')">In Build <span class="cnt">${nBuild}</span></button>
 <button class="tab ${TAB==='finished'?'active':''}" onclick="setTab('finished')">Finished · Review/Live <span class="cnt">${nFin}</span></button>
 <button class="tab ${TAB==='possible'?'active':''}" onclick="setTab('possible')">Possible Projects <span class="cnt">${nPoss}</span></button>
+<button class="tab ${TAB==='archive'?'active':''}" onclick="setTab('archive')">Archive <span class="cnt">${nArch}</span></button>
 <button class="tab ${TAB==='structure'?'active':''}" onclick="setTab('structure')">Structure</button>`;
 document.getElementById("tabhint").innerHTML = TAB==="build"
 ? "Projects actively being built (incl. green-lit, not yet submitted). Tap a card for full details."
@@ -619,6 +620,7 @@ struct.style.display="none"; grid.style.display="";
 let items;
 if(TAB==="build"){ items = PROJECTS.filter(isBuildPhase); }
 else if(TAB==="finished"){ items = PROJECTS.filter(isFinishedPhase); }
+else if(TAB==="archive"){ items = PROJECTS.filter(p=>p.group==="archive"); }
 else { const h=hiddenSet(); items = PROJECTS.filter(p=>p.group==="possible"&&!h.has(p.id)); items.sort((a,b)=>(a.rank||99)-(b.rank||99)); }
 grid.innerHTML = items.map(card).join("");
 if(TAB==="possible"){ const n=hiddenSet().size; if(n>0) grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--ink2);margin:-4px 0 4px">${n} hidden from your view · <a href="#" onclick="unhideAll();return false" style="color:var(--blue);font-weight:700">show all</a></div>` + grid.innerHTML; }
