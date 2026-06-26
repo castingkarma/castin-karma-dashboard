@@ -55,6 +55,7 @@ header{background:#FFFFFF;color:var(--ink);border-bottom:1px solid var(--line);p
 .pill.review{background:#eef2ff;color:#3b5bdb;border:1px solid #c7d2fe}
 .pill.possible{background:#f5f0ff;color:#6d28d9;border:1px solid #ddd0fb}
 .pill.planned{background:#f1f5f9;color:var(--slate)}
+.pill.archived{background:#f1eee7;color:#8a7b5e;border:1px solid #e0d8c8}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .kpi{background:#fafbfc;border:1px solid var(--line);border-radius:9px;padding:9px}
 .kpi.pot{background:#f3f0ff;border-color:#e2d9fb}
@@ -341,7 +342,7 @@ links:[
 id:"ghl-field", group:"active", name:"Jobcast — Field-Service for GHL", platform:"GoHighLevel Marketplace",
 icon:`<svg viewBox="0 0 512 512" width="40" height="40" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0E2A47"/><g transform="translate(250,256) scale(5)" fill="none" stroke-linecap="round"><circle cx="-20" cy="0" r="8.5" fill="#fff"/><path d="M-9.7,-12.3 A16,16 0 0 1 -9.7,12.3" stroke="#FF7A1A" stroke-width="6"/><path d="M-2.6,-20.7 A27,27 0 0 1 -2.6,20.7" stroke="#FF7A1A" stroke-width="6"/><path d="M4.4,-29.1 A38,38 0 0 1 4.4,29.1" stroke="#FF7A1A" stroke-width="6"/></g></svg>`,
 status:"review", mrr:0, customers:0, trials:0, source:"Submitted — in GHL review", potential:"4.5",
-note:"Build #3 — ❌ disapproved 2026-06-23 (whitelabel: platform brand names showed on the embedded custom page) → 🔧 fixed same day (scrubbed all GHL/HighLevel mentions, redeployed) → 🚀 RESUBMITTED · back to IN REVIEW (~10-day re-review). Full live install passed end-to-end earlier; real-SMS still gated on A2P. (2026-06-23)",
+note:"Build #3 · 2026-06-25: 🗄️ DB migration kicked off — moving Jobcast's DB off the expiring free Render Postgres → free Supabase (a low-risk DATABASE_URL swap, no schema/code change). Step 1 done; pending Operations to create the Supabase project + set the Render env var, then P-3 verifies. GHL review status UNCHANGED — still IN REVIEW (resubmitted 06-23 after the whitelabel fix; ~10-day re-review). Full live install passed end-to-end earlier; real-SMS still gated on A2P.",
 kpis:[{k:"Est. @ 6 mo",v:"$0.8–2.5k"},{k:"Est. @ 1 yr",v:"$2.5–8k"},{k:"Potential",v:"4.5/5",pot:true}],
 detail:{
 Solution:"GHL-native field-service layer for trades: scheduling/dispatch, tech GPS, 'on-my-way' SMS, before/after photos in a client portal, job-linked invoicing",
@@ -352,263 +353,205 @@ Integrations:"GoHighLevel API V2 (CRM, calendars, conversations/SMS, payments, c
 "Build — Claude (~85%)":"OAuth + token store (reuse DueBell), dispatch board, tech view, arrival-SMS, photo capture/storage, client portal, invoicing (v1.1)",
 "Build — you (human walls)":"GHL dev account + Marketplace app (Client ID/Secret), GHL test acct (14-day trial), Tipalti payout reg, domain ✅ (usejobcast.com), submission, approvals",
 Distribution:"GHL Marketplace; agencies auto-bundle across ALL sub-accounts (1 sale → dozens of seats); 145-vote request = warm leads",
-"Status":"LIVE + WIRED + CONFIG COMPLETE (2026-06-17): backend on Render at api.usejobcast.com (/health OK), GHL Marketplace app fully configured — OAuth (redirect + 7 scopes + keys), Custom Page → /app, Webhook → /webhooks/ghl; domain + marketing site usejobcast.com live. All 5 mandatory Marketplace steps done (basic info, profile, support, $39/mo pricing, review); finish-line QC passed. ✅ SUBMITTED 2026-06-21 → now IN REVIEW (~10 business days). Live install since tested END-TO-END (install → OAuth → embedded SSO dispatch board → create job → 'on-my-way' SMS) — only a real text landing on a physical phone is still pending (gated on A2P 10DLC). Open: A2P decision + tidy/confirm our own HighLevel billing. Ops: route support@usejobcast.com → jamin@castingkarmallc.com.",
+"Status":"LIVE + WIRED + CONFIG COMPLETE (2026-06-17): backend on Render at api.usejobcast.com (/health OK), GHL Marketplace app fully configured — OAuth (redirect + 7 scopes + keys), Custom Page → /app, Webhook → /webhooks/ghl; domain + marketing site usejobcast.com live. All 5 mandatory Marketplace steps done (basic info, profile, support, $39/mo pricing, review); finish-line QC passed. ✅ SUBMITTED 2026-06-21 → now IN REVIEW (~10 business days). Live install since tested END-TO-END (install → OAuth → embedded SSO dispatch board → create job → 'on-my-way' SMS) — only a real text landing on a physical phone is still pending (gated on A2P 10DLC). Open: A2P decision + tidy/confirm our own HighLevel billing. Ops: route support@usejobcast.com → jamin@castingkarmallc.com. 2026-06-25: DB migration kicked off — moving off the expiring free Render Postgres to a free Supabase 'jobcast' project (DATABASE_URL swap, no schema/code change); Step 1 done, pending Operations to create the project + set the Render env var, then P-3 verifies.",
 "⚠ Risk":"Contested (FieldTask, WorkSyncer) + GHL shipped a native Jobber integration (Sept 2025) — but it's contacts-sync only, NOT the job workflow. We win on the customer-facing layer (arrival SMS + photo portal) neither does."
 }
 },
 
 // ───────────── POSSIBLE PROJECTS (ordered by build-next priority) ─────────────
 {
-id:"wixconsent", group:"possible", rank:1, name:"Wix ConsentLog", platform:"Wix App Market (native billing)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.8", potential:"3.8",
-note:"🆕 v7 gem · faceless+passive PASS · best native-billing combo",
-kpis:[{k:"Est. @ 6 mo",v:"~$0.5k"},{k:"Est. @ 1 yr",v:"~$2k"},{k:"Potential",v:"3.8/5",pot:true}],
+id:"hullfax", group:"possible", rank:1, name:"HULLFAX — Boat Maintenance History", platform:"Network/transfer record (boating)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v8 · 4.5 · moat-gate PASS", potential:"4.5",
+note:"🆕 v8 · 3 gates PASS · moat = transfer-at-sale recruiting loop; market leader does not cover maintenance",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–3k"},{k:"Est. @ 1 yr",v:"~$6–15k"},{k:"Potential",v:"4.5/5",pot:true}],
 sc:{
-plain:{what:"EU/US websites must show a cookie pop-up AND keep a record proving each visitor agreed before any tracking ran. Our Wix app does both, automatically.",problem:"No proof of consent = fines (up to millions). Cheap tools show a banner but keep no real proof. We keep the proof.",who:"Small businesses on Wix who need GDPR compliance — billed a few $/mo through Wix's own checkout."},
-cls:{industry:"Web privacy / compliance",customer:"B2B — site owners + agencies",lives:"Wix App Market",idea:"Marketplace app (native billing)"},
-price:"$8–15/mo",
-build:{we:"A consent banner + a tamper-evident consent logger + a tracker/vendor scanner + admin dashboard, on the Wix SDK.",you:"Create the Wix developer account, submit for Wix review, approve <$50/mo hosting. Wix bills the customer — no Stripe.",not:"No separate website, no per-customer legal work, no payment plumbing.",relies:"Wix App SDK + Wix billing + a consent-record store.",cost:"~3–5 weeks · <$50/mo"},
-market:{buyer:"Small businesses + agencies running Wix sites in the EU/EEA.",big:"Millions of live Wix business sites + a thin app catalog (~300–800) so a newcomer ranks. Need only ~150–400 for $1.5–4k MRR.",need:"~150 paying = ~$1.5k MRR; ~400 = ~$4k MRR — a tiny fraction of Wix's base.",why:"GDPR enforcement + EU Accessibility Act + ongoing CNIL fines = mandatory; owners search 'cookie consent / GDPR'.",day1:"Publish in the Wix App Market with a free tier + 'proof-of-consent' positioning; seed Wix forums/agency groups once.",budget:"App Market SEO (free) + free tier + answer 'Wix GDPR' in the Wix community + agency word-of-mouth. ~$0–100/mo."},
-barrier:"MEDIUM · 3/5", faceless:"Yes",
-score:[["Real demand",5],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",4],["Money potential",3],["Stays ours",2]],
-overall:"3.8",
-risk:"Wix ships native consent, OR Cookiebot/Enzuzo ports to Wix and out-trusts a no-name on a legal product."
-}
-},
-{
-id:"ytstudio", group:"possible", rank:2, name:"Better YouTube Studio", platform:"Chrome Web Store",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.8", potential:"3.8",
-note:"🆕 v7 gem · faceless+passive PASS · NewStudio proves faceless ranking",
-kpis:[{k:"Est. @ 6 mo",v:"~$2.5k"},{k:"Est. @ 1 yr",v:"$5–12k"},{k:"Potential",v:"3.8/5",pot:true}],
-sc:{
-plain:{what:"A Chrome extension that adds the bulk-edit tools YouTube Studio is missing — like editing 200 video descriptions or end-screens at once.",problem:"Creators with big back-catalogs waste hours editing one video at a time; Studio has no bulk tools.",who:"YouTubers with sizable libraries pay ~$8/mo to save hours."},
-cls:{industry:"Creator tools",customer:"B2C / prosumer",lives:"Chrome Web Store (overlay on YouTube Studio)",idea:"Browser extension"},
-price:"$8/mo",
-build:{we:"A content-script overlay on YouTube Studio + bulk-write via the YouTube Data API + accounts/billing (ExtensionPay).",you:"Chrome Web Store dev account ($5 once), a Google API project, approve ~$20–60/mo hosting.",not:"No website, no video hosting, no per-user support.",relies:"YouTube Data API (verify quota/ToS for bulk writes) + Chrome extension APIs + ExtensionPay.",cost:"~4–6 weeks · ~$20–60/mo"},
-market:{buyer:"YouTube creators with back-catalogs (+ small multi-channel managers).",big:"20M+ channels with editable libraries; the in-Studio-UX lane is open (TubeBuddy/vidIQ chase SEO, not bulk edit). Need ~600 for ~$58k/yr.",need:"~600 paying = ~$58k ARR; ~1,500 = ~$144k ARR.",why:"They search 'YouTube Studio bulk edit'. Live proof: NewStudio hit ~4k users, +1k/week, on store ranking alone.",day1:"Publish targeting 'YouTube Studio' keywords with a free tier; post a demo in creator subreddits/Discords once.",budget:"Web Store keyword optimization (free) + free tier + one demo video in r/NewTubers + creator Discords. ~$0–50/mo."},
+plain:{what:"A QR-tag + app that logs every service and repair on a boat, tied to its hull ID (HIN), so the maintenance history stays with the boat forever — even after it is sold.",problem:"Boaters track maintenance in nothing or a notebook, and used-boat buyers cannot verify a boat was cared for. A documented history is worth real money at resale.",who:"Boat owners pay ~$5/mo to protect resale value; buyers pay a one-time fee for a verified history report at purchase."},
+cls:{industry:"Recreational boating",customer:"B2C — boat owners + buyers",lives:"Web/mobile app + QR tag",idea:"Network/transfer record (new category)"},
+price:"$4–8/mo + $25–40 report at sale",
+build:{we:"A maintenance log (service, repairs, photos, receipts) tied to the boat HIN + a QR tag + a shareable verified-history report + Stripe billing.",you:"Create the Stripe account, buy the domain, approve ~$50/mo hosting.",not:"No hardware beyond a printed QR sticker; no manual data entry by us; no per-customer support.",relies:"Standard web stack + photo storage + Stripe (HIN is a public free standard).",cost:"~3–5 weeks · under $50/mo"},
+market:{buyer:"US recreational boat owners (and the buyers who inherit the record at sale).",big:"~12M registered US recreational boats; even 0.1% = 12,000 boats. Market leader Boat History Report (120M records) does NOT cover maintenance — a confirmed gap.",need:"~1,000 paying boats ≈ $4–8k MRR — a tiny sliver of 12M.",why:"Used-boat buyers already pay for history reports; owners want resale value plus a place to keep service records.",day1:"Launch the log + a free is-my-boat-documented checker; programmatic SEO on HIN-lookup + prove-boat-maintenance-for-resale; seed The Hull Truth + r/boating.",budget:"Programmatic SEO (free) + free checker + boating forums. ~$0–100/mo."},
 barrier:"LOW · 4/5", faceless:"Yes",
-score:[["Real demand",4],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",4],["Money potential",4],["Stays ours",2]],
-overall:"3.8",
-risk:"YouTube ships native bulk-edit; it's a DOM-maintenance treadmill. Verify the YouTube API allows bulk writes at scale first."
+score:[["Real demand",4],["Easy to get found",5],["Cheap & fast to build",5],["Runs itself",5],["Money potential",4],["Stays ours",4]],
+overall:"4.5",
+risk:"Boat History Report bolts on maintenance using its 120M-record distribution — mitigated by their 20-yr record-only focus + a different data model; move fast on the transfer-at-sale loop."
 }
 },
 {
-id:"hazcom", group:"possible", rank:3, name:"HazCom Co-Pilot (vertical)", platform:"SEO micro-SaaS (one trade)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.8", potential:"3.8",
-note:"🆕 v7 gem · faceless+passive PASS · best defensibility + a real deadline",
-kpis:[{k:"Est. @ 6 mo",v:"~$1.2k"},{k:"Est. @ 1 yr",v:"~$2.5k"},{k:"Potential",v:"3.8/5",pot:true}],
+id:"ledgerpeppol", group:"possible", rank:2, name:"LedgerPeppol — EU E-Invoicing App", platform:"Exclusive-distribution marketplace app",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v8 · 4.5 · moat-gate PASS", potential:"4.5",
+note:"🆕 v8 · 3 gates PASS · moat = official marketplace-partner slot + legally-forced demand",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–4k"},{k:"Est. @ 1 yr",v:"~$8–25k"},{k:"Potential",v:"4.5/5",pot:true}],
 sc:{
-plain:{what:"Shops that use chemicals (auto shops: motor oil, brake cleaner, antifreeze) must by law keep a safety sheet per chemical + label the containers. Our app stores it all and prints the label PDFs automatically.",problem:"It's annoying paperwork and OSHA fines you if it's missing. We make it a non-issue.",who:"Small shops that handle chemicals (auto shops, breweries, cleaners) pay ~$39/mo so they never get fined."},
-cls:{industry:"Workplace safety / compliance",customer:"B2B — small shops",lives:"Web app + free SEO pages",idea:"SEO-found micro-SaaS"},
-price:"$39/mo",
-build:{we:"A chemical + safety-sheet library (free PubChem data) + a label generator that outputs a print-ready PDF + accounts + Stripe subscription + the free SEO label pages.",you:"Create the Stripe account, buy the domain (~$12), approve ~$30–60/mo hosting, optional quick legal disclaimer review.",not:"NO hardware, NO printers — the shop prints the label PDF on its own printer. No manual data entry, no per-customer support, no inventory.",relies:"PubChem (free chemical data) + a PDF library + Stripe + a cheap web host.",cost:"~4–6 weeks · ~$30–60/mo"},
-market:{buyer:"US small shops that handle chemicals — starting with auto repair shops.",big:"~160,000 US auto-repair shops (+ breweries, cleaners, salons later). We need only ~250 for ~$10k/mo.",need:"~50 paying = ~$2k MRR; ~250 = ~$10k MRR — a tiny fraction of 160k.",why:"OSHA GHS Rev-7 update — a Nov-2026 deadline sends shops searching 'how do I comply?'.",day1:"Publish the free auto-shop label generator + ~50 chemical pages; post once in r/AutoRepair + shop FB groups.",budget:"Programmatic SEO (free) + free tool as the hook + answer trade-forum questions + pitch ONE supplier newsletter. ~$0–100/mo."},
-barrier:"LOW · 4/5", faceless:"Yes",
-score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",4],["Runs itself",4],["Money potential",3],["Stays ours",4]],
-overall:"3.8",
-risk:"A sharper rival (SafeSheet) exists — we only win by owning ONE trade's words (e.g. auto shop), not copying the broad tool."
+plain:{what:"EU businesses are being legally required to send invoices electronically through a network called Peppol. Our app is a one-click make-me-compliant add-on inside one accounting platform app store.",problem:"Millions of small EU businesses must switch to e-invoicing by law (Germany 2027–2028) and most have no idea how. We do it for them inside the software they already use.",who:"SMBs on the target accounting/ERP platform pay 15–49 euro/mo to be legally compliant."},
+cls:{industry:"EU e-invoicing / fintech compliance",customer:"B2B — EU SMBs",lives:"A vertical ERP app marketplace",idea:"Exclusive-distribution marketplace app"},
+price:"15–49 euro/mo or per-invoice",
+build:{we:"A connector that turns the platform invoices into compliant Peppol documents + status tracking + onboarding, riding a white-label Access Point.",you:"Register as the platform marketplace developer, contract a white-label Access Point (Storecove/Qvalia), approve hosting + the AP fee.",not:"We do NOT build the regulated Peppol network rails or get our own ISO-27001 accreditation — we inherit the white-label AP one.",relies:"The host platform API + a white-label Peppol Access Point + the host billing.",cost:"~6–10 weeks · ~$50–150/mo + per-invoice AP cost"},
+market:{buyer:"SMBs on one chosen vertical ERP in a mandated EU country.",big:"Millions of SMBs face mandates (Belgium live 1/2026; France 9/2026; Germany all-company 2028). Pick one platform too small for the host to build native.",need:"A few hundred SMBs = real MRR; the mandate makes it non-optional.",why:"It is the LAW with a hard deadline — forced, recurring demand.",day1:"Get listed (ideally official Peppol partner) in one ERP marketplace ahead of its country mandate; mandate-driven search does the rest.",budget:"Marketplace SEO + mandate-driven search + the host own comms. ~$0–200/mo."},
+barrier:"MED · 3/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",4],["Money potential",5],["Stays ours",4]],
+overall:"4.5",
+risk:"The host ERP builds Peppol natively — mitigate by picking a platform too small to bother + locking an official-partner slot."
 }
 },
 {
-id:"stockpo", group:"possible", rank:4, name:"StockPO — Stocky replacement", platform:"Shopify App Store",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.7", potential:"3.7",
-note:"🆕 v7 · faceless+passive PASS · dated Stocky-shutdown stampede",
-kpis:[{k:"Est. @ 6 mo",v:"~$1.2k"},{k:"Est. @ 1 yr",v:"$2.5–4k"},{k:"Potential",v:"3.7/5",pot:true}],
+id:"invoiceindex", group:"possible", rank:3, name:"InvoiceIndex — Restaurant Price Benchmark", platform:"Proprietary-data benchmark",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v8 · 4.3 · moat-gate PASS", potential:"4.3",
+note:"🆕 v8 · 3 gates PASS · moat = proprietary buyer-only invoice data + interest-alignment",
+kpis:[{k:"Est. @ 6 mo",v:"~$2–6k"},{k:"Est. @ 1 yr",v:"~$10–40k"},{k:"Potential",v:"4.3/5",pot:true}],
 sc:{
-plain:{what:"Shopify is shutting down its free inventory tool 'Stocky' on Aug 31 2026. StockPO is the simple replacement — purchase orders, receiving, reorder points.",problem:"Thousands of Shopify shops suddenly need a Stocky replacement and the alternatives are pricey/bloated. We're the cheap, simple one.",who:"Shopify retailers who manage their own inventory pay ~$29/mo."},
-cls:{industry:"E-commerce ops",customer:"B2B — Shopify merchants",lives:"Shopify App Store",idea:"Marketplace app"},
-price:"$29/mo",
-build:{we:"A Shopify-embedded app for POs, receiving, reorder points, supplier list; Shopify billing.",you:"Shopify Partner account, submit for app review, approve ~$30–60/mo hosting. Shopify bills.",not:"No warehouse, no hardware, no manual fulfillment.",relies:"Shopify Admin API + Shopify billing + a host.",cost:"~6–10 weeks · ~$30–60/mo"},
-market:{buyer:"Small/mid Shopify merchants who used Stocky.",big:"Stocky's large free install base is being stranded; millions of Shopify merchants overall. Reachable: the Stocky refugees searching now.",need:"~70 paying = ~$2k MRR; ~150 = ~$4.3k MRR.",why:"Shopify force-kills Stocky Aug 31 2026 → a dated migration stampede; merchants search 'Stocky alternative'.",day1:"Publish a 'Stocky alternative' listing + a free migration importer; one post in r/shopify.",budget:"App Store SEO + a comparison/migration landing page + r/shopify. ~$0–100/mo."},
-barrier:"MEDIUM · 3/5", faceless:"Yes",
-score:[["Real demand",5],["Easy to get found",5],["Cheap & fast to build",3],["Runs itself",4],["Money potential",3],["Stays ours",2]],
-overall:"3.7",
-risk:"The window peaks Aug 2026 and incumbents are already winning the migration race; Shopify could improve native inventory."
+plain:{what:"Independent restaurants upload their food-distributor invoices (Sysco, US Foods) and instantly see whether they are being overcharged versus other restaurants like them.",problem:"Distributors charge every restaurant a different, secret price for the same items; owners have no way to know if they are getting ripped off. We show them.",who:"Independent restaurant owners pay $49–99/mo to stop overpaying (the savings dwarf the fee)."},
+cls:{industry:"Restaurant / food-service",customer:"B2B — independent restaurants",lives:"Web app",idea:"Proprietary-data benchmark (data moat)"},
+price:"$49–99/mo",
+build:{we:"Invoice upload + auto-parsing + a peer price benchmark by region/volume tier + an am-I-overpaying dashboard + Stripe.",you:"Stripe account, domain, approve ~$50/mo hosting.",not:"No buying group, no negotiating on their behalf, no manual data entry by us.",relies:"OCR/parsing + a database + Stripe. The data is contributed by users (the moat).",cost:"~5–8 weeks · ~$30–80/mo"},
+market:{buyer:"~750k US independent restaurants.",big:"Huge; Sysco vs US Foods spreads run 10–15%. The data exists nowhere public — only buyers have it.",need:"~150 paying = ~$10k MRR.",why:"Owners already drive to Restaurant Depot to price-check; the pain is loud and constant.",day1:"Seed ONE metro + cuisine; free are-you-overpaying-on-Sysco analysis (upload one invoice) then contribute-to-unlock the benchmark.",budget:"SEO (is-my-Sysco-pricing-fair) + restaurant-owner communities + contribute-to-unlock virality. ~$0–100/mo."},
+barrier:"MED · 3/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",4],["Cheap & fast to build",4],["Runs itself",4],["Money potential",4],["Stays ours",5]],
+overall:"4.3",
+risk:"Cold-start — the benchmark is worthless until ~30 invoices per cohort; seed one metro/vertical first."
 }
 },
 {
-id:"orchid", group:"possible", rank:5, name:"Orchid Companion", platform:"App store + web (niche)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v7 · 3.7", potential:"3.7",
-note:"🆕 v7 · faceless+passive PASS · best passive-ops; real vacuum",
-kpis:[{k:"Est. @ 6 mo",v:"~$0.7k"},{k:"Est. @ 1 yr",v:"$2–4k"},{k:"Potential",v:"3.7/5",pot:true}],
+id:"equitrail", group:"possible", rank:4, name:"EquiTrail — Horse History Record", platform:"Network/transfer record (equine)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v8 · 4.2 · moat-gate PASS", potential:"4.2",
+note:"🆕 v8 · 3 gates PASS · HULLFAX sibling for the used-horse market",
+kpis:[{k:"Est. @ 6 mo",v:"~$0.6–2k"},{k:"Est. @ 1 yr",v:"~$4–10k"},{k:"Potential",v:"4.2/5",pot:true}],
 sc:{
-plain:{what:"A phone/web app that tracks each orchid's bloom cycle, care, and parentage — built for orchid lovers, with depth a generic plant app lacks.",problem:"Serious growers track collections in messy spreadsheets, and the one dedicated database (OrchidWiz) is a $250 desktop relic being retired.",who:"Orchid hobbyists (who already spend hundreds/yr on plants) pay a small subscription."},
-cls:{industry:"Hobby / horticulture",customer:"B2C enthusiast",lives:"App store + web",idea:"Niche vertical app (SEO + store)"},
-price:"$5–7/mo",
-build:{we:"A collection tracker + bloom-cycle reminders + orchid data/parentage + the app; subscription billing.",you:"App-store developer accounts ($), Stripe/store billing, approve hosting.",not:"No plants, no physical product, no per-user support.",relies:"Orchid data sources + app frameworks + billing + a host.",cost:"~6–8 weeks · <$50/mo"},
-market:{buyer:"Serious orchid hobbyists (the American Orchid Society sells paid orchid data → proven willingness to pay).",big:"A large global orchid-hobby community (AOS + big forums/FB groups). Reachable via the community + SEO.",need:"~350 paying = ~$1.7k MRR.",why:"OrchidWiz (the $250 incumbent) is being retired by its owner = a vacuum; growers search 'orchid care tracker / rebloom'.",day1:"Launch the app + SEO bloom-care pages; share once in r/orchids + orchid FB groups.",budget:"SEO + free tier + organic posts in r/orchids + AOS community. ~$0–50/mo."},
+plain:{what:"Same idea as HULLFAX but for horses — a lifetime vet, farrier, and performance record that travels with the horse when it is sold.",problem:"Buying a horse is a 4–5 figure decision with no verifiable history; buyers pay vets for pre-purchase exams but there is no trusted record that follows the animal.",who:"Horse owners pay ~$6–10/mo; the record becomes the buyer reason to trust the horse at sale."},
+cls:{industry:"Equine / livestock",customer:"B2C — horse owners + buyers",lives:"Web/mobile app",idea:"Network/transfer record (HULLFAX sibling)"},
+price:"$6–10/mo",
+build:{we:"Health/farrier/vet/performance log + photos + a transferable verified-history record + Stripe.",you:"Stripe account, domain, approve hosting.",not:"No physical product, no manual support, no vet integrations in v1 (owner-entered).",relies:"Standard web stack + photo storage + Stripe.",cost:"~4–6 weeks · under $50/mo"},
+market:{buyer:"Serious horse owners (buyers already pay vets for pre-purchase exams).",big:"~7M US horses; high transaction values = strong willingness-to-pay per record.",need:"~300 paying = ~$2k+ MRR.",why:"High-value transactions + buyers already demand records; siloed apps (HorseRecords, EquineGo) have no transfer layer.",day1:"Launch owner log + a free pre-purchase-exam checklist; pSEO + equestrian Facebook groups.",budget:"SEO + equestrian communities. ~$0–50/mo."},
 barrier:"LOW-MED · 3/5", faceless:"Yes",
-score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",3],["Runs itself",5],["Money potential",3],["Stays ours",3]],
-overall:"3.7",
-risk:"Conservative base won't leave spreadsheets; a generalist plant app adds orchid depth."
+score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",5],["Runs itself",5],["Money potential",4],["Stays ours",4]],
+overall:"4.2",
+risk:"Thinner, more relationship-driven cold-start than boats; keep v1 owner-entered to stay faceless."
 }
 },
 {
-id:"shopguard", group:"possible", rank:6, name:"ShopGuard — TikTok Shop SPS Sentinel", platform:"Paid Chrome extension + organic TikTok",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v4 · score 4.6", potential:"4.6",
-note:"#1 — highest-scoring candidate; defense wedge vs growth-only incumbents",
-kpis:[{k:"Est. @ 6 mo",v:"$0.5–3k"},{k:"Est. @ 1 yr",v:"$3–12k"},{k:"Potential",v:"4.6/5",pot:true}],
-detail:{
-Solution:"Proactive penalty-avoidance + SPS/account-health alerts + appeal evidence for TikTok Shop sellers — before they cross a threshold",
-"Market size":"Huge TikTok Shop seller base; sticky fear/survival buyer",
-"Pricing model":"$19–49/mo; our billing",
-Distribution:"Organic TikTok demo videos into the seller ecosystem (no SEO-from-zero)",
-"⚠ Risk":"Platform DOM fragility; defense demand inferred not metered — 1-wk smoke test first"
-}
-}
-,
+id:"arch-wixconsent", group:"archive", name:"Wix ConsentLog", platform:"Wix App Market",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Wix native consent + Cookiebot/CookieYes free tiers.",
+kpis:[],
+detail:{"Why cut":"Wix native consent + Cookiebot/CookieYes free tiers.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"auditready", group:"possible", rank:7, name:"AuditReady — Med-Spa Compliance", platform:"Vertical SaaS (medical aesthetics)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.5 · GATE-PASSED", potential:"4.5",
-note:"#2 — gate-passed, green-light proposed; existential demand",
-kpis:[{k:"Est. @ 6 mo",v:"$3–12k"},{k:"Est. @ 1 yr",v:"$15–40k"},{k:"Potential",v:"4.5/5",pot:true}],
-detail:{
-Solution:"Continuous multi-state, per-service compliance audit-readiness monitoring + one-click audit binder for ~12k med spas",
-"Market size":"~12k US med spas growing ~14%/yr; AmSpa 4k+ paid members + Medical Spa Show",
-"Pricing model":"$249–399/loc/mo + onboarding; MSO ACV $30–50k/yr",
-Distribution:"AmSpa webinar/Boot-camp + compliance-attorney & GFE-vendor partnerships",
-"⚠ Risk":"Regulatory-content upkeep + liability positioning (needs attorney-reviewer partner); HIPAA"
-}
-}
-,
+id:"arch-ytstudio", group:"archive", name:"Better YouTube Studio", platform:"Chrome Web Store",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Free/native rivals + YouTube can ship bulk-edit; copyable DOM wedge.",
+kpis:[],
+detail:{"Why cut":"Free/native rivals + YouTube can ship bulk-edit; copyable DOM wedge.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"modguard", group:"possible", rank:8, name:"ModGuard — Workers-Comp Overcharge Defense", platform:"AI vertical (P&C insurance agencies)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.4", potential:"4.4",
-note:"#3 — interest-alignment moat (carriers will never build it)",
-kpis:[{k:"Est. @ 6 mo",v:"$2–8k"},{k:"Est. @ 1 yr",v:"$10–30k"},{k:"Potential",v:"4.4/5",pot:true}],
-detail:{
-Solution:"Auto-detect mod/audit overcharges + generate dispute packets across an agency whole book",
-"Market size":"~39k independent agencies place 87% of commercial premium",
-"Pricing model":"SaaS seat + recovery share; agency channel",
-Distribution:"Big I + state associations + agency clusters; free we-found-$X sample audit",
-"⚠ Risk":"Rules-encoding accuracy + liability (NCCI vs independent-bureau states)"
-}
-}
-,
+id:"arch-hazcom", group:"archive", name:"HazCom Co-Pilot", platform:"SEO micro-SaaS",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — VelocityEHS/MSDSonline crowded + SDS Manager makes labels FREE.",
+kpis:[],
+detail:{"Why cut":"VelocityEHS/MSDSonline crowded + SDS Manager makes labels FREE.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"renewaldesk", group:"possible", rank:9, name:"RenewalDesk — Insurance Renewal Packaging", platform:"Service-as-software (insurance)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.4", potential:"4.4",
-note:"#4 — fastest to MRR (~3–6 wks to $1k)",
-kpis:[{k:"Est. @ 6 mo",v:"$1–4k"},{k:"Est. @ 1 yr",v:"$5–15k"},{k:"Potential",v:"4.4/5",pot:true}],
-detail:{
-Solution:"Done-for-you carrier-ready renewal/remarketing submission packages for small agencies; sell-before-build, automate behind the scenes",
-"Market size":"Small commercial-lines agencies (1–10 ppl), ~30 renewals/mo each",
-"Pricing model":"$750–1,000/mo retainer + per-submission; our billing",
-Distribution:"Warm IAOA + agency cluster communities; case-study outbound",
-"⚠ Risk":"Ops-heavy delivery; Patra could extend from policy-checking into this lane"
-}
-}
-,
+id:"arch-stockpo", group:"archive", name:"StockPO", platform:"Shopify App Store",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Crowded inventory-app category + Shopify could improve native; copyable.",
+kpis:[],
+detail:{"Why cut":"Crowded inventory-app category + Shopify could improve native; copyable.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"leadledger", group:"possible", rank:10, name:"LeadLedger — EPA Lead RRP Recordkeeping", platform:"Vertical SaaS (renovation/painting)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.4", potential:"4.4",
-note:"#5 — $49,772/day penalties; Lowe-s decree published the spec",
-kpis:[{k:"Est. @ 6 mo",v:"$1–6k"},{k:"Est. @ 1 yr",v:"$6–20k"},{k:"Potential",v:"4.4/5",pot:true}],
-detail:{
-Solution:"Per-job lead-safe guided workflow + one-click EPA audit packet + cert-expiry tracking for pre-1978 renovation firms",
-"Market size":"Tens of thousands of EPA-certified RRP firms; public state registries = a buyer list",
-"Pricing model":"$49–299/mo SMB; $1.5–10k/mo installer networks",
-Distribution:"Public certified-firm registries (direct outreach) + PCA/NARI + training-provider bundling",
-"⚠ Risk":"Federal enforcement currently deprioritized (mitigated by state programs + HUD + insurers/GCs)"
-}
-}
-,
+id:"arch-orchid", group:"archive", name:"Orchid Companion", platform:"App store (niche)",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Generalist plant apps + spreadsheet-loyal base; no real moat.",
+kpis:[],
+detail:{"Why cut":"Generalist plant apps + spreadsheet-loyal base; no real moat.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"seedledger", group:"possible", rank:11, name:"SeedLedger — TikTok Shop Seeding ROI", platform:"TikTok Shop sellers (community)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.3", potential:"4.3",
-note:"#6 — overlaps ShopGuard; evaluate as one TikTok-Shop suite",
-kpis:[{k:"Est. @ 6 mo",v:"$0.5–2.5k"},{k:"Est. @ 1 yr",v:"$3–10k"},{k:"Potential",v:"4.3/5",pot:true}],
-detail:{
-Solution:"Neutral per-creator profit-truth ledger — which seeded samples actually paid back + a monthly kill-list",
-"Market size":"Large TikTok Shop seller base spending $2.5–5k seeding + per-affiliate retainers",
-"Pricing model":"$29–49/mo; our billing",
-Distribution:"Free seeding-ROI sheet into seller FB groups + Discords",
-"⚠ Risk":"TikTok ships native ROI / incumbent bolts it on (mitigate: cross-platform)"
-}
-}
-,
+id:"arch-shopguard", group:"archive", name:"ShopGuard", platform:"Chrome extension",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — TikTok ships native Account-Health + SPS Appeal (3/2026) + free trackers.",
+kpis:[],
+detail:{"Why cut":"TikTok ships native Account-Health + SPS Appeal (3/2026) + free trackers.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"clawbackdental", group:"possible", rank:12, name:"ClawBack Dental — PPO Underpayment Recovery", platform:"Service-as-software (dental RCM)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v6 · score 4.2", potential:"4.2",
-note:"#7 — paid from recovered money; payer/clearinghouse won-t build it",
-kpis:[{k:"Est. @ 6 mo",v:"$1–5k"},{k:"Est. @ 1 yr",v:"$6–20k"},{k:"Potential",v:"4.2/5",pot:true}],
-detail:{
-Solution:"Auto-detect + appeal dental claims paid below the contracted PPO rate; we take a cut of what is recovered",
-"Market size":"DSOs (3,131) + ADSO 8,500+ practices; clearinghouse channel (Vyne 84k practices)",
-"Pricing model":"15–20% contingency + recurring; ~$4–10k/yr per practice",
-Distribution:"DSO + clearinghouse partnerships; free we-found-$X audit hook",
-"⚠ Risk":"HIPAA/SOC2 + fee-schedule onboarding friction; possible dental-RCM clone"
-}
-}
-,
+id:"arch-auditready", group:"archive", name:"AuditReady", platform:"Med-spa SaaS",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Moxie Compliance Defender (~$40M, 12/2024) + AmSpa/Qualiphy already shipped it.",
+kpis:[],
+detail:{"Why cut":"Moxie Compliance Defender (~$40M, 12/2024) + AmSpa/Qualiphy already shipped it.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"inkdesk", group:"possible", rank:13, name:"InkDesk — Tattoo Intake/Booking OS", platform:"Vertical SaaS (tattoo artists)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.2", potential:"4.2",
-note:"#8 — cheapest/fastest community build; launch into r/TattooArtists",
-kpis:[{k:"Est. @ 6 mo",v:"$0.4–1.5k"},{k:"Est. @ 1 yr",v:"$2–6k"},{k:"Potential",v:"4.2/5",pot:true}],
-detail:{
-Solution:"Tattoo-native inquiry-triage + deposit + reference-image handling; replaces IG-DM + Google-Forms chaos",
-"Market size":"r/TattooArtists ~230k; proven-paid (Venue.ink, Get Ink shopped)",
-"Pricing model":"$15–35/mo; our billing",
-Distribution:"Post into r/TattooArtists + tattoo FB groups + IG; free-for-first-N",
-"⚠ Risk":"Fragmented small tattoo-tool competitors + free-Google-Forms holdouts"
-}
-}
-,
+id:"arch-modguard", group:"archive", name:"ModGuard", platform:"Insurance AI",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — ModMaster(Zywave)/ModAdvisor/CutComp crowded + NCCI Test Mod free.",
+kpis:[],
+detail:{"Why cut":"ModMaster(Zywave)/ModAdvisor/CutComp crowded + NCCI Test Mod free.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"cleanbooks", group:"possible", rank:14, name:"CleanBooks — HCP ↔ QuickBooks Repair", platform:"Housecall Pro + QuickBooks",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v3 · score 4.0", potential:"4.0",
-note:"#9 — strongest demand quotes; no dedicated incumbent",
-kpis:[{k:"Est. @ 6 mo",v:"$0.6–2k"},{k:"Est. @ 1 yr",v:"$2–6k"},{k:"Potential",v:"4.0/5",pot:true}],
-detail:{
-Solution:"Sits between Housecall Pro and QuickBooks; de-dupes the messy sync and generates the clean statements HCP cannot",
-"Market size":"200k+ HCP pros; engine resells to Jobber/ServiceTitan later",
-"Pricing model":"$49–99/mo; our billing",
-Distribution:"QuickBooks App Store + bookkeeper referral loop",
-"⚠ Risk":"HCP store curated — distribution leans on QBO marketplace + accountants"
-}
-}
-,
+id:"arch-renewaldesk", group:"archive", name:"RenewalDesk", platform:"Insurance service",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Patra/Applied own both ends + it is a DFY labor service (fails passive-ops).",
+kpis:[],
+detail:{"Why cut":"Patra/Applied own both ends + it is a DFY labor service (fails passive-ops).", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"listinglock", group:"possible", rank:15, name:"ListingLock — Google Business Watchdog", platform:"Google Business Profile API",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v3 · score 4.0", potential:"4.0",
-note:"#10 — agency multiplier; official Google webhook",
-kpis:[{k:"Est. @ 6 mo",v:"$0.5–1.8k"},{k:"Est. @ 1 yr",v:"$1.5–5k"},{k:"Potential",v:"4.0/5",pot:true}],
-detail:{
-Solution:"Snapshots each Google Business Profile; instant alert on any change (hours, phone, address, category, permanently-closed)",
-"Market size":"Tens of millions of GBPs; agency-managed segment is the wedge",
-"Pricing model":"$2–5/location/mo or $49–149/mo agency; our billing",
-Distribution:"Sell to local-SEO agencies (1 buyer = dozens of locations) + SEO",
-"⚠ Risk":"Incumbents (Local Falcon, BrightLocal); open webhook lowers moat — win on cheap alert-first UX"
-}
-}
-,
+id:"arch-leadledger", group:"archive", name:"LeadLedger", platform:"Renovation SaaS",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — RRPCM incumbent + EPA forms free + Jobber/HCP template it in a day.",
+kpis:[],
+detail:{"Why cut":"RRPCM incumbent + EPA forms free + Jobber/HCP template it in a day.", "Gate failed":"Competitive moat (undefended competition)"}
+},
 {
-id:"beatledger", group:"possible", rank:16, name:"BeatLedger — Beat-Seller License Ledger", platform:"Vertical SaaS (music producers)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v5 · score 4.0", potential:"4.0",
-note:"#11 — loud community, open wedge, weak moat (borderline)",
-kpis:[{k:"Est. @ 6 mo",v:"$0.3–1.5k"},{k:"Est. @ 1 yr",v:"$2–6k"},{k:"Potential",v:"4.0/5",pot:true}],
-detail:{
-Solution:"Cross-platform license/oversell-protection system-of-record + contract automation for beat sellers",
-"Market size":"~5M producer community; BeatStars paid out $200M+",
-"Pricing model":"$9–19/mo; our billing",
-Distribution:"Free oversell-checker into r/makinghiphop + beat-selling YouTube educators",
-"⚠ Risk":"Defensibility 2 — BeatStars could clone if we threaten them"
-}
+id:"arch-seedledger", group:"archive", name:"SeedLedger", platform:"TikTok Shop",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Cruva + Euka own the seeding workflow end-to-end.",
+kpis:[],
+detail:{"Why cut":"Cruva + Euka own the seeding workflow end-to-end.", "Gate failed":"Competitive moat (undefended competition)"}
+},
+{
+id:"arch-clawbackdental", group:"archive", name:"ClawBack Dental", platform:"Dental RCM",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Aroris/eAssist/Zentist + PMS flags underpayments natively.",
+kpis:[],
+detail:{"Why cut":"Aroris/eAssist/Zentist + PMS flags underpayments natively.", "Gate failed":"Competitive moat (undefended competition)"}
+},
+{
+id:"arch-inkdesk", group:"archive", name:"InkDesk", platform:"Tattoo SaaS",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Venue.ink — funded, native, free-forever booking/deposit.",
+kpis:[],
+detail:{"Why cut":"Venue.ink — funded, native, free-forever booking/deposit.", "Gate failed":"Competitive moat (undefended competition)"}
+},
+{
+id:"arch-cleanbooks", group:"archive", name:"CleanBooks", platform:"HCP + QuickBooks",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — HCP native two-way QBO sync + free error repair (platform owns it).",
+kpis:[],
+detail:{"Why cut":"HCP native two-way QBO sync + free error repair (platform owns it).", "Gate failed":"Competitive moat (undefended competition)"}
+},
+{
+id:"arch-listinglock", group:"archive", name:"ListingLock", platform:"Google GBP",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — Google emails suggested-edit alerts FREE + BrightLocal/Local Falcon.",
+kpis:[],
+detail:{"Why cut":"Google emails suggested-edit alerts FREE + BrightLocal/Local Falcon.", "Gate failed":"Competitive moat (undefended competition)"}
+},
+{
+id:"arch-beatledger", group:"archive", name:"BeatLedger", platform:"Music SaaS",
+status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
+note:"CUT — BeatStars handles license/oversell natively + free templates.",
+kpis:[],
+detail:{"Why cut":"BeatStars handles license/oversell natively + free templates.", "Gate failed":"Competitive moat (undefended competition)"}
 }
 ];
 
 // ── RENDER ────────────────────────────────────────────────────────────
 const money = n => "$"+n.toLocaleString();
-let TAB = "active";
+let TAB = "build";
 function iconHtml(p){
 if(p.icon) return p.icon;
-const colors={build:"#d97706",review:"#3b5bdb",live:"#16a34a",greenlit:"#0f8a3d",possible:"#6d28d9",planned:"#64748b"};
+const colors={build:"#d97706",review:"#3b5bdb",live:"#16a34a",greenlit:"#0f8a3d",possible:"#6d28d9",planned:"#64748b",archived:"#8a7b5e"};
 const c = colors[p.status] || "#64748b";
 const ch = (p.name||"?").replace(/[^A-Za-z0-9]/,"").charAt(0).toUpperCase();
 return `<div class="cinitial" style="background:${c}">${ch}</div>`;
 }
-const STATUS = {build:["build","In build"], review:["review","In review"], live:["live","Live"], greenlit:["greenlit","Green-lit"], possible:["possible","Possible"], planned:["planned","Planned"]};
+const STATUS = {build:["build","In build"], review:["review","In review"], live:["live","Live"], greenlit:["greenlit","Green-lit"], possible:["possible","Possible"], planned:["planned","Planned"], archived:["archived","Cut"]};
 
 function renderTiles(){
 const inReview = PROJECTS.filter(p=>p.status==="review").length;
@@ -625,17 +568,26 @@ document.getElementById("tiles").innerHTML = tiles.map(t=>
 `<div class="tile"><div class="k">${t.k}</div><div class="v">${t.v}</div></div>`).join("");
 }
 
+const isBuildPhase = p => p.group==="active" && (p.status==="build"||p.status==="greenlit"||p.status==="planned");
+const isFinishedPhase = p => p.group==="active" && (p.status==="review"||p.status==="live");
 function renderTabs(){
-const nActive = PROJECTS.filter(p=>p.group==="active").length;
+const nBuild = PROJECTS.filter(isBuildPhase).length;
+const nFin = PROJECTS.filter(isFinishedPhase).length;
 const _h2=hiddenSet(); const nPoss = PROJECTS.filter(p=>p.group==="possible"&&!_h2.has(p.id)).length;
+const nArch = PROJECTS.filter(p=>p.group==="archive").length;
 document.getElementById("tabs").innerHTML =
-`<button class="tab ${TAB==='active'?'active':''}" onclick="setTab('active')">Active Builds <span class="cnt">${nActive}</span></button>
+`<button class="tab ${TAB==='build'?'active':''}" onclick="setTab('build')">In Build <span class="cnt">${nBuild}</span></button>
+<button class="tab ${TAB==='finished'?'active':''}" onclick="setTab('finished')">Finished · Review/Live <span class="cnt">${nFin}</span></button>
 <button class="tab ${TAB==='possible'?'active':''}" onclick="setTab('possible')">Possible Projects <span class="cnt">${nPoss}</span></button>
 <button class="tab ${TAB==='structure'?'active':''}" onclick="setTab('structure')">Structure</button>`;
-document.getElementById("tabhint").innerHTML = TAB==="active"
-? "Projects in active build, review, or green-lit. Tap a card for full details."
+document.getElementById("tabhint").innerHTML = TAB==="build"
+? "Projects actively being built (incl. green-lit, not yet submitted). Tap a card for full details."
+: TAB==="finished"
+? "Projects finished &amp; shipped — in marketplace review or live to customers. Tap a card for full details."
 : TAB==="possible"
 ? "Researched &amp; scored, not committed — <b>ordered by what I'd build next</b> (#1 = my top pick). Tap a card for solution, market, pricing, integrations &amp; the build split."
+: TAB==="archive"
+? "Projects CUT under our gates (moat / score) — kept for the audit trail. Tap a card for why it was cut."
 : "How the lanes coordinate — one Project, many chats, shared living docs. Mirrors <code>00_Operations/Coordination_System_Map.svg</code>.";
 }
 function setTab(t){ TAB=t; renderTabs(); renderGrid(); }
@@ -664,8 +616,10 @@ const grid = document.getElementById("grid");
 const struct = document.getElementById("structure");
 if(TAB==="structure"){ struct.style.display="block"; grid.style.display="none"; return; }
 struct.style.display="none"; grid.style.display="";
-let items = PROJECTS.filter(p=>p.group===TAB);
-if(TAB==="possible"){ const h=hiddenSet(); items=items.filter(p=>!h.has(p.id)); items.sort((a,b)=>(a.rank||99)-(b.rank||99)); }
+let items;
+if(TAB==="build"){ items = PROJECTS.filter(isBuildPhase); }
+else if(TAB==="finished"){ items = PROJECTS.filter(isFinishedPhase); }
+else { const h=hiddenSet(); items = PROJECTS.filter(p=>p.group==="possible"&&!h.has(p.id)); items.sort((a,b)=>(a.rank||99)-(b.rank||99)); }
 grid.innerHTML = items.map(card).join("");
 if(TAB==="possible"){ const n=hiddenSet().size; if(n>0) grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--ink2);margin:-4px 0 4px">${n} hidden from your view · <a href="#" onclick="unhideAll();return false" style="color:var(--blue);font-weight:700">show all</a></div>` + grid.innerHTML; }
 }
@@ -739,7 +693,7 @@ function closeModal(){ document.getElementById("ov").classList.remove("show"); }
 
 document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString();
 document.getElementById("footer").innerHTML =
-"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (disapproved 6/23 on a whitelabel detail, fixed + resubmitted same day · back in GHL re-review) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-24.";
+"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (in GHL re-review since the 6/23 whitelabel fix · 6/25 DB migration Render→Supabase kicked off, pending Operations) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear). Possible Projects = researched & scored (Discovery Sprint v3, 2026-06-09), ordered by build-next priority. Code & live URLs now run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-25.";
 renderTiles(); renderTabs(); renderGrid();
 </script>
 </body>
