@@ -377,6 +377,23 @@ risk:"Boat History Report bolts on maintenance using its 120M-record distributio
 }
 },
 {
+id:"ebikefit", group:"possible", rank:1, name:"eBikeFit — E-Bike Parts Compatibility", platform:"Compounding fitment data-graph",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v9 · 4.5 · 3 gates PASS", potential:"4.5",
+note:"🆕 v9 ⭐ — the one moat-passing find. Negative-compatibility data no manufacturer publishes; reusable engine → mobility scooters next.",
+kpis:[{k:"Est. @ 6 mo",v:"~$0.5–2k"},{k:"Est. @ 1 yr",v:"~$3–10k"},{k:"Potential",v:"4.5/5",pot:true}],
+sc:{
+plain:{what:"E-bike and e-scooter electrical parts (batteries, controllers, displays, connectors) are wildly non-standard — a plug that looks identical can be wired differently and fry an expensive controller. eBikeFit tells you whether part X works with bike or part Y.",problem:"Builders and repairers guess, buy the wrong part, fry components, and return it. No cross-brand compatibility database exists anywhere.",who:"DIY builders/repairers find it free via search (we earn parts affiliate); parts sellers pay for an API/widget that cuts their support load and returns."},
+cls:{industry:"E-bike / micromobility parts",customer:"B2C/prosumer builders + B2B sellers",lives:"Web app + API",idea:"Compounding data graph (fitment)"},
+price:"Free (affiliate) + $50–300/mo seller API",
+build:{we:"A cross-brand compatibility graph (connectors, voltage, protocol, confirmed pairings) + SEO fitment pages + a check-fitment API/widget + affiliate links.",you:"Domain, hosting, affiliate-program signups, Stripe for API billing.",not:"No parts inventory, no manual support, no hardware.",relies:"A public pinout/spec corpus + forum-confirmed pairings + user confirmations (the moat).",cost:"~6–10 weeks · ~$300–500/mo"},
+market:{buyer:"DIY e-bike/e-scooter builders and repairers (consumers) + parts retailers (B2B API).",big:"$8.3B e-bike conversion-kit/parts market (2026, ~10% CAGR, 82% aftermarket); tens of millions of e-bikes in service.",need:"Affiliate at scale + a few hundred seller-API subs.",why:"Parts are non-standard with high return rates; no cross-brand DB exists; retailers absorb it as manual support today (the cost we remove).",day1:"Publish the fitment graph + SEO pages (will X controller work with Y display) + a free fitment checker; seed e-bike forums and Reddit.",budget:"SEO (free) + the free checker as the hook + e-bike communities + affiliate. ~$0–100/mo."},
+barrier:"LOW · 4/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",5],["Money potential",4],["Stays ours",4]],
+overall:"4.5",
+risk:"Data cold-start — the valuable negative-compatibility edges are hardest to seed before traffic; seed from existing pinout literature, then compound via user confirmations."
+}
+},
+{
 id:"ledgerpeppol", group:"possible", rank:2, name:"LedgerPeppol — EU E-Invoicing App", platform:"Exclusive-distribution marketplace app",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v8 · 4.5 · moat-gate PASS", potential:"4.5",
 note:"🆕 v8 · 3 gates PASS · moat = official marketplace-partner slot + legally-forced demand",
