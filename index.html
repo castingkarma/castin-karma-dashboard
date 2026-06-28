@@ -355,7 +355,12 @@ Integrations:"GoHighLevel API V2 (CRM, calendars, conversations/SMS, payments, c
 Distribution:"GHL Marketplace; agencies auto-bundle across ALL sub-accounts (1 sale → dozens of seats); 145-vote request = warm leads",
 "Status":"LIVE + WIRED + CONFIG COMPLETE (2026-06-17): backend on Render at api.usejobcast.com (/health OK), GHL Marketplace app fully configured — OAuth (redirect + 7 scopes + keys), Custom Page → /app, Webhook → /webhooks/ghl; domain + marketing site usejobcast.com live. All 5 mandatory Marketplace steps done (basic info, profile, support, $39/mo pricing, review); finish-line QC passed. ✅ SUBMITTED 2026-06-21 → now IN REVIEW (~10 business days). Live install since tested END-TO-END (install → OAuth → embedded SSO dispatch board → create job → 'on-my-way' SMS) — only a real text landing on a physical phone is still pending (gated on A2P 10DLC). Open: A2P decision + tidy/confirm our own HighLevel billing. Ops: route support@usejobcast.com → jamin@castingkarmallc.com. 2026-06-25: DB migration kicked off — moving off the expiring free Render Postgres to a free Supabase 'jobcast' project (DATABASE_URL swap, no schema/code change); Step 1 done, pending Operations to create the project + set the Render env var, then P-3 verifies.",
 "⚠ Risk":"Contested (FieldTask, WorkSyncer) + GHL shipped a native Jobber integration (Sept 2025) — but it's contacts-sync only, NOT the job workflow. We win on the customer-facing layer (arrival SMS + photo portal) neither does."
-}
+},
+links:[
+{label:"🌐 usejobcast.com (live)", url:"https://usejobcast.com"},
+{label:"Backend/API health (Render)", url:"https://api.usejobcast.com/health"},
+{label:"Embedded app page", url:"https://api.usejobcast.com/app"}
+]
 },
 
 // ───────────── POSSIBLE PROJECTS (ordered by build-next priority) ─────────────
@@ -363,6 +368,12 @@ Distribution:"GHL Marketplace; agencies auto-bundle across ALL sub-accounts (1 s
 id:"hullfax", group:"active", name:"HullDocs — Boat Maintenance History", platform:"Web PWA (boating) · Project #5",
 icon:`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 1024 1024" role="img" aria-label="HullDocs"><defs><linearGradient id="hdbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A2742"/><stop offset="1" stop-color="#173F63"/></linearGradient><clipPath id="hdround"><rect x="0" y="0" width="1024" height="1024" rx="230"/></clipPath></defs><g clip-path="url(#hdround)"><g transform="scale(5.12)"><rect x="0" y="0" width="200" height="200" fill="url(#hdbg)"/><ellipse cx="100" cy="32" rx="140" ry="80" fill="#FFFFFF" opacity="0.13"/><path d="M103,34 L122,40 L103,46 Z" fill="#E7A93A"/><path d="M94,88 L94,114 L60,114 Q76,84 94,68 Z" fill="#FFFFFF"/><path d="M103,40 L103,118 L158,118 Q138,74 103,40 Z" fill="#FFFFFF"/><rect x="110" y="75" width="20" height="4" rx="2" fill="#8AAEC6"/><rect x="110" y="86" width="30" height="4" rx="2" fill="#8AAEC6"/><rect x="110" y="97" width="36" height="4" rx="2" fill="#8AAEC6"/><rect x="110" y="108" width="26" height="4" rx="2" fill="#8AAEC6"/><line x1="100" y1="40" x2="100" y2="124" stroke="#FFFFFF" stroke-width="3"/><path d="M42,124 L164,124 Q156,142 136,150 Q102,158 68,150 Q50,142 42,124 Z" fill="#FFFFFF"/><circle cx="148" cy="116" r="14" fill="#E7A93A"/><circle cx="148" cy="116" r="10" fill="none" stroke="#FFFFFF" stroke-width="1.4"/><path d="M141,116 L146,121 L156,109" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g></g></svg>`,
 status:"build", mrr:0, customers:0, trials:0, source:"P-5 · Discovery v8 · 4.5 · GREEN-LIT 2026-06-27", potential:"4.5",
+website:"https://hulldocs.com",
+links:[
+{label:"🌐 hulldocs.com (live)", url:"https://hulldocs.com"},
+{label:"App on Render", url:"https://hulldocs.onrender.com"},
+{label:"Code repo — castingkarma/hulljourney (private)", url:"https://github.com/castingkarma/hulljourney"}
+],
 note:"P-5 · 2026-06-28: hulldocs.com is LIVE (custom domain + HTTPS, Render-hosted) — app staged for testing. Latest build (06-28): ownership TRANSFER LOOP built (the moat — seller→buyer claim flips boat ownership; seller's copy becomes a read-only 'Previously owned' archive), plan matrix LOCKED (Free / Captain $5-mo / $30 Sale Report) with real server-side gating + locked-feature upsells; plus AI doc-vault + historical-import + shop-confirm magic link. QA: 11/11 unit tests green + a Playwright E2E suite (signup→add-boat→log→transfer). 55 files. Ops infra done: domain + DNS + GitHub + Supabase. 🔴 Two gates to a fully-live SaaS (Jamin, not infra): Stripe LLC acct + KYC (no paid signups / $30 report until then) · Supabase 2FA + service_role/DATABASE_URL/R2/Resend/OpenAI keys → Apple Passwords (lights up photo upload, emails, AI import).",
 kpis:[{k:"Est. @ 6 mo",v:"~$1–3k"},{k:"Est. @ 1 yr",v:"~$6–15k"},{k:"Potential",v:"4.5/5",pot:true}],
 sc:{
@@ -704,7 +715,7 @@ ${p.liveTiers ? `<div class="seclbl">Live — installs &amp; users by tier</div>
 ${p.funnel ? `<div class="seclbl">Most-realistic forecast · post-approval clock</div>
 <table class="ftab"><tr><th>Period</th><th>Installs*</th><th>Active</th><th>Paying (S/G/P)</th><th>MRR (end)</th><th>Cash</th></tr>
 ${p.funnel.map(f=>`<tr><td>${f.period}</td><td>${f.installs}</td><td>${f.active}</td><td>${f.paying} (${f.tiers})</td><td>${f.mrr}</td><td>${f.cash}</td></tr>`).join("")}</table>` : ""}
-${(p.links||[]).map(l=>`<a class="mlink" href="${l.url}" target="_blank" rel="noreferrer">${l.label} ↗</a>`).join("")}
+${(p.group==="active" && p.links && p.links.length) ? `<div class="seclbl">Links</div>${p.links.map(l=>`<a class="mlink" href="${l.url}" target="_blank" rel="noreferrer">${l.label} ↗</a>`).join("")}` : ""}
 ${p.group==="possible"?`<div style="margin-top:14px"><button onclick="hideProject('${p.id}')" style="border:1px solid var(--line);background:#fff;color:var(--ink2);padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:700;font-size:12.5px">✕ Hide from my view</button></div>`:""}
 <div class="cnote" style="margin-top:14px">${p.group==='possible'?'Possible project — researched, not committed. Revenue = mid-case modeled range (±50%); Potential = my overall rating, out of 5.':'Forecasts are mid-case modeled ranges (±50%), post-launch clock.'}<span class="src">${p.source}</span></div>`;
 document.getElementById("ov").classList.add("show");
