@@ -360,10 +360,10 @@ Distribution:"GHL Marketplace; agencies auto-bundle across ALL sub-accounts (1 s
 
 // ───────────── POSSIBLE PROJECTS (ordered by build-next priority) ─────────────
 {
-id:"hullfax", group:"active", name:"Hull Journey — Boat Maintenance History", platform:"Web PWA (boating) · Project #5",
+id:"hullfax", group:"active", name:"HullDocs — Boat Maintenance History", platform:"Web PWA (boating) · Project #5",
 icon:`<svg viewBox="0 0 512 512" width="40" height="40" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#13678A"/><g fill="#fff"><path d="M168 296h176l-26 60a22 22 0 0 1-20 13H214a22 22 0 0 1-20-13z"/><rect x="250" y="120" width="14" height="168" rx="7"/><path d="M270 132l86 150h-86z"/></g></svg>`,
 status:"build", mrr:0, customers:0, trials:0, source:"P-5 · Discovery v8 · 4.5 · GREEN-LIT 2026-06-27", potential:"4.5",
-note:"P-5 · 2026-06-27: Brand LOCKED = HullJourney (hulljourney.com). Single-player MVP largely built — Next.js 15 + TS + PWA, 25 files: Supabase auth, 'My Dock' portal, add-boat-by-HIN (live decode), boat detail (Timeline/Reminders/Verified Report/QR), log-a-service + Cloudflare R2 photo upload, public report route. Ops infra: Supabase project 'hulljourney' + GitHub repo created, USPTO clear. 🔴 Blocked at the walls (Jamin): Cloudflare login (domain/R2/Pages/Resend DNS) + Stripe KYC + Supabase 2FA.",
+note:"P-5 · 2026-06-27: Brand LOCKED = HullDocs · hulldocs.com REGISTERED ($10.46/yr). Single-player MVP largely built — Next.js 15 + TS + PWA, 25 files: Supabase auth, 'My Dock' portal, add-boat-by-HIN (live decode), boat detail (Timeline/Reminders/Verified Report/QR), log-a-service + Cloudflare R2 photo upload, public report route. Ops infra done: domain + GitHub repo + Supabase project; USPTO clear. 🔴 Remaining walls (Jamin): Stripe KYC (new CastingKarma acct) + Supabase 2FA; then Ops wires R2/Pages/Resend/DNS (Cloudflare, in-browser).",
 kpis:[{k:"Est. @ 6 mo",v:"~$1–3k"},{k:"Est. @ 1 yr",v:"~$6–15k"},{k:"Potential",v:"4.5/5",pot:true}],
 sc:{
 plain:{what:"A QR-tag + app that logs every service and repair on a boat, tied to its hull ID (HIN), so the maintenance history stays with the boat forever — even after it is sold.",problem:"Boaters track maintenance in nothing or a notebook, and used-boat buyers cannot verify a boat was cared for. A documented history is worth real money at resale.",who:"Boat owners pay ~$5/mo to protect resale value; buyers pay a one-time fee for a verified history report at purchase."},
@@ -431,11 +431,11 @@ risk:"Cold-start — the benchmark is worthless until ~30 invoices per cohort; s
 {
 id:"equitrail", group:"possible", rank:4, name:"EquiTrail — Horse History Record", platform:"Network/transfer record (equine)",
 status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v8 · 4.2 · moat-gate PASS", potential:"4.2",
-note:"🆕 v8 · 3 gates PASS · HULLFAX sibling for the used-horse market",
+note:"🆕 v8 · 3 gates PASS · HullDocs sibling for the used-horse market",
 kpis:[{k:"Est. @ 6 mo",v:"~$0.6–2k"},{k:"Est. @ 1 yr",v:"~$4–10k"},{k:"Potential",v:"4.2/5",pot:true}],
 sc:{
-plain:{what:"Same idea as HULLFAX but for horses — a lifetime vet, farrier, and performance record that travels with the horse when it is sold.",problem:"Buying a horse is a 4–5 figure decision with no verifiable history; buyers pay vets for pre-purchase exams but there is no trusted record that follows the animal.",who:"Horse owners pay ~$6–10/mo; the record becomes the buyer reason to trust the horse at sale."},
-cls:{industry:"Equine / livestock",customer:"B2C — horse owners + buyers",lives:"Web/mobile app",idea:"Network/transfer record (HULLFAX sibling)"},
+plain:{what:"Same idea as HullDocs but for horses — a lifetime vet, farrier, and performance record that travels with the horse when it is sold.",problem:"Buying a horse is a 4–5 figure decision with no verifiable history; buyers pay vets for pre-purchase exams but there is no trusted record that follows the animal.",who:"Horse owners pay ~$6–10/mo; the record becomes the buyer reason to trust the horse at sale."},
+cls:{industry:"Equine / livestock",customer:"B2C — horse owners + buyers",lives:"Web/mobile app",idea:"Network/transfer record (HullDocs sibling)"},
 price:"$6–10/mo",
 build:{we:"Health/farrier/vet/performance log + photos + a transferable verified-history record + Stripe.",you:"Stripe account, domain, approve hosting.",not:"No physical product, no manual support, no vet integrations in v1 (owner-entered).",relies:"Standard web stack + photo storage + Stripe.",cost:"~4–6 weeks · under $50/mo"},
 market:{buyer:"Serious horse owners (buyers already pay vets for pre-purchase exams).",big:"~7M US horses; high transaction values = strong willingness-to-pay per record.",need:"~300 paying = ~$2k+ MRR.",why:"High-value transactions + buyers already demand records; siloed apps (HorseRecords, EquineGo) have no transfer layer.",day1:"Launch owner log + a free pre-purchase-exam checklist; pSEO + equestrian Facebook groups.",budget:"SEO + equestrian communities. ~$0–50/mo."},
@@ -713,7 +713,7 @@ function closeModal(){ document.getElementById("ov").classList.remove("show"); }
 
 document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString();
 document.getElementById("footer").innerHTML =
-"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (in GHL re-review since the 6/23 whitelabel fix · DB migration Render→Supabase pending Operations) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear) + Hull Journey (P-5 · green-lit 6/27 · single-player MVP largely built · Ops infra blocked at Cloudflare login + Stripe KYC). Possible Projects = 4 moat-survivors (eBikeFit, LedgerPeppol, InvoiceIndex, EquiTrail), ordered by build-next priority. Code & live URLs run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-27.";
+"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (in GHL re-review since the 6/23 whitelabel fix · DB migration Render→Supabase pending Operations) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear) + HullDocs (P-5 · green-lit 6/27 · hulldocs.com registered · single-player MVP largely built · remaining walls: Stripe KYC + Supabase 2FA, then Ops wires R2/Pages/Resend/DNS). Possible Projects = 4 moat-survivors (eBikeFit, LedgerPeppol, InvoiceIndex, EquiTrail), ordered by build-next priority. Code & live URLs run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-27.";
 renderTiles(); renderTabs(); renderGrid();
 </script>
 </body>
