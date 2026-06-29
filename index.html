@@ -526,9 +526,9 @@ risk:"PII is low (business principals; no FCRA) but mind TCPA/CAN-SPAM hygiene i
 }
 },
 {
-id:"stockshow", group:"possible", rank:8, name:"StockShow Hub — Junior Livestock Results", platform:"Public-PDF aggregator (B2C enthusiast)",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.3 · 3 gates PASS", potential:"4.3",
-note:"🆕 v11 ⭐ the gem · moat = un-backfillable national results archive (fairs take PDFs down) + breeders citing rankings in sale catalogs.",
+id:"stockshow", group:"active", name:"StockShow Hub — Junior Livestock Results", platform:"Web app (4-H/FFA) · Project #8",
+status:"build", mrr:0, customers:0, trials:0, source:"P-8 · Discovery v11 · 4.3 · GREEN-LIT 2026-06-29", potential:"4.3",
+note:"P-8 · 2026-06-29: GREEN-LIT + lane minted (the gem — best organic story of Sprint v11). OpenPowerlifting for 4-H/FFA stock shows: a national searchable results DB aggregated from thousands of fair-result PDFs (rankings, sire/dam/breeder performance). Moat = un-backfillable results archive (fairs take PDFs down) + breeder network effect. Stack Next.js · Supabase · Stripe + PDF-parsing pipeline; cold-start = seed one season. Monetization is the risk to validate (freemium; gate power tools, not core search). ⚠️ HARD PII RULE — results name MINORS: ingest only already-public results, de-emphasize child contact info, name-suppression/opt-out, and a one-time youth-privacy legal check GATES LAUNCH. 🔴 Walls: brand+domain · Supabase Pro $25-mo · Stripe · youth-privacy legal check. Build chat opens when Jamin pastes the charter.",
 kpis:[{k:"Est. @ 6 mo",v:"~$1–4k"},{k:"Est. @ 1 yr",v:"~$10–35k"},{k:"Potential",v:"4.3/5",pot:true}],
 sc:{
 plain:{what:"OpenPowerlifting for 4-H and FFA stock shows — a national place to see who is winning, which sires and breeders are hot, and how your animal ranks, aggregated from thousands of county-fair result PDFs.",problem:"Hundreds of thousands of show families spend $3k–$25k+ per animal but results are trapped in thousands of county-fair PDFs and Facebook groups; there is no national rankings or animal-record view.",who:"Show families pay $8–12/mo Pro for analytics + rankings; breeders and circuits sponsor."},
@@ -543,9 +543,9 @@ risk:"⚠️ Results name minors — ingest only already-public results, offer n
 }
 },
 {
-id:"tailwatch", group:"possible", rank:9, name:"TailWatch — Aircraft Title/Lien Alerts", platform:"Public-data prosumer alert feed",
-status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.3 · 3 gates PASS", potential:"4.3",
-note:"🆕 v11 · moat = un-backfillable daily FAA ownership/lien diff archive (FAA publishes only current state) + lien-holder normalization.",
+id:"tailwatch", group:"active", name:"TailWatch — Aircraft Title/Lien Alerts", platform:"Web app + alerts (GA) · Project #7",
+status:"build", mrr:0, customers:0, trials:0, source:"P-7 · Discovery v11 · 4.3 · GREEN-LIT 2026-06-29", potential:"4.3",
+note:"P-7 · 2026-06-29: GREEN-LIT + lane minted (the safe earner — proven WTP). A watch-this-tail-number alert service: pings GA buyers/brokers/lenders when a new lien, ownership, or registration-status change hits the FAA record, replacing the stale one-time $150–450 title search. Moat = un-backfillable daily FAA ownership/lien diff archive (FAA publishes only current state). Stack Next.js · Supabase · Stripe · Resend + daily FAA-diff cron. 🔴 Build-lane first task: verify current FAA owner-data availability (PARS / privacy-masking) before relying on owner fields. 🔴 Walls: brand+domain · Supabase Pro $25-mo · Stripe · light legal check on republishing FAA owner data. Build chat opens when Jamin pastes the charter.",
 kpis:[{k:"Est. @ 6 mo",v:"~$1–5k"},{k:"Est. @ 1 yr",v:"~$10–35k"},{k:"Potential",v:"4.3/5",pot:true}],
 sc:{
 plain:{what:"A cheap watch-this-tail-number alert that pings buyers, brokers and small lenders the moment a new lien, ownership change or registration flip hits the FAA record for a small aircraft.",problem:"Buying a small plane ($80k–$2M) means paying $150–450 for a one-time human title/lien search that goes stale immediately; liens get filed days before closing.",who:"GA buyers pay $9–19/mo per tail; brokers $49–99/mo to watch inventory; small lenders $199+/mo."},
@@ -861,7 +861,7 @@ function closeModal(){ document.getElementById("ov").classList.remove("show"); }
 
 document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString();
 document.getElementById("footer").innerHTML =
-"Active builds = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (in GHL re-review since the 6/23 whitelabel fix · DB migration Render→Supabase pending Operations) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear) + HullDocs (P-5 · green-lit 6/27 · hulldocs.com LIVE 6/27 over HTTPS · transfer loop + plan-gating + QA suite built 6/28 · remaining walls: Stripe KYC + Supabase 2FA/keys). Possible Projects = 4 moat-survivors (eBikeFit, LedgerPeppol, InvoiceIndex, EquiTrail), ordered by build-next priority. Code & live URLs run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-28.";
+"Active builds (6) = monday Cert Tracker (v4 live · in review · board re-cleared 6/22, awaiting reviewer · lockout resolved) + DueBell (submitted to Jobber · in review · App Review call booked Jul 2) + Jobcast / GHL Field-Service (in GHL re-review since the 6/23 whitelabel fix · DB migration Render→Supabase pending Operations) + TenderProof (P-4 · multi-tenant LIVE 6/24, /api/health = multitenant:true · web-app + extension built · USPTO name clear) + HullDocs (P-5 · green-lit 6/27 · hulldocs.com LIVE 6/27 over HTTPS · transfer loop + plan-gating + QA suite built 6/28 · remaining walls: Stripe KYC + Supabase 2FA/keys) + The Load Vault (P-6 · green-lit 6/28 · build lane minted · seed-recovery spike + schema lock + Next.js skeleton 6/29 · walls: brand/domain pick, Supabase Pro, attorney + E&O). Possible Projects = 11 candidates (eBikeFit, LedgerPeppol, InvoiceIndex, EquiTrail, AgentLedger, BurnLedger + 5 Sprint-v11 public-data-arbitrage finds: FormDraft, StockShow Hub, TailWatch, DarkTower, OrphanWellRadar), ordered by build-next priority; Archive = 16 moat-gate cuts. Code & live URLs run on the Casting Karma LLC GitHub (castingkarma); ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Internal use only. Synced 2026-06-29.";
 renderTiles(); renderTabs(); renderGrid();
 </script>
 </body>
