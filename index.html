@@ -475,6 +475,125 @@ risk:"Thinner, more relationship-driven cold-start than boats; keep v1 owner-ent
 }
 },
 {
+id:"agentledger", group:"possible", rank:5, name:"AgentLedger — AI-Agent Oversight Evidence Box", platform:"Data-gravity evidence ledger (B2B SaaS)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v10 · 4.3 · 3 gates PASS", potential:"4.3",
+note:"🆕 v10 · 3 gates PASS · moat = immutable agent-log data-gravity + insurer-recognized export format. Dated demand: EU AI-Act logging Aug 2 2026 + strict liability Dec 9 2026.",
+kpis:[{k:"Est. @ 6 mo",v:"~$2–8k"},{k:"Est. @ 1 yr",v:"~$15–60k"},{k:"Potential",v:"4.3/5",pot:true}],
+sc:{
+plain:{what:"A drop-in logger that gives a small business an immutable, exportable record of exactly what its AI agent did, accessed, and decided — the one-click oversight evidence pack you must produce to escape liability.",problem:"New rules make the business that runs an AI agent liable unless it can produce an auditable trail of what the agent did. Enterprise AI-governance software is heavy and expensive; SMBs have nothing.",who:"SMBs and agencies running someone else's AI agent pay $29–99/mo for the evidence box; insurers/auditors pay a $299+ tier."},
+cls:{industry:"AI governance / compliance",customer:"B2B — SMBs + agencies running AI agents",lives:"SDK/proxy + hosted dashboard",idea:"Evidence-ledger data-gravity moat (new)"},
+price:"$29–99/mo + $299 insurer tier",
+build:{we:"A lightweight logging SDK/proxy + an append-only, hash-chained log + a one-click oversight evidence pack export + Stripe.",you:"Stripe account, domain, approve hosting.",not:"No human in the loop (ingest-and-store); no per-customer integration work.",relies:"Standard web stack + append-only storage + Stripe.",cost:"~6–8 weeks · under $500/mo"},
+market:{buyer:"Every SMB/agency deploying an AI agent (huge, fast-growing).",big:"Two hard EU deadlines (Aug 2 + Dec 9 2026) + US reasonable-oversight liability; AI-agent insurers already require structured governance evidence.",need:"Modest paid base; insurer-referral channel compounds.",why:"Liability is dated and personal — the deployer is liable unless it can produce the trail.",day1:"Free open-source logging SDK (dev PLG) + SEO on panic queries + a free are-you-AI-Act-loggable check; insurers/brokers as inbound referrers.",budget:"Free SDK PLG + SEO + insurer referrals. Under $500/mo."},
+barrier:"MED · 3/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",4],["Cheap & fast to build",4],["Runs itself",4],["Money potential",4],["Stays ours",5]],
+overall:"4.3",
+risk:"The agent frameworks (Anthropic/OpenAI) ship good-enough native logging free → collapses the need. Counter-moat: own the cross-vendor, legally-formatted, insurer-recognized export (native logs are siloed + not liability-formatted) — be Switzerland across agents."
+}
+},
+{
+id:"burnledger", group:"possible", rank:6, name:"BurnLedger — Prescribed-Burn Records & Ops", platform:"Liability system-of-record (niche B2B)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v10 · 4.2 · 3 gates PASS", potential:"4.2",
+note:"🆕 v10 · 3 gates PASS · moat = evidentiary switching-cost (multi-year burn-file archive) + per-state burn-plan/smoke regulatory data. Real vacuum (only free academic weather planners exist).",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–4k"},{k:"Est. @ 1 yr",v:"~$8–25k"},{k:"Potential",v:"4.2/5",pot:true}],
+sc:{
+plain:{what:"The standalone system of record for a prescribed (controlled) burn business — digital burn plans, crew/qualification tracking, per-acre quoting/invoicing, smoke-complaint logging, and a court-defensible burn file proving due diligence.",problem:"Prescribed-fire contractors run on paper plans, spreadsheets, and QuickBooks; one escaped burn means lawsuits, and a missing or unfollowed burn plan is cited negligence. There is no dedicated software.",who:"Prescribed-burn contractors pay $79–199/mo; burn associations/agencies pay $300–600/mo."},
+cls:{industry:"Prescribed fire / land management",customer:"B2B — burn contractors + associations",lives:"Web app",idea:"Liability system-of-record (regulatory data moat)"},
+price:"$79–199/mo · $300–600/mo agency",
+build:{we:"Burn-plan builder + crew/qualification tracking + per-acre quoting/invoicing + smoke-complaint log + a court-defensible burn-file export + Stripe.",you:"Stripe account, domain, approve hosting.",not:"No hardware (BurnBot is hardware); no weather-modeling — we own the business/liability layer.",relies:"Standard web stack + Stripe + per-state regulatory data.",cost:"~6–8 weeks · under $500/mo"},
+market:{buyer:"Prescribed-burn contractors + the 130+ Prescribed Burn Associations across 22 states (growing fast).",big:"Prescribed fire is supply-constrained ($1,000+/acre); liability-driven demand; plans must be stored beyond the statute of limitations.",need:"Small TAM — ceiling ~$15–40k MRR; win the association channel.",why:"Having and following a burn plan decreases liability; failing to is cited negligence. One escaped burn = multiple lawsuits.",day1:"Free-PDF SEO (prescribed burn plan template, smoke complaint log) + 130+ PBA listservs / state Fire Council directories (cold-email + sponsored newsletters).",budget:"Free-PDF SEO + association listservs. Under $500/mo."},
+barrier:"MED · 3/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",5],["Cheap & fast to build",4],["Runs itself",4],["Money potential",3],["Stays ours",5]],
+overall:"4.2",
+risk:"Small TAM caps the ceiling (~$15–40k MRR) + an academic player could bolt records onto the free planner. Mitigate: own the business/liability layer they won't build; win the association channel first."
+}
+},
+{
+id:"formdraft", group:"possible", rank:7, name:"FormDraft — SEC Form D New-Fund Feed", platform:"Public-data B2B lead feed",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.33 · 3 gates PASS", potential:"4.33",
+note:"🆕 v11 · public-data arbitrage · moat = compounding emerging-manager relationship graph (every manager from filing #1; un-backfillable).",
+kpis:[{k:"Est. @ 6 mo",v:"~$2–7k"},{k:"Est. @ 1 yr",v:"~$12–40k"},{k:"Potential",v:"4.33/5",pot:true}],
+sc:{
+plain:{what:"When a brand-new investment fund or SPV registers with the SEC (a Form D filing), that is proof it just started moving money. FormDraft sells a fresh, filtered feed of those new filers to the vendors who need them as clients.",problem:"Fund administrators, securities lawyers, audit/tax firms, D&O insurers and business bankers win or lose on catching emerging managers early — today they hand-watch EDGAR or buy LP-oriented databases not built for vendor prospecting.",who:"Fund-services vendors pay $99–299/mo per vertical filter for the fresh new-filer feed."},
+cls:{industry:"Financial services / fund administration",customer:"B2B — fund-services vendors",lives:"Web app + data feed",idea:"Public-data lead feed (relationship-graph moat)"},
+price:"$99–299/mo per vertical filter",
+build:{we:"Ingest the SEC EDGAR Form D feed, filter/enrich by vertical, and deliver a fresh new-filer feed + alerts + a CRM-ready export with Stripe.",you:"Stripe account, domain, approve hosting.",not:"No scraping (official API); no manual research; no human in the loop.",relies:"SEC EDGAR Form D real-time RSS + full-text search + bulk submissions API (legal, minutes-fresh) + Stripe.",cost:"~3–5 weeks · under $100/mo"},
+market:{buyer:"Fund admins, boutique securities firms, audit/tax firms, D&O brokers, business bankers.",big:"Every new fund/SPV files a Form D; vendors compete to catch emerging managers first.",need:"A modest paid base across vertical filters.",why:"Vendors already hand-watch EDGAR; the pain is catching new managers before competitors.",day1:"SEO + LinkedIn BD outreach to the first 100 (fund admins, boutique securities firms, D&O brokers).",budget:"SEO + outbound BD. Under $100/mo."},
+barrier:"LOW · 4/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",5],["Runs itself",5],["Money potential",4],["Stays ours",4]],
+overall:"4.33",
+risk:"PII is low (business principals; no FCRA) but mind TCPA/CAN-SPAM hygiene if enriching personal contacts. Competition is adjacent (compliance filers + LP deal databases) — defend with the compounding manager-from-filing-#1 relationship graph."
+}
+},
+{
+id:"stockshow", group:"possible", rank:8, name:"StockShow Hub — Junior Livestock Results", platform:"Public-PDF aggregator (B2C enthusiast)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.3 · 3 gates PASS", potential:"4.3",
+note:"🆕 v11 ⭐ the gem · moat = un-backfillable national results archive (fairs take PDFs down) + breeders citing rankings in sale catalogs.",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–4k"},{k:"Est. @ 1 yr",v:"~$10–35k"},{k:"Potential",v:"4.3/5",pot:true}],
+sc:{
+plain:{what:"OpenPowerlifting for 4-H and FFA stock shows — a national place to see who is winning, which sires and breeders are hot, and how your animal ranks, aggregated from thousands of county-fair result PDFs.",problem:"Hundreds of thousands of show families spend $3k–$25k+ per animal but results are trapped in thousands of county-fair PDFs and Facebook groups; there is no national rankings or animal-record view.",who:"Show families pay $8–12/mo Pro for analytics + rankings; breeders and circuits sponsor."},
+cls:{industry:"Agriculture / livestock shows",customer:"B2C — show families + breeders",lives:"Web/mobile app",idea:"Public-PDF aggregator (data-archive moat)"},
+price:"Freemium · $8–12/mo Pro",
+build:{we:"Parse county-fair result PDFs into a structured national database + cross-circuit rankings + sire/dam analytics + alerts + export, with Stripe.",you:"Stripe account, domain, approve hosting.",not:"No back-office show management (that is the incumbents); no manual data entry once parsers are built.",relies:"ShoWorks/FairEntry/FairWire result PDFs + breed junior-national results (public) + PDF parsing (the work + the moat).",cost:"~6–10 weeks · under $100/mo"},
+market:{buyer:"4-H/FFA show families + breeders citing rankings in sale catalogs.",big:"Hundreds of thousands of families at $3k–$25k+ per animal; fair-results searches return nothing good today.",need:"~1,000 Pro = strong MRR + sponsorship.",why:"Families cobble results from Facebook + scattered PDFs; a national ranking is a clear unmet need.",day1:"Stock-show Facebook groups, FFA/4-H, breed junior-nationals + SEO on fair-results queries; seed the un-backfillable archive.",budget:"Communities + SEO. Under $100/mo."},
+barrier:"MED · 3/5", faceless:"Yes",
+score:[["Real demand",5],["Easy to get found",4],["Cheap & fast to build",3],["Runs itself",4],["Money potential",5],["Stays ours",5]],
+overall:"4.3",
+risk:"⚠️ Results name minors — ingest only already-public results, offer name-suppression/opt-out, de-emphasize child contact info, and get a youth-privacy legal sanity-check. Build effort is higher (PDF parsing) but that is also the moat."
+}
+},
+{
+id:"tailwatch", group:"possible", rank:9, name:"TailWatch — Aircraft Title/Lien Alerts", platform:"Public-data prosumer alert feed",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.3 · 3 gates PASS", potential:"4.3",
+note:"🆕 v11 · moat = un-backfillable daily FAA ownership/lien diff archive (FAA publishes only current state) + lien-holder normalization.",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–5k"},{k:"Est. @ 1 yr",v:"~$10–35k"},{k:"Potential",v:"4.3/5",pot:true}],
+sc:{
+plain:{what:"A cheap watch-this-tail-number alert that pings buyers, brokers and small lenders the moment a new lien, ownership change or registration flip hits the FAA record for a small aircraft.",problem:"Buying a small plane ($80k–$2M) means paying $150–450 for a one-time human title/lien search that goes stale immediately; liens get filed days before closing.",who:"GA buyers pay $9–19/mo per tail; brokers $49–99/mo to watch inventory; small lenders $199+/mo."},
+cls:{industry:"General aviation",customer:"B2C/B2B — buyers, brokers, small lenders",lives:"Web app + alerts",idea:"Public-data alert feed (diff-archive moat)"},
+price:"$9–19/mo tail · $49–99/mo broker · $199+/mo lender",
+build:{we:"Ingest the daily FAA aircraft database, diff it to detect lien/ownership/registration changes, and alert watchers; add lien-holder normalization + Stripe.",you:"Stripe account, domain, approve hosting.",not:"No human title searches; no enrichment of owner PII; no per-customer work.",relies:"FAA Releasable Aircraft Database (daily bulk CSVs) + FAA document/lien records (official, legal, bulk) + Stripe.",cost:"~3–5 weeks · under $100/mo"},
+market:{buyer:"GA buyers, deal-closing brokers, A&P mechanics protecting liens, small aircraft lenders.",big:"200k+ piston fleet ignored by enterprise aviation-finance platforms; the one-time-search model structurally cannot cover the gap.",need:"Hundreds of paid tails/brokers.",why:"Liens get filed days before closing; a watchlist is the obvious fix the incumbents do not offer at this price.",day1:"GA forums (Pilots of America, Beechtalk, VAF), AOPA/EAA, Trade-A-Plane + SEO on aircraft lien check / N-number title search.",budget:"Forums + SEO. Under $100/mo."},
+barrier:"LOW · 4/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",5],["Runs itself",5],["Money potential",4],["Stays ours",4]],
+overall:"4.3",
+risk:"Moderate PII (owner name+address, public by design) — surface as-is, do not enrich. FAA publishes only current state, so the daily-snapshot diff archive is the un-backfillable moat."
+}
+},
+{
+id:"darktower", group:"possible", rank:10, name:"DarkTower — Tower Lighting-Outage Monitor", platform:"Public-data join (B2B compliance)",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.2 · 3 gates PASS", potential:"4.2",
+note:"🆕 v11 · moat = non-obvious FCC-ASR × FAA-NOTAM dataset join + compounding per-tower good-faith compliance history.",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–4k"},{k:"Est. @ 1 yr",v:"~$8–25k"},{k:"Potential",v:"4.2/5",pot:true}],
+sc:{
+plain:{what:"DarkTower watches every tall tower for lighting-outage NOTAMs and inspection deadlines and alerts the long tail of small owners who have no automated monitoring.",problem:"Every tall tower must keep warning lights working and pass quarterly inspections; a dead beacon the owner misses draws FCC fines of $7k–$25k+.",who:"Small/mid tower owners + service firms pay $39–149/mo by tower count, plus a compliance-archive upsell."},
+cls:{industry:"Telecom / broadcast infrastructure",customer:"B2B — small/mid tower owners",lives:"Web app + alerts",idea:"Public-data join (compliance-history moat)"},
+price:"$39–149/mo by tower count",
+build:{we:"Join the FCC ASR registry to the FAA NOTAM feed by lat/long + structure ID, detect obstruction-light-outage NOTAMs + inspection deadlines, and alert owners; add a compliance archive + Stripe.",you:"Stripe account, domain, approve hosting.",not:"No hardware (lighting vendors sell that); no pilot-facing NOTAM app.",relies:"FCC ASR registry (~120k+ structures, owner + lighting spec) × FAA NOTAM API (free) + Stripe.",cost:"~4–6 weeks · under $100/mo"},
+market:{buyer:"Broadcast, WISP, microwave and rural-coop tower owners + service firms (the non-big-3 long tail).",big:"~120k+ registered structures; 2024 Part 17 tightening raised the stakes; big players self-monitor, the long tail finds out via FCC inquiry.",need:"A few hundred small owners.",why:"A dead beacon means a five-figure fine; no SaaS joins ASR + NOTAM for small owners today.",day1:"ASR-filtered cold-mail to non-big-3 owners + WISPA/SBE forums.",budget:"Cold-mail + forums. Under $100/mo."},
+barrier:"LOW-MED · 3/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",3],["Cheap & fast to build",4],["Runs itself",5],["Money potential",4],["Stays ours",5]],
+overall:"4.2",
+risk:"No PII. Distribution is the constraint (cold-mail/forums; found=3). Moat = the non-obvious ASR × NOTAM dataset join + compounding per-tower good-faith compliance history."
+}
+},
+{
+id:"orphanwell", group:"possible", rank:11, name:"OrphanWellRadar — Well-Plugging Bid Feed", platform:"Public-data B2B bid feed",
+status:"possible", mrr:0, customers:0, trials:0, source:"Discovery v11 · 4.17 · 3 gates PASS", potential:"4.17",
+note:"🆕 v11 · moat = un-backfillable bid + per-well cost benchmark archive across 12+ normalized state schemas.",
+kpis:[{k:"Est. @ 6 mo",v:"~$1–5k"},{k:"Est. @ 1 yr",v:"~$10–30k"},{k:"Potential",v:"4.17/5",pot:true}],
+sc:{
+plain:{what:"One fresh feed of every abandoned-well plugging bid plus the underlying well inventory, normalized from 12+ ugly state portals and sold to the contractors chasing the federal plugging money.",problem:"~$4.7B in federal money is plugging abandoned oil/gas wells through 2035; the bids + inventories are public but scattered across 12+ state portals contractors must watch by hand.",who:"Plugging contractors pay $99–299/mo; a $499 tier adds per-well cost benchmarking."},
+cls:{industry:"Oil & gas / environmental remediation",customer:"B2B — well-plugging contractors",lives:"Web app + feed",idea:"Public-data bid feed (benchmark-archive moat)"},
+price:"$99–299/mo · $499 benchmarking tier",
+build:{we:"Aggregate + normalize state orphan/idle-well inventories + bid postings + DOI award data into one fresh feed + alerts + a cost-benchmark tier, with Stripe.",you:"Stripe account, domain, approve hosting.",not:"No bid-writing service; no manual portal-watching once normalizers are built.",relies:"State well inventories (TX RRC, PA DEP, OH DNR, LA, NM, WV, CalGEM, NY DEC) + state bid postings + DOI grant data (official open data) + Stripe.",cost:"~5–8 weeks · under $100/mo"},
+market:{buyer:"Plugging contractors + subcontracting surveyors/title/water-haulers.",big:"~$4.7B budgeted through 2035; generic bid tools (BidNet/GovWin/GovSpend) bury orphan-well RFPs and skip the inventory.",need:"~100 contractors.",why:"Bid timing/scoping is contractors #1 pain; the money is budgeted and the buyers are motivated.",day1:"Winning contractors are named in public award docs (email directly) + SEO on [state] orphan well plugging bids + O&G association newsletters.",budget:"Direct email + SEO + newsletters. Under $100/mo."},
+barrier:"MED · 3/5", faceless:"Yes",
+score:[["Real demand",4],["Easy to get found",4],["Cheap & fast to build",4],["Runs itself",4],["Money potential",4],["Stays ours",5]],
+overall:"4.17",
+risk:"No PII. The federal program is time-boxed (through 2035) but large; moat = the un-backfillable bid + per-well cost benchmark archive + 12+ state-schema normalization generic tools will not do."
+}
+},
+{
 id:"arch-wixconsent", group:"archive", name:"Wix ConsentLog", platform:"Wix App Market",
 status:"archived", mrr:0, customers:0, trials:0, source:"CUT 2026-06-25 · moat gate", potential:"—",
 note:"CUT — Wix native consent + Cookiebot/CookieYes free tiers.",
