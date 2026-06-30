@@ -735,22 +735,27 @@ document.getElementById("tiles").innerHTML = tiles.map(t=>
 }
 
 const isBuildPhase = p => p.group==="active" && (p.status==="build"||p.status==="greenlit"||p.status==="planned");
-const isFinishedPhase = p => p.group==="active" && (p.status==="review"||p.status==="live");
+const isReviewPhase = p => p.group==="active" && p.status==="review";
+const isLivePhase = p => p.group==="active" && p.status==="live";
 function renderTabs(){
 const nBuild = PROJECTS.filter(isBuildPhase).length;
-const nFin = PROJECTS.filter(isFinishedPhase).length;
+const nReview = PROJECTS.filter(isReviewPhase).length;
+const nLive = PROJECTS.filter(isLivePhase).length;
 const _h2=hiddenSet(); const nPoss = PROJECTS.filter(p=>p.group==="possible"&&!_h2.has(p.id)).length;
 const nArch = PROJECTS.filter(p=>p.group==="archive").length;
 document.getElementById("tabs").innerHTML =
 `<button class="tab ${TAB==='build'?'active':''}" onclick="setTab('build')">In Build <span class="cnt">${nBuild}</span></button>
-<button class="tab ${TAB==='finished'?'active':''}" onclick="setTab('finished')">Finished · Review/Live <span class="cnt">${nFin}</span></button>
+<button class="tab ${TAB==='review'?'active':''}" onclick="setTab('review')">In Review <span class="cnt">${nReview}</span></button>
+<button class="tab ${TAB==='live'?'active':''}" onclick="setTab('live')">Live <span class="cnt">${nLive}</span></button>
 <button class="tab ${TAB==='possible'?'active':''}" onclick="setTab('possible')">Possible Projects <span class="cnt">${nPoss}</span></button>
 <button class="tab ${TAB==='archive'?'active':''}" onclick="setTab('archive')">Archive <span class="cnt">${nArch}</span></button>
 <button class="tab ${TAB==='structure'?'active':''}" onclick="setTab('structure')">Structure</button>`;
 document.getElementById("tabhint").innerHTML = TAB==="build"
 ? "Projects actively being built (incl. green-lit, not yet submitted). Tap a card for full details."
-: TAB==="finished"
-? "Projects finished &amp; shipped — in marketplace review or live to customers. Tap a card for full details."
+: TAB==="review"
+? "Finished &amp; submitted — in marketplace review, awaiting approval. Tap a card for full details."
+: TAB==="live"
+? "Live to customers — accepting signups/revenue. (None live yet — first launch coming soon.)"
 : TAB==="possible"
 ? "Researched &amp; scored, not committed — <b>ordered by what I'd build next</b> (#1 = my top pick). Tap a card for solution, market, pricing, integrations &amp; the build split."
 : TAB==="archive"
@@ -785,10 +790,11 @@ if(TAB==="structure"){ struct.style.display="block"; grid.style.display="none"; 
 struct.style.display="none"; grid.style.display="";
 let items;
 if(TAB==="build"){ items = PROJECTS.filter(isBuildPhase); }
-else if(TAB==="finished"){ items = PROJECTS.filter(isFinishedPhase); }
+else if(TAB==="review"){ items = PROJECTS.filter(isReviewPhase); }
+else if(TAB==="live"){ items = PROJECTS.filter(isLivePhase); }
 else if(TAB==="archive"){ items = PROJECTS.filter(p=>p.group==="archive"); }
 else { const h=hiddenSet(); items = PROJECTS.filter(p=>p.group==="possible"&&!h.has(p.id)); items.sort((a,b)=>(a.rank||99)-(b.rank||99)); }
-grid.innerHTML = items.map(card).join("");
+grid.innerHTML = items.length ? items.map(card).join("") : `<div style="grid-column:1/-1;color:var(--ink2);font-size:13px;padding:10px 2px">${TAB==='live'?'No products are live yet — first launch coming soon. Apps move here from In Review once they launch to customers.':'Nothing here yet.'}</div>`;
 if(TAB==="possible"){ const n=hiddenSet().size; if(n>0) grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--ink2);margin:-4px 0 4px">${n} hidden from your view · <a href="#" onclick="unhideAll();return false" style="color:var(--blue);font-weight:700">show all</a></div>` + grid.innerHTML; }
 }
 
