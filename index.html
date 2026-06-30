@@ -744,9 +744,9 @@ const nLive = PROJECTS.filter(isLivePhase).length;
 const _h2=hiddenSet(); const nPoss = PROJECTS.filter(p=>p.group==="possible"&&!_h2.has(p.id)).length;
 const nArch = PROJECTS.filter(p=>p.group==="archive").length;
 document.getElementById("tabs").innerHTML =
-`<button class="tab ${TAB==='build'?'active':''}" onclick="setTab('build')">In Build <span class="cnt">${nBuild}</span></button>
+`<button class="tab ${TAB==='live'?'active':''}" onclick="setTab('live')">Live <span class="cnt">${nLive}</span></button>
 <button class="tab ${TAB==='review'?'active':''}" onclick="setTab('review')">In Review <span class="cnt">${nReview}</span></button>
-<button class="tab ${TAB==='live'?'active':''}" onclick="setTab('live')">Live <span class="cnt">${nLive}</span></button>
+<button class="tab ${TAB==='build'?'active':''}" onclick="setTab('build')">In Build <span class="cnt">${nBuild}</span></button>
 <button class="tab ${TAB==='possible'?'active':''}" onclick="setTab('possible')">Possible Projects <span class="cnt">${nPoss}</span></button>
 <button class="tab ${TAB==='archive'?'active':''}" onclick="setTab('archive')">Archive <span class="cnt">${nArch}</span></button>
 <button class="tab ${TAB==='structure'?'active':''}" onclick="setTab('structure')">Structure</button>`;
