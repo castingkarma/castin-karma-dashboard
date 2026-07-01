@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Casting Karma — Revenue (living tracker)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBF8F1;--ink:#2E3A28;--ink2:#6E7A63;--line:#E6E0D2;--card:#FFFFFF;--gold:#A8863F;--green:#3B6D34;--amber:#B07A1E;--slate:#8A7B5E;--violet:#7A6A45}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 22px 60px}
+header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.brand h1{font-family:'Cinzel',Georgia,serif;font-size:16px;margin:0;font-weight:600;letter-spacing:1px}
+.brand .sub{font-size:12px;color:var(--ink2);margin-top:1px}
+.htag{font-size:10px;font-weight:700;letter-spacing:.5px;background:rgba(168,134,63,.15);padding:3px 8px;border-radius:6px;color:var(--gold)}
+.tabs{display:flex;gap:0;margin:2px 0 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{border:none;background:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink2);padding:10px 4px;margin-right:16px;border-bottom:2.5px solid transparent}
+.tab.active{color:var(--ink);border-bottom-color:var(--gold)}
+.tab.rev.active{color:var(--green);border-bottom-color:var(--green)}
+.lead{font-size:12.5px;color:var(--ink2);margin:0 0 14px;max-width:760px;line-height:1.5}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.seg{display:inline-flex;background:#F1ECDF;border:1px solid var(--line);border-radius:9px;padding:2px}
+.seg button{border:none;background:none;cursor:pointer;font:inherit;font-size:12px;font-weight:700;color:var(--ink2);padding:6px 12px;border-radius:7px}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.seg.cons button.on{color:var(--slate)}.seg.base button.on{color:var(--green)}.seg.opt button.on{color:var(--gold)}
+.segl{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ink2);margin-right:2px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+.kpi .k{font-size:9.5px;color:var(--ink2);font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.kpi .v{font-size:21px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.kpi .v small{font-size:12px;font-weight:700;color:var(--ink2)}
+.kpi .d{font-size:10.5px;color:var(--ink2);margin-top:2px}
+.kpi.hero{background:linear-gradient(135deg,#F7F2E6,#fff);border-color:#E6DBBF}
+.kpi.hero .v{color:var(--green)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.panel h2{font-size:13px;margin:0 0 2px;font-weight:800;letter-spacing:.2px}
+.panel .ph{font-size:11.5px;color:var(--ink2);margin:0 0 12px}
+.chartwrap{position:relative}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:9px 11px;font-size:11.5px;opacity:0;transition:opacity .1s;z-index:5;min-width:150px}
+.tip .tm{font-weight:800;font-size:12px;margin-bottom:5px}
+.tip .tr{display:flex;justify-content:space-between;gap:14px;padding:1px 0}
+.tip .tr .lab{color:var(--ink2)}
+.tip .mono{font-variant-numeric:tabular-nums}
+table.rev{width:100%;border-collapse:collapse;font-size:12.5px}
+table.rev th{text-align:left;color:var(--ink2);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line);padding:7px 8px}
+table.rev td{padding:9px 8px;border-bottom:1px solid #F3EEE2}
+table.rev tr.prow{cursor:pointer}
+table.rev tr.prow:hover{background:#FBF8F1}
+.pj{display:flex;align-items:center;gap:9px}
+.pj .ci{width:26px;height:26px;border-radius:7px;flex-shrink:0}
+.pj b{font-weight:700}
+.mono{font-variant-numeric:tabular-nums}
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.pill.build{background:#fff7ed;color:var(--amber)}
+.pill.review{background:#eef2ff;color:#3b5bdb}
+.pill.live{background:#ecfdf3;color:var(--green)}
+.right{text-align:right}
+.chip{font-size:10px;color:var(--slate);background:#F1ECDF;border-radius:5px;padding:2px 7px}
+.note{font-size:11.5px;color:var(--ink2);background:#FBF8F1;border:1px dashed #E0D8C8;border-radius:10px;padding:11px 13px;margin-top:4px;line-height:1.5}
+.ov{position:fixed;inset:0;background:rgba(20,25,15,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:30}
+.modal{background:#fff;border-radius:16px;max-width:620px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow:auto}
+.mclose{float:right;border:none;background:#f1ece0;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;color:var(--ink2)}
+.mtit{font-size:17px;font-weight:800}
+.msub{font-size:12px;color:var(--ink2);margin-top:2px}
+.mkpis{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.mkpi{background:#F7F2E6;border:1px solid #E6DBBF;border-radius:10px;padding:10px}
+.mkpi .k{font-size:9.5px;color:var(--ink2);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.mkpi .v{font-size:17px;font-weight:800;margin-top:3px;color:var(--green)}
+.back{font-size:12px;color:var(--gold);font-weight:700;cursor:pointer}
+.foot{font-size:11px;color:var(--ink2);margin-top:8px}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body>
+<header>
+<div class="brand"><h1>PROJECT TRACKER — REVENUE</h1><div class="sub">Casting Karma LLC · living revenue tracker</div></div>
+<div style="display:flex;align-items:center;gap:10px"><span class="htag">PRIVATE</span><span class="sub" id="upd"></span></div>
+</header>
+
+<div class="wrap">
+<!-- faux tab bar to show where this lives -->
+<div class="tabs">
+<button class="tab">Live</button><button class="tab">In Review</button><button class="tab">In Build</button>
+<button class="tab">Possible</button><button class="tab">Archive</button><button class="tab">Structure</button>
+<button class="tab rev active">Revenue</button>
+</div>
+
+<p class="lead"><b>The living revenue picture.</b> Forecast (dashed) for projects not yet earning; actual (solid) fills in automatically as each goes live. Toggle the scenario, switch between the portfolio total with its range and the by-project stack, and click any project to drill in. Actuals are updated in one data block — no need to ask in chat.</p>
+
+<div class="controls">
+<span class="segl">Scenario</span>
+<div class="seg base" id="segScen">
+<button data-s="cons">Conservative</button>
+<button data-s="base" class="on">Base</button>
+<button data-s="opt">Optimistic</button>
+</div>
+<span class="segl" style="margin-left:8px">View</span>
+<div class="seg" id="segView">
+<button data-v="total" class="on">Portfolio total + range</button>
+<button data-v="stack">By project</button>
+</div>
+</div>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="panel">
+<h2 id="chTitle">Monthly recurring revenue — portfolio</h2>
+<p class="ph" id="chSub"></p>
+<div class="chartwrap"><div id="chart"></div><div class="tip" id="tip"></div></div>
+<div class="legend" id="legend"></div>
+</div>
+
+<div class="panel">
+<h2>By project</h2>
+<p class="ph">Base figures re-clock from each project's launch. Click a row to drill in.</p>
+<table class="rev"><thead><tr>
+<th>Project</th><th>Status</th><th>Launch</th><th class="right">Actual MRR</th>
+<th class="right">6-mo</th><th class="right">12-mo</th><th>Gate / note</th>
+</tr></thead><tbody id="ptbody"></tbody>
+<tfoot><tr style="font-weight:800"><td>Portfolio</td><td></td><td></td>
+<td class="right mono" id="fActual">$0</td><td class="right mono" id="f6">—</td><td class="right mono" id="f12">—</td><td></td></tr></tfoot>
+</table>
+</div>
+
+<div class="note" id="livingNote"></div>
+<div class="foot">Modeled ranges from the GTM-anchored forecast (Distribution, 2026-07-01) + RangeNodes GTM plan. Not commitments. All projects pre-revenue → actual = $0 until go-live.</div>
+</div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+
+<script>
+// ================= LIVING DATA =================
+// Timeline: 18 months, Jul 2026 (idx 0) → Dec 2027 (idx 17). "Today" = idx 0.
+const MONTHS=[];
+(function(){const names=['Jul','Aug','Sep','Oct','Nov','Dec'];let y=2026,mi=6;
+for(let i=0;i<18;i++){const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mi];MONTHS.push({lbl:m+" '"+String(y).slice(2),key:y+"-"+String(mi+1).padStart(2,'0')});mi++;if(mi>11){mi=0;y++;}}})();
+const TODAY=0;
+
+// Per-project forecast anchors (MRR $): m6 = 6 mo post-launch, m12 = 12 mo. launch = month index.
+const PROJECTS=[
+ {id:'tenderproof',name:'TenderProof',full:'TenderProof — Broker Defense File',color:'#22304A',status:'build',launch:1,launchLbl:"Aug 1 '26",
+  gate:'Attorney sign-off gates launch',blurb:'B2B, high ACV ($149–699/mo). Post-Montgomery urgency lets it front-load — highest ceiling of the portfolio.',
+  cons:{m6:2500,m12:7000},base:{m6:6000,m12:20000},opt:{m6:15000,m12:50000}},
+ {id:'tailwatch',name:'TailWatch',full:'TailWatch — Aircraft Title/Lien Alerts',color:'#B07A1E',status:'build',launch:1,launchLbl:"mid-Aug '26",
+  gate:'Brand/domain + legal check; mid-Aug is a stretch',blurb:'Proven WTP (people pay $150–450 today). Sticky at broker/lender tiers — one portfolio deal is the upside.',
+  cons:{m6:800,m12:3000},base:{m6:2500,m12:9000},opt:{m6:7000,m12:30000}},
+ {id:'stockshow',name:'StockShow Hub',full:'StockShow Hub — Junior Livestock Results',color:'#7A6A45',status:'build',launch:1,launchLbl:"mid-Aug '26",
+  gate:'Youth-privacy legal check gates launch; monetization = the risk',blurb:'Best organic SEO surface of the sprint; launches into show season. Free→paid conversion is the unknown.',
+  cons:{m6:700,m12:1500},base:{m6:2500,m12:6000},opt:{m6:7000,m12:30000}},
+ {id:'rangenodes',name:'RangeNodes',full:'RangeNodes — Handload Database',color:'#3B6D34',status:'build',launch:1,launchLbl:"Aug 1 '26",
+  gate:'Attorney + E&O gate launch',blurb:'Community-led flywheel in 2026; SEO compounds in 2027. Judge on indexed pages + contribution, not year-1 $.',
+  cons:{m6:400,m12:1000},base:{m6:900,m12:2500},opt:{m6:2500,m12:9000}},
+ {id:'hulldocs',name:'HullDocs',full:'HullDocs — Boat Maintenance History',color:'#4A6E8A',status:'build',launch:1,launchLbl:"Aug 1 '26",
+  gate:'Off-season launch headwind; payoff next spring',blurb:'Low-ACV sub ($5/mo) + $30 report-at-sale fee (the real engine). Cheapest, most durable, slowest.',
+  cons:{m6:250,m12:600},base:{m6:600,m12:2200},opt:{m6:1200,m12:8000}},
+ {id:'marketplace',name:'Marketplace apps',full:'P1–P3 Marketplace apps (Cert · DueBell · Jobcast)',color:'#8A7B5E',status:'review',launch:2,launchLbl:"post-approval",
+  gate:'In marketplace review; monetization TBD',blurb:'monday / Jobber / GHL apps in review. Small, uncertain revenue — placeholder until approvals + billing wire up.',
+  cons:{m6:100,m12:300},base:{m6:300,m12:800},opt:{m6:1000,m12:3000}}
+];
+
+// ===== ACTUALS (the living part) — fill in as projects go live: actuals['id']['YYYY-MM']=mrr =====
+// Everything pre-revenue today → all zero. Example once live:  actuals.tenderproof['2026-09']=1490;
+const actuals={tenderproof:{},tailwatch:{},stockshow:{},rangenodes:{},hulldocs:{},marketplace:{}};
+
+// ---- build a smooth monthly MRR curve from anchors ----
+function curve(p,scen){
+ const a=p[scen];const out=new Array(18).fill(0);
+ for(let i=0;i<18;i++){const k=i-p.launch;
+  if(k<0){out[i]=0;continue;}
+  let v;
+  if(k===0){v=a.m6*0.08;}
+  else if(k<=6){const t=k/6;v=a.m6*(0.08+0.92*Math.pow(t,1.5));}
+  else if(k<=12){const t=(k-6)/6;v=a.m6+(a.m12-a.m6)*t;}
+  else{const slope=(a.m12-a.m6)/6;v=a.m12+slope*0.6*(k-12);}
+  out[i]=Math.round(v);
+ }
+ return out;
+}
+function actualCurve(p){
+ const out=new Array(18).fill(null);
+ MONTHS.forEach((m,i)=>{if(actuals[p.id]&&actuals[p.id][m.key]!=null)out[i]=actuals[p.id][m.key];});
+ return out;
+}
+function totalCurve(scen){const t=new Array(18).fill(0);PROJECTS.forEach(p=>{const c=curve(p,scen);for(let i=0;i<18;i++)t[i]+=c[i];});return t;}
+function totalActual(){const t=new Array(18).fill(null);MONTHS.forEach((m,i)=>{let s=0,any=false;PROJECTS.forEach(p=>{if(actuals[p.id]&&actuals[p.id][m.key]!=null){s+=actuals[p.id][m.key];any=true;}});t[i]=any?s:null;});return t;}
+
+let SCEN='base',VIEW='total';
+const fmt=v=>{if(v==null)return '—';if(v>=1000)return '$'+(v/1000).toFixed(v>=10000?0:1)+'k';return '$'+Math.round(v);};
+const fmtF=v=>'$'+Math.round(v).toLocaleString();
+
+// ---------------- CHART ----------------
+function drawChart(){
+ const W=920,H=372,padL=56,padR=16,padT=14,padB=36;
+ const n=18;const cons=totalCurve('cons'),opt=totalCurve('opt'),sel=totalCurve(SCEN),act=totalActual();
+ let ymax;
+ if(VIEW==='total'){ymax=Math.max(...opt);}
+ else{ymax=Math.max(...sel);}
+ ymax=niceMax(ymax*1.12);
+ const xF=i=>padL+i*(W-padL-padR)/(n-1);
+ const yF=v=>padT+(1-v/ymax)*(H-padT-padB);
+ let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+ // gridlines
+ for(let g=0;g<=5;g++){const gv=ymax*g/5;const gy=yF(gv);
+  s+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#EFE9DB" stroke-width="1"/>';
+  s+='<text x="'+(padL-8)+'" y="'+(gy+3.5)+'" text-anchor="end" font-size="10" fill="#9a927f">'+fmt(gv)+'</text>';}
+ // x labels + launch markers
+ MONTHS.forEach((m,i)=>{if(i%2===0){s+='<text x="'+xF(i)+'" y="'+(H-padB+16)+'" text-anchor="middle" font-size="9.5" fill="#9a927f">'+m.lbl+'</text>';}});
+ // launch markers (unique)
+ const seen={};PROJECTS.forEach(p=>{if(seen[p.launch])return;seen[p.launch]=1;const x=xF(p.launch);
+  s+='<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(H-padB)+'" stroke="#D9CFB6" stroke-width="1" stroke-dasharray="3 3"/>';});
+ // today marker
+ const tx=xF(TODAY);s+='<line x1="'+tx+'" y1="'+padT+'" x2="'+tx+'" y2="'+(H-padB)+'" stroke="#3B6D34" stroke-width="1.2" stroke-dasharray="2 2"/>';
+ s+='<text x="'+(tx+4)+'" y="'+(padT+10)+'" font-size="9" fill="#3B6D34" font-weight="700">today</text>';
+
+ if(VIEW==='total'){
+  // cone opt..cons
+  let up='',dn='';for(let i=0;i<n;i++){up+=(i?'L':'M')+xF(i)+' '+yF(opt[i])+' ';}
+  for(let i=n-1;i>=0;i--){dn+='L'+xF(i)+' '+yF(cons[i])+' ';}
+  s+='<path d="'+up+dn+'Z" fill="#3B6D34" opacity="0.08"/>';
+  // cons + opt thin lines
+  s+=linePath(cons,xF,yF,'#B9A97E',1,'3 3');
+  s+=linePath(opt,xF,yF,'#B9A97E',1,'3 3');
+  // selected forecast (dashed = forecast)
+  s+=linePath(sel,xF,yF,scenColor(SCEN),2.4,'6 4');
+ } else {
+  // stacked by project (selected scenario)
+  const curves=PROJECTS.map(p=>curve(p,SCEN));
+  let acc=new Array(n).fill(0);
+  PROJECTS.forEach((p,pi)=>{
+   let top='',bot='';const newAcc=acc.map((v,i)=>v+curves[pi][i]);
+   for(let i=0;i<n;i++){top+=(i?'L':'M')+xF(i)+' '+yF(newAcc[i])+' ';}
+   for(let i=n-1;i>=0;i--){bot+='L'+xF(i)+' '+yF(acc[i])+' ';}
+   s+='<path d="'+top+bot+'Z" fill="'+p.color+'" opacity="0.82"/>';
+   acc=newAcc;
+  });
+ }
+ // ACTUAL overlay (solid) where present
+ const segs=[];let cur=[];
+ act.forEach((v,i)=>{if(v!=null){cur.push([i,v]);}else{if(cur.length){segs.push(cur);cur=[];}}});
+ if(cur.length)segs.push(cur);
+ segs.forEach(seg=>{let d='';seg.forEach((pt,j)=>{d+=(j?'L':'M')+xF(pt[0])+' '+yF(pt[1])+' ';});
+  s+='<path d="'+d+'" fill="none" stroke="#2E3A28" stroke-width="2.6"/>';
+  seg.forEach(pt=>{s+='<circle cx="'+xF(pt[0])+'" cy="'+yF(pt[1])+'" r="3.2" fill="#2E3A28"/>';});});
+ // hover capture
+ for(let i=0;i<n;i++){const x0=(i===0?0:(xF(i-1)+xF(i))/2),x1=(i===n-1?W:(xF(i)+xF(i+1))/2);
+  s+='<rect x="'+x0+'" y="'+padT+'" width="'+(x1-x0)+'" height="'+(H-padT-padB)+'" fill="transparent" onmousemove="hover(event,'+i+')" onmouseleave="hideTip()"/>';}
+ s+='</svg>';
+ document.getElementById('chart').innerHTML=s;
+}
+function linePath(arr,xF,yF,col,w,dash){let d='';arr.forEach((v,i)=>{d+=(i?'L':'M')+xF(i)+' '+yF(v)+' ';});return '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';}
+function scenColor(s){return s==='cons'?'#8A7B5E':s==='opt'?'#A8863F':'#3B6D34';}
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;let m;if(n<=1)m=1;else if(n<=2)m=2;else if(n<=2.5)m=2.5;else if(n<=5)m=5;else m=10;return m*p;}
+
+function hover(e,i){
+ const tip=document.getElementById('tip');const sel=totalCurve(SCEN),act=totalActual();
+ let rows='<div class="tm">'+MONTHS[i].lbl+'</div>';
+ rows+='<div class="tr"><span class="lab">Forecast ('+SCEN+')</span><b class="mono">'+fmt(sel[i])+'</b></div>';
+ if(act[i]!=null)rows+='<div class="tr"><span class="lab">Actual</span><b class="mono">'+fmt(act[i])+'</b></div>';
+ // top contributors
+ const parts=PROJECTS.map(p=>({n:p.name,v:curve(p,SCEN)[i],c:p.color})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v).slice(0,3);
+ parts.forEach(o=>{rows+='<div class="tr"><span class="lab"><span class="sw" style="background:'+o.c+'"></span> '+o.n+'</span><span class="mono">'+fmt(o.v)+'</span></div>';});
+ tip.innerHTML=rows;tip.style.opacity=1;
+ const wrap=document.querySelector('.chartwrap').getBoundingClientRect();
+ const px=(e.clientX-wrap.left);tip.style.left=Math.min(px+14,wrap.width-170)+'px';tip.style.top='16px';
+}
+function hideTip(){document.getElementById('tip').style.opacity=0;}
+
+// ---------------- KPIs ----------------
+function m6idx(){return 7;} // Feb '27 (launch idx1 + 6)
+function m12idx(){return 13;} // Aug '27
+function renderKpis(){
+ const sel=totalCurve(SCEN),act=totalActual();
+ // current actual MRR = latest non-null total at/<= today... none yet
+ let curActual=0;for(let i=TODAY;i>=0;i--){if(act[i]!=null){curActual=act[i];break;}}
+ const yearEnd=sel[5]; // Dec '26
+ const m12=sel[m12idx()];const arr=m12*12;
+ const nBuild=PROJECTS.filter(p=>p.status==='build').length;
+ const nRev=PROJECTS.filter(p=>p.status==='review').length;
+ // to-date actual cumulative
+ let toDate=0;MONTHS.forEach((m,i)=>{PROJECTS.forEach(p=>{if(actuals[p.id]&&actuals[p.id][m.key])toDate+=actuals[p.id][m.key];});});
+ const tiles=[
+  ['Current MRR (actual)',fmtF(curActual),'all pre-revenue','hero'],
+  ['Forecast MRR · Dec &rsquo;26',fmt(yearEnd),SCEN+' · year-end',''],
+  ['Forecast MRR · 12-mo',fmt(m12),"Aug &rsquo;27 run-rate",''],
+  ['Projected ARR · 12-mo',fmt(arr),'run-rate ×12',''],
+  ['Live / Building','0 <small>/ '+(nBuild+nRev)+'</small>','launches Aug &rsquo;26',''],
+  ['Revenue to date',fmtF(toDate),'cumulative actual','']
+ ];
+ document.getElementById('kpis').innerHTML=tiles.map(t=>'<div class="kpi '+(t[3]||'')+'"><div class="k">'+t[0]+'</div><div class="v">'+t[1]+'</div><div class="d">'+t[2]+'</div></div>').join('');
+}
+
+// ---------------- project table ----------------
+function renderTable(){
+ let t6=0,t12=0;
+ const rows=PROJECTS.map(p=>{
+  const c=curve(p,SCEN);const s6=c[m6idx()],s12=c[m12idx()];t6+=s6;t12+=s12;
+  const ac=actualCurve(p);let a=0;for(let i=TODAY;i>=0;i--){if(ac[i]!=null){a=ac[i];break;}}
+  const pill=p.status==='build'?'build':p.status==='review'?'review':'live';
+  const pl=p.status==='build'?'In build':p.status==='review'?'In review':'Live';
+  return '<tr class="prow" onclick="openP(\''+p.id+'\')"><td><div class="pj"><span class="ci" style="background:'+p.color+'"></span><b>'+p.name+'</b></div></td>'
+   +'<td><span class="pill '+pill+'">'+pl+'</span></td><td style="font-size:11.5px;color:var(--ink2)">'+p.launchLbl+'</td>'
+   +'<td class="right mono">'+(a?fmtF(a):'$0')+'</td><td class="right mono">'+fmt(s6)+'</td><td class="right mono"><b>'+fmt(s12)+'</b></td>'
+   +'<td style="font-size:11px;color:var(--ink2)">'+p.gate+'</td></tr>';
+ }).join('');
+ document.getElementById('ptbody').innerHTML=rows;
+ document.getElementById('f6').textContent=fmt(t6);
+ document.getElementById('f12').textContent=fmt(t12);
+}
+
+// ---------------- drill-in ----------------
+function openP(id){
+ const p=PROJECTS.find(x=>x.id===id);
+ const c=curve(p,SCEN),cc=curve(p,'cons'),oo=curve(p,'opt'),ac=actualCurve(p);
+ // mini chart
+ const W=560,H=190,padL=48,padR=12,padT=12,padB=26,n=18;
+ let ymax=niceMax(Math.max(...oo)*1.15);
+ const xF=i=>padL+i*(W-padL-padR)/(n-1),yF=v=>padT+(1-v/ymax)*(H-padT-padB);
+ let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+ for(let g=0;g<=3;g++){const gv=ymax*g/3,gy=yF(gv);s+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#EFE9DB"/><text x="'+(padL-6)+'" y="'+(gy+3)+'" text-anchor="end" font-size="9" fill="#9a927f">'+fmt(gv)+'</text>';}
+ MONTHS.forEach((m,i)=>{if(i%3===0)s+='<text x="'+xF(i)+'" y="'+(H-padB+15)+'" text-anchor="middle" font-size="8.5" fill="#9a927f">'+m.lbl+'</text>';});
+ let up='',dn='';for(let i=0;i<n;i++)up+=(i?'L':'M')+xF(i)+' '+yF(oo[i])+' ';for(let i=n-1;i>=0;i--)dn+='L'+xF(i)+' '+yF(cc[i])+' ';
+ s+='<path d="'+up+dn+'Z" fill="'+p.color+'" opacity="0.1"/>';
+ s+=linePath(c,xF,yF,p.color,2.2,'6 4');
+ const lx=xF(p.launch);s+='<line x1="'+lx+'" y1="'+padT+'" x2="'+lx+'" y2="'+(H-padB)+'" stroke="#D9CFB6" stroke-dasharray="3 3"/>';
+ // actual
+ let d='',any=false;ac.forEach((v,i)=>{if(v!=null){d+=(any?'L':'M')+xF(i)+' '+yF(v)+' ';any=true;}});
+ if(any)s+='<path d="'+d+'" fill="none" stroke="#2E3A28" stroke-width="2.4"/>';
+ s+='</svg>';
+ const mk=(k,v)=>'<div class="mkpi"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';
+ document.getElementById('modal').innerHTML=
+  '<button class="mclose" onclick="closeP()">✕</button>'
+  +'<div class="mtit">'+p.full+'</div><div class="msub">'+p.launchLbl+' launch · '+SCEN+' scenario · <span class="chip">'+p.gate+'</span></div>'
+  +'<div class="mkpis">'+mk('6-mo MRR',fmt(c[m6idx()]))+mk('12-mo MRR',fmt(c[m12idx()]))+mk('Range 12-mo',fmt(cc[m12idx()])+'–'+fmt(oo[m12idx()]))+'</div>'
+  +'<div style="font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:10px">'+p.blurb+'</div>'
+  +s
+  +'<div class="foot" style="margin-top:10px">Dashed = forecast ('+SCEN+'); shaded = conservative–optimistic range; solid = actual once live. '+(any?'':'No actuals yet — pre-revenue.')+'</div>'
+  +'<div style="margin-top:12px"><span class="back" onclick="closeP()">← back to portfolio</span></div>';
+ document.getElementById('ov').style.display='flex';
+}
+function closeP(){document.getElementById('ov').style.display='none';}
+document.getElementById('ov').addEventListener('click',e=>{if(e.target.id==='ov')closeP();});
+
+// ---------------- legend + living note ----------------
+function renderLegend(){
+ let s='';
+ if(VIEW==='total'){
+  s+='<span><span class="sw" style="background:'+scenColor(SCEN)+'"></span> Forecast ('+SCEN+', dashed)</span>';
+  s+='<span><span class="sw" style="background:#3B6D34;opacity:.15"></span> Conservative–optimistic range</span>';
+  s+='<span><span class="sw" style="background:#2E3A28"></span> Actual (solid, once live)</span>';
+ } else {
+  PROJECTS.forEach(p=>{s+='<span><span class="sw" style="background:'+p.color+'"></span> '+p.name+'</span>';});
+  s+='<span><span class="sw" style="background:#2E3A28"></span> Actual total</span>';
+ }
+ document.getElementById('legend').innerHTML=s;
+ document.getElementById('chSub').textContent=(VIEW==='total'?'Portfolio total, '+SCEN+' case, with the conservative–optimistic cone. ':'Stacked by project, '+SCEN+' case. ')+'Forecast is dashed until a month has an actual.';
+ document.getElementById('chTitle').textContent=VIEW==='total'?'Monthly recurring revenue — portfolio':'Monthly recurring revenue — by project';
+}
+function renderNote(){
+ document.getElementById('livingNote').innerHTML='<b>How this stays current (the living tracker):</b> every project is pre-revenue today, so every actual is $0. As each goes live, actual MRR is entered per month in one place — the <code>actuals</code> block in this file (e.g. <code>actuals.tenderproof[&#39;2026-09&#39;]=1490</code>). The solid line and the KPIs then update automatically and the forecast becomes actual-vs-plan. Ops/Finance updates it monthly — no need to ask in chat.';
+}
+
+// ---------------- wire ----------------
+document.querySelectorAll('#segScen button').forEach(b=>b.onclick=()=>{SCEN=b.dataset.s;document.querySelectorAll('#segScen button').forEach(x=>x.classList.toggle('on',x===b));document.getElementById('segScen').className='seg '+SCEN;renderAll();});
+document.querySelectorAll('#segView button').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;document.querySelectorAll('#segView button').forEach(x=>x.classList.toggle('on',x===b));renderAll();});
+function renderAll(){drawChart();renderKpis();renderTable();renderLegend();renderNote();}
+document.getElementById('upd').textContent='Updated '+new Date().toLocaleDateString();
+renderAll();
+</script>
+</body></html>
