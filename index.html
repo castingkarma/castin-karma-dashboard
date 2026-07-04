@@ -767,7 +767,7 @@ function setTab(t){ TAB=t; renderTabs(); renderGrid(); }
 
 function card(p){
 const [cls,label] = STATUS[p.status];
-const kpis = (p.kpis||[]).map(x=>`<div class="kpi${x.pot?' pot':''}"><div class="kk">${x.k}</div><div class="kv">${x.v}</div></div>`).join("");
+const kpis = [{k:"Monthly visits",v:(p.visits!=null?p.visits:"—")},{k:"Accounts",v:(p.accounts!=null?p.accounts:"—")},{k:"Subscriptions",v:(p.subs!=null?p.subs:"—")}].map(x=>`<div class="kpi"><div class="kk">${x.k}</div><div class="kv">${x.v}</div></div>`).join("");
 const rb = p.rank ? `<span class="rankbadge">#${p.rank}</span>` : "";
 return `<div class="card" onclick='openModal("${p.id}")'>
 <div class="ctop">
