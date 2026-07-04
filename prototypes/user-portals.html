@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SquawkTrail — user portals (interactive)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0A0E13;--surf:#0F1720;--surf2:#111C27;--line:#1D2732;--aqua:#25D0C8;--amber:#F5B301;--green:#3FCf8E;--red:#F0563A;--sky:#7FB0FF;--mut:#8A97A6;--tx:#EAF1F7}
+*{box-sizing:border-box;margin:0}body{font-family:'Inter',sans-serif;background:var(--ink);color:var(--tx);-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono'}.tl{font-family:'JetBrains Mono';font-weight:700}
+a{cursor:pointer}
+.top{position:sticky;top:0;z-index:20;background:rgba(10,14,19,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1240px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Space Grotesk';font-weight:700;font-size:18px;cursor:pointer}.brand b{color:var(--aqua)}
+.mk{width:26px;height:26px}
+.roletabs{display:inline-flex;background:#0C1620;border:1px solid var(--line);border-radius:10px;padding:3px;margin-left:6px}
+.roletabs button{border:none;background:none;cursor:pointer;font:inherit;font-size:13px;font-weight:700;color:var(--mut);padding:7px 15px;border-radius:8px}
+.roletabs button.on{background:var(--aqua);color:#04211E}
+.search{flex:1;max-width:300px;margin-left:auto;background:var(--surf);border:1px solid var(--line);border-radius:9px;padding:8px 12px;display:flex;gap:8px;align-items:center;color:var(--mut);font-size:13px;cursor:pointer}
+.btn{font-weight:600;font-size:13px;border-radius:9px;padding:9px 14px;border:none;cursor:pointer;font-family:'Inter'}
+.btn.p{background:var(--aqua);color:#04211E}.btn.g{background:var(--surf);border:1px solid var(--line);color:var(--tx)}.btn.a{background:var(--amber);color:#3a2a00}
+.btn.sm{padding:6px 11px;font-size:12px}
+.bell{position:relative;cursor:pointer;color:var(--mut);font-size:19px}.bell .dot{position:absolute;top:-2px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--amber)}
+.av{width:32px;height:32px;border-radius:50%;background:#123;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--aqua);border:1px solid var(--line);cursor:pointer}
+.shell{max-width:1240px;margin:0 auto;padding:20px 22px 70px;display:grid;grid-template-columns:212px 1fr;gap:22px}
+.rail{border-right:1px solid var(--line);padding-right:16px}
+.plan{font-family:'JetBrains Mono';font-size:11px;color:var(--aqua);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:14px;background:#0C1620}
+.rail a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;color:var(--mut);font-size:13.5px;font-weight:500;margin-bottom:2px;cursor:pointer}
+.rail a.on,.rail a:hover{background:#13202B;color:var(--tx)}
+.rail a .ic{width:16px;text-align:center;opacity:.9}
+.rail .grp{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:#4E6070;margin:14px 0 6px 4px}
+.main{min-width:0}
+.h1{font-family:'Space Grotesk';font-size:23px;font-weight:700;letter-spacing:-.4px}
+.crumb{font-size:12.5px;color:var(--mut);margin-top:2px}
+.back{font-size:12.5px;color:var(--aqua);cursor:pointer;display:inline-flex;gap:6px;align-items:center;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.kpi{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+.kpi .n{font-family:'JetBrains Mono';font-size:23px;font-weight:700}.kpi .l{font-size:11px;color:var(--mut);margin-top:3px}
+.grid{display:grid;grid-template-columns:1.55fr .95fr;gap:18px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.card .ch{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.card .ch h3{font-family:'Space Grotesk';font-size:14px;font-weight:600}.card .ch .r{margin-left:auto}
+.row{display:grid;grid-template-columns:1fr 1.2fr auto 1.1fr;gap:10px;align-items:center;padding:11px 16px;border-bottom:1px solid #14202B;font-size:13px;cursor:pointer}
+.row:last-child{border-bottom:none}.row:hover{background:#13202B}.row.head{color:#5E7284;font-size:10px;text-transform:uppercase;letter-spacing:.5px;background:#0C161F;cursor:default}.row.head:hover{background:#0C161F}
+.tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.tag.clear{background:rgba(63,207,142,.12);color:var(--green)}.tag.lien{background:rgba(240,86,58,.12);color:var(--red)}.tag.watch{background:rgba(37,208,200,.1);color:var(--aqua)}.tag.reg{background:rgba(127,176,255,.12);color:var(--sky)}
+.alert{display:flex;gap:11px;padding:12px 16px;border-bottom:1px solid #14202B;cursor:pointer}.alert:last-child{border-bottom:none}.alert:hover{background:#13202B}
+.alert.unread{background:rgba(245,179,1,.04)}
+.alert .d{width:9px;height:9px;border-radius:50%;margin-top:4px;flex:none}
+.d.lien{background:var(--red)}.d.rel{background:var(--green)}.d.own{background:var(--aqua)}.d.reg{background:var(--sky)}
+.alert .tt{font-size:13px;font-weight:600}.alert .ts{font-size:11.5px;color:var(--mut);margin-top:1px}
+.abil{background:linear-gradient(180deg,rgba(37,208,200,.06),transparent);border:1px solid rgba(37,208,200,.28);border-radius:14px;padding:16px 18px;margin-top:6px}
+.abil h4{font-family:'JetBrains Mono';font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--aqua);margin-bottom:10px}
+.abil ul{list-style:none;padding:0;margin:0;columns:2;column-gap:28px}
+.abil li{font-size:13px;color:#C6D3DF;padding:4px 0;display:flex;gap:8px;break-inside:avoid}.abil li:before{content:"✓";color:var(--aqua)}
+/* tail detail */
+.rgrid{display:grid;grid-template-columns:1fr 1fr}.rgrid>div{padding:12px 16px;border-bottom:1px solid #14202B;border-right:1px solid #14202B}
+.rgrid .k{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut)}.rgrid .v{font-family:'JetBrains Mono';font-size:13px;margin-top:3px}
+.tli{display:flex;gap:13px;padding:13px 16px;border-bottom:1px solid #14202B}.tli:last-child{border-bottom:none}
+.tli .dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:none}
+.tli .dd{font-family:'JetBrains Mono';font-size:12px;color:var(--mut);width:92px;flex:none}
+.tli .tt{font-size:13.5px;font-weight:600}.tli .ts{font-size:12px;color:var(--mut);margin-top:1px}
+.acts{display:flex;gap:9px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--line)}
+/* forms / toggles */
+.field{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--tx);font:inherit;font-size:14px;margin-top:6px}
+.lbl{font-size:12px;color:var(--mut);font-weight:600;margin-top:14px;display:block}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.toggle{width:40px;height:23px;border-radius:999px;background:#22324F;position:relative;cursor:pointer;flex:none}.toggle.on{background:var(--aqua)}.toggle::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.15s}.toggle.on::after{left:19px}
+.set{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #14202B}.set:last-child{border-bottom:none}
+.set .sx{flex:1}.set b{font-size:13.5px}.set .sub{font-size:12px;color:var(--mut);margin-top:1px}
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:16px 0}
+.subtabs a{padding:9px 13px;color:var(--mut);font-size:13.5px;border-bottom:2px solid transparent}.subtabs a.on{color:var(--aqua);border-bottom-color:var(--aqua)}
+.pane{display:none}.pane.on{display:block}
+/* plan cards */
+.pcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pcard{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:18px}.pcard.cur{border-color:var(--aqua);box-shadow:0 0 0 1px rgba(37,208,200,.25)}
+.pcard .nm{font-family:'Space Grotesk';font-weight:600}.pcard .amt{font-family:'Space Grotesk';font-size:26px;font-weight:700;margin:6px 0}
+.pcard ul{list-style:none;padding:0;margin:10px 0 14px}.pcard li{font-size:12.5px;color:var(--mut);padding:3px 0;display:flex;gap:7px}.pcard li:before{content:"✓";color:var(--aqua)}
+/* dropzone */
+.drop{border:1.5px dashed #2A3A49;border-radius:12px;padding:34px;text-align:center;color:var(--mut);cursor:pointer;background:#0C1620}
+.drop:hover{border-color:var(--aqua);color:var(--tx)}
+/* seat / apirow */
+.seat{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #14202B;font-size:13px}.seat:last-child{border-bottom:none}.seat .rl{margin-left:auto;font-size:11px;color:var(--mut)}
+.bar{height:12px;border-radius:6px;background:#14202B;overflow:hidden;display:flex}.bar i{display:block;height:100%}
+.codebox{font-family:'JetBrains Mono';font-size:12px;background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:12px 14px;color:#C6D3DF;white-space:pre-wrap;line-height:1.6;margin:0 16px 16px}
+/* modal + toast */
+.ov{position:fixed;inset:0;background:rgba(6,10,16,.6);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}.ov.on{display:flex}
+.modal{background:var(--surf);border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal h3{font-family:'Space Grotesk';font-size:18px;margin-bottom:4px}.modal .ms{font-size:12.5px;color:var(--mut);margin-bottom:14px}
+.mx{float:right;cursor:pointer;color:var(--mut);font-size:18px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#13202B;border:1px solid var(--aqua);color:var(--tx);padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;transition:.25s;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:600;color:var(--mut);background:var(--surf);border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer}.chip.on{background:var(--aqua);color:#04211E;border-color:var(--aqua)}
+.note{font-size:11px;color:#5C6A78;text-align:center;padding:18px}
+.umenu{position:fixed;top:56px;right:22px;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:216px;box-shadow:0 16px 44px rgba(0,0,0,.55);display:none;z-index:60}
+.umenu.on{display:block}
+.umenu .uh{padding:9px 11px 11px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.umenu .uh b{font-size:13.5px}.umenu .uh .up{font-size:10.5px;color:var(--mut);font-family:'JetBrains Mono';margin-top:2px}
+.umenu a{display:flex;gap:10px;align-items:center;padding:9px 11px;border-radius:8px;font-size:13.5px;color:var(--tx);cursor:pointer}
+.umenu a:hover{background:#13202B}
+.umenu .sep{height:1px;background:var(--line);margin:5px 4px}
+.seg{display:inline-flex;background:#0C1620;border:1px solid var(--line);border-radius:9px;padding:3px;flex-wrap:wrap}
+.seg button{border:none;background:none;cursor:pointer;font:inherit;font-size:12px;font-weight:600;color:var(--mut);padding:6px 12px;border-radius:7px}
+.seg button.on{background:var(--aqua);color:#04211E}
+.navsub{font-size:10.5px;color:var(--mut);margin-left:5px;font-weight:400}
+.hsub{font-size:14px;color:var(--mut);font-weight:500;letter-spacing:0}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.rail{border-right:none;border-bottom:1px solid var(--line);padding:0 0 14px;display:flex;flex-wrap:wrap;gap:4px}.rail .grp,.plan{width:100%}.grid,.kpis,.pcards,.frow{grid-template-columns:1fr 1fr}.abil ul{columns:1}}
+</style></head>
+<body>
+<div class="top"><div class="in">
+<div class="brand" onclick="go('dash')"><span class="mk" id="mk"></span>Squawk<b>Trail</b></div>
+<div class="roletabs" id="tabs">
+<button data-r="owner" class="on">Owner</button><button data-r="broker">Broker</button><button data-r="lender">Lender</button>
+</div>
+<div class="search" onclick="lookupModal()">⌕ Search / look up a tail…</div>
+<button class="btn p" onclick="addTailModal()">＋ Watch a tail</button>
+<span class="bell" onclick="go('squawks')">🔔<span class="dot"></span></span>
+<div class="av" onclick="toggleMenu(event)">JA</div>
+</div></div>
+
+<div class="umenu" id="umenu">
+<div class="uh"><b>Jamin Austin</b><div class="up" id="umplan">Owner · $14/mo</div></div>
+<a onclick="acct('profile')">👤 My account</a>
+<a onclick="acct('notify')">🔔 Notifications &amp; alerts</a>
+<a onclick="acct('billing')">💳 Plan &amp; billing</a>
+<div class="sep"></div>
+<a onclick="closeMenu();toast('Signed out')">⏻ Sign out</a>
+</div>
+
+<div class="shell"><aside class="rail" id="rail"></aside><main class="main" id="main"></main></div>
+<div class="note">Interactive concept — every nav, row &amp; button is clickable (sample data). SquawkTrail · record-never-vouch.</div>
+
+<div class="ov" id="ov" onclick="if(event.target.id==='ov')closeModal()"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const A='#25D0C8';
+const LOGO="data:image/png;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJTu/wNvJVs2DcNnCQAAAABJRU5ErkJggg==";
+document.getElementById('mk').innerHTML='<img src="'+LOGO+'" alt="SquawkTrail" style="width:28px;height:28px;display:block">';
+
+const TAILS=[
+ {t:'N321JT',m:'2016 Cirrus SR22T',o:'Skyline Holdings LLC',reg:'Valid · exp 2027-04',s:'lien',trail:[['lien','2026-06-30','Lien filed — $180,000','Regional Aviation Finance'],['own','2025-11-02','Ownership transfer','Holding LLC → individual'],['rel','2024-08-15','Prior lien released','Clear 14 months'],['reg','2023-03-01','Registration renewed','Valid']]},
+ {t:'N88WX',m:'1999 King Air B200',o:'WX Charter Group',reg:'Valid · exp 2028-02',s:'lien',trail:[['lien','2026-05-18','Lien filed — $1,250,000','Fleet lender'],['own','2023-09-04','Ownership transfer','Charter acquisition'],['reg','2021-02-10','Registration renewed','Valid']]},
+ {t:'N172SP',m:'2004 Cessna 172S',o:'Individual (withheld)',reg:'Valid · exp 2026-11',s:'clear',trail:[['own','2026-01-12','Ownership transfer','New individual owner'],['reg','2024-11-01','Registration renewed','Valid'],['rel','2022-05-20','Lien released','Paid off']]},
+ {t:'N550RG',m:'2019 Citation CJ3+',o:'RG Aviation LLC',reg:'Valid · exp 2029-06',s:'watch',trail:[['reg','2024-06-01','Registration renewed','Valid']]},
+ {t:'N9042L',m:'2011 Beechcraft G58',o:'Private owner',reg:'Valid · exp 2027-09',s:'clear',trail:[['reg','2026-03-01','Registration renewed','Valid'],['rel','2023-07-14','Lien released','Clear']]},
+ {t:'N77AV',m:'2015 Pilatus PC-12',o:'AV Partners',reg:'Valid · exp 2028-05',s:'watch',trail:[['own','2022-04-02','Ownership transfer','—']]},
+ {t:'N614DK',m:'2020 Daher TBM 940',o:'DK Holdings',reg:'Valid · exp 2029-01',s:'clear',trail:[['rel','2025-08-15','Lien released','Clear'],['reg','2023-01-05','Registration renewed','Valid']]},
+ {t:'N28PH',m:'2013 Bonanza G36',o:'Individual (withheld)',reg:'Valid · exp 2027-12',s:'clear',trail:[['reg','2025-12-01','Registration renewed','Valid']]}
+];
+let SQUAWKS=[
+ {c:'lien',t:'N321JT — new lien filed',s:'$180,000 · Regional Aviation Finance',w:'2h ago',read:false,tail:'N321JT'},
+ {c:'own',t:'N172SP — ownership transfer',s:'Holding LLC → individual',w:'1d ago',read:false,tail:'N172SP'},
+ {c:'reg',t:'N9042L — registration renewed',s:'Valid',w:'3d ago',read:true,tail:'N9042L'},
+ {c:'rel',t:'N614DK — lien released',s:'Clear',w:'4d ago',read:true,tail:'N614DK'}
+];
+const TEAM=[['Jamin A. (you)','jamin@acme','Admin'],['Dana R.','dana@acme','Broker'],['K. Obi','obi@acme','Viewer'],['M. Vance','vance@acme','Broker']];
+const INVOICES=[['2026-06-01','$79.00','Paid'],['2026-05-01','$79.00','Paid'],['2026-04-01','$79.00','Paid']];
+
+const ROLES={
+ owner:{plan:'Owner · up to 2 tails · $14/mo',count:2,label:'Watchlist',
+   nav:[['dash','📡','My tails','watchlist'],['squawks','🔔','Squawks','alerts']],
+   kpis:[['2 / 2','Tails (of 2)'],['1','Active lien','var(--red)'],['1','New squawk','var(--amber)'],['24/7','Daily watch','var(--aqua)']],
+   abil:['Look up any N-number free','Watch a plane (or two)','Email + SMS squawks','Lien · ownership · status alerts','Full Trail history per tail','Manage account &amp; card']},
+ broker:{plan:'Broker · up to 25 tails · $79/mo · 4/8 seats',count:8,label:'For-sale inventory',
+   nav:[['dash','🏷️','Inventory'],['squawks','🔔','Squawks','alerts'],['team','👥','Team'],['digest','📰','Daily digest']],
+   kpis:[['8','Tails (of 25)'],['2','Active liens','var(--red)'],['7','Squawks / wk','var(--amber)'],['4/8','Seats used']],
+   abil:['Everything in Owner','Watch up to 25 tails','Shared team watchlist','Seats &amp; roles','Daily digest + instant alerts','Catch a seller&rsquo;s surprise lien first']},
+ lender:{plan:'Lender / Enterprise · unlimited tails · $199+/mo',count:8,label:'Financed tails',
+   nav:[['dash','📊','Portfolio'],['tails','📡','Tails','watchlist'],['squawks','🔔','Squawks','alerts'],['import','⬆','Bulk import'],['api','🔑','API keys'],['team','👥','Team']],
+   kpis:[['1,240','Tails watched'],['63','Active liens','var(--red)'],['214','Alerts / wk','var(--amber)'],['$0.9B','Fleet exposure','var(--green)']],
+   abil:['Everything in Broker','Unlimited tails','Portfolio dashboard + export','Bulk CSV fleet import','API access','Priority support &amp; SLAs']}
+};
+ROLES.owner.short='Owner workspace';ROLES.broker.short='Broker \u00b7 team';ROLES.lender.short='Lender / Enterprise';
+let state={role:'owner',screen:'dash',tail:null,sub:'profile',filter:'all',added:[]};
+
+const tag=s=>`<span class="tag ${s}">${s==='clear'?'CLEAR':s==='lien'?'LIEN':s==='reg'?'RENEWED':'WATCHING'}</span>`;
+const dotLabel={lien:'Lien filed',rel:'Lien released',own:'Ownership transfer',reg:'Registration renewed'};
+function findTail(t){return TAILS.find(x=>x.t===t)||state.added.find(x=>x.t===t);}
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>e.classList.remove('on'),2200);}
+function modal(html){document.getElementById('modal').innerHTML=html;document.getElementById('ov').classList.add('on');}
+function closeModal(){document.getElementById('ov').classList.remove('on');}
+function go(s){state.screen=s;state.tail=null;render();}
+function setRole(r){state.role=r;state.screen='dash';state.tail=null;render();}
+function openTail(t){state.tail=t;state.screen='tail';render();}
+
+function listRows(n){
+ const rows=state.added.concat(TAILS).slice(0,n+state.added.length);
+ return `<div class="row head"><span>Tail</span><span>Aircraft</span><span>Status</span><span>Last change</span></div>`+
+  rows.map(t=>`<div class="row" onclick="openTail('${t.t}')"><span class="tl" style="color:var(--aqua)">${t.t}</span><span style="color:#C6D3DF">${t.m}</span><span>${tag(t.s)}</span><span class="mono" style="color:var(--mut);font-size:11.5px">${t.trail&&t.trail[0]?t.trail[0][2]:'Watching · no change'}</span></div>`).join('');
+}
+function feed(items){return items.map((s,i)=>`<div class="alert ${s.read?'':'unread'}" onclick="openTail('${s.tail}')"><span class="d ${s.c}"></span><div><div class="tt">${s.t}</div><div class="ts">${s.s} · ${s.w}</div></div></div>`).join('');}
+function kpi(a){return `<div class="kpis">`+a.map(k=>`<div class="kpi"><div class="n" style="color:${k[2]||'var(--tx)'}">${k[0]}</div><div class="l">${k[1]}</div></div>`).join('')+`</div>`;}
+function abilities(l){return `<div class="abil"><h4>What this user sees &amp; can do</h4><ul>`+l.map(x=>`<li>${x}</li>`).join('')+`</ul></div>`;}
+
+// ---------- screens ----------
+function scrDash(r){
+ return `<div class="h1">${r.nav[0][2]}${state.role==='owner'?' <span class=\'hsub\'>· your watchlist</span>':''}</div><div class="crumb">${r.plan}</div>`+kpi(r.kpis)+
+  (state.role==='lender'?`<div class="card"><div class="ch"><h3>Portfolio exposure by status</h3><button class="btn g sm r" onclick="toast('Exported portfolio CSV')">⬇ Export</button></div><div style="padding:16px"><div class="bar"><i style="width:63%;background:var(--green)"></i><i style="width:22%;background:var(--amber)"></i><i style="width:15%;background:var(--red)"></i></div><div style="display:flex;gap:18px;margin-top:10px;font-size:12px;color:var(--mut)"><span style="color:var(--green)">■ Clear 63%</span><span style="color:var(--amber)">■ Watch/expiring 22%</span><span style="color:var(--red)">■ Lien 15%</span></div></div></div>`:'')+
+  `<div class="grid"><div><div class="card"><div class="ch"><h3>${r.label}</h3><span class="r mono" style="color:var(--mut);font-size:11px">${state.role==='lender'?'showing 8 of 1,240':''}</span></div>${listRows(r.count)}</div></div>
+   <div><div class="card"><div class="ch"><h3>🔔 Squawks</h3><a class="r" style="color:var(--aqua);font-size:12px" onclick="go('squawks')">View all</a></div>${feed(SQUAWKS.slice(0,4))}</div></div></div>`+
+  abilities(r.abil);
+}
+function scrTail(){
+ const d=findTail(state.tail);if(!d)return `<div class="back" onclick="go('dash')">← back</div>Not found.`;
+ const rows=d.trail.map(e=>`<div class="tli"><span class="dot d ${e[0]}" style="background:${e[0]==='lien'?'var(--red)':e[0]==='rel'?'var(--green)':e[0]==='own'?'var(--aqua)':'var(--sky)'}"></span><span class="dd">${e[1]}</span><div><div class="tt">${e[2]}</div><div class="ts">${e[3]||dotLabel[e[0]]}</div></div></div>`).join('');
+ return `<div class="back" onclick="go('dash')">← back to ${ROLES[state.role].label.toLowerCase()}</div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div class="h1 tl">${d.t}</div>${tag(d.s)}</div>
+  <div class="crumb mono">${d.m} · ${d.o}</div>
+  <div class="card" style="margin-top:16px"><div class="ch"><h3>Current FAA registration</h3></div>
+   <div class="rgrid"><div><div class="k">Aircraft</div><div class="v">${d.m}</div></div><div><div class="k">Registered owner</div><div class="v" style="font-size:12px">${d.o}</div></div><div><div class="k">Registration</div><div class="v" style="font-size:12px">${d.reg}</div></div><div><div class="k">Coverage</div><div class="v" style="font-size:12px">daily snapshots</div></div></div>
+   <div class="ch" style="border-top:1px solid var(--line)"><h3>The Trail — ownership &amp; lien history</h3></div>${rows}
+   <div class="acts"><button class="btn p sm" onclick="toast('Re-ran FAA check for ${d.t}')">↻ Re-run check</button><button class="btn g sm" onclick="noteModal('${d.t}')">✎ Add note</button><button class="btn g sm" onclick="toast('Exported ${d.t} defense packet (PDF)')">⬇ Export</button><button class="btn a sm" onclick="toast('Notifications ${d.s==='watch'?'paused':'active'} for ${d.t}')">🔔 ${d.s==='watch'?'Watching':'Watching'}</button></div>
+  </div>`;
+}
+function scrSquawks(){
+ const f=state.filter;const items=SQUAWKS.filter(s=>f==='all'||s.c===f||(f==='status'&&s.c==='reg'));
+ const chips=[['all','All'],['lien','Liens'],['own','Ownership'],['status','Status']].map(c=>`<span class="chip ${f===c[0]?'on':''}" onclick="state.filter='${c[0]}';render()">${c[1]}</span>`).join('');
+ return `<div class="h1">Squawks <span class="hsub">· your alerts</span></div><div class="crumb">Every change on your watched tails — this is where alerts land.</div>
+  <div style="display:flex;align-items:center;margin:16px 0"><div class="filters" style="margin:0">${chips}</div><button class="btn g sm" style="margin-left:auto" onclick="SQUAWKS.forEach(s=>s.read=true);toast('All marked read');render()">Mark all read</button></div>
+  <div class="card">${items.length?feed(items):'<div style="padding:26px;text-align:center;color:var(--mut);font-size:13px">No squawks in this filter — all quiet. We&rsquo;ll ping you the moment that changes.</div>'}</div>`;
+}
+function scrTeam(){
+ return `<div class="h1">Team &amp; seats</div><div class="crumb">${state.role==='lender'?'Enterprise seats':'4 of 8 seats used'}.</div>
+  <div class="card" style="margin-top:16px"><div class="ch"><h3>Members</h3><button class="btn p sm r" onclick="inviteModal()">＋ Invite member</button></div>
+   ${TEAM.map(m=>`<div class="seat"><b>${m[0]}</b> <span style="color:var(--mut);font-size:12px" class="mono">${m[1]}</span><span class="rl">${m[2]} ▾</span></div>`).join('')}</div>`;
+}
+function scrDigest(){
+ return `<div class="h1">Daily digest</div><div class="crumb">A once-a-day roll-up of everything that moved — plus instant alerts on the big ones.</div>
+  <div class="card" style="margin-top:16px">
+   <div class="set"><div class="sx"><b>Daily digest email</b><div class="sub">One summary each morning.</div></div><div class="toggle on" onclick="this.classList.toggle('on');toast('Digest updated')"></div></div>
+   <div class="set"><div class="sx"><b>Delivery time</b><div class="sub">When we send it.</div></div><select class="field" style="width:150px;margin:0"><option>7:00 AM CT</option><option>8:00 AM CT</option><option>6:00 PM CT</option></select></div>
+   <div class="set"><div class="sx"><b>Instant alerts for liens</b><div class="sub">Don&rsquo;t wait for the digest on a new lien.</div></div><div class="toggle on" onclick="this.classList.toggle('on');toast('Updated')"></div></div>
+  </div>
+  <button class="btn g sm" onclick="toast('Sent a sample digest to your email')">Preview a digest</button>`;
+}
+function scrImport(){
+ return `<div class="h1">Bulk import</div><div class="crumb">Upload a CSV of tail numbers to watch a whole fleet at once.</div>
+  <div class="card" style="margin-top:16px;padding:16px"><div class="drop" onclick="importPreview()">⬆ &nbsp;Drop a CSV here or click to choose · <span class="mono" style="font-size:12px">tail,label</span></div></div>
+  <div id="importResult"></div>`;
+}
+function importPreview(){
+ document.getElementById('importResult').innerHTML=`<div class="card"><div class="ch"><h3>fleet_q3.csv — 5 tails parsed</h3><button class="btn p sm r" onclick="toast('Imported 5 tails to your watchlist');go('dash')">Import 5 tails</button></div>
+  ${['N412TX','N88KL','N206WW','N19FE','N7710Q'].map(t=>`<div class="seat"><span class="tl" style="color:var(--aqua)">${t}</span><span style="color:var(--mut);font-size:12px;margin-left:auto">ready</span></div>`).join('')}</div>`;
+ toast('Parsed fleet_q3.csv');
+}
+function scrApi(){
+ return `<div class="h1">API keys</div><div class="crumb">Wire monitoring into your own systems.</div>
+  <div class="card" style="margin-top:16px"><div class="ch"><h3>Keys</h3><button class="btn p sm r" onclick="toast('Generated a new API key')">＋ Create key</button></div>
+   <div class="apirow" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #14202B"><span class="mono" style="color:var(--mut);font-size:12px">Production</span><span class="mono" id="apikey" style="color:#C6D3DF">sk_live_••••_a91f</span><a style="margin-left:auto;color:var(--aqua);font-size:12px" onclick="document.getElementById('apikey').textContent='sk_live_••••_'+Math.random().toString(16).slice(2,6);toast('Key rotated')">Rotate</a></div></div>
+  <div class="card"><div class="ch"><h3>Quick start</h3></div><div class="codebox">curl https://api.squawktrail.com/v1/tails/N321JT \\
+  -H "Authorization: Bearer sk_live_..."
+
+# → { tail, status, owner, trail:[…], watching:true }</div></div>`;
+}
+let freq='instant';
+function setFreq(f){freq=f;render();toast('Alert frequency: '+f);}
+function scrAccount(){
+ const sub=state.sub;
+ const tabs=[['profile','Profile'],['security','Security'],['notify','Notifications &amp; alerts'],['billing','Plan &amp; billing']].map(t=>`<a class="${sub===t[0]?'on':''}" onclick="state.sub='${t[0].replace(/&amp;/g,'&')}';render()">${t[1]}</a>`).join('');
+ let pane='';
+ if(sub==='profile')pane=`<div class="card" style="padding:6px 16px 16px"><label class="lbl">Full name</label><input class="field" value="Jamin Austin"><div class="frow"><div><label class="lbl">Email</label><input class="field" value="jamin@acme.com"></div><div><label class="lbl">Phone (for SMS squawks)</label><input class="field" value="+1 512 ••• 4021"></div></div><button class="btn p sm" style="margin-top:16px" onclick="toast('Profile saved')">Save changes</button></div>`;
+ if(sub==='security')pane=`<div class="card"><div class="set"><div class="sx"><b>Two-factor authentication</b><div class="sub">App-based 2FA.</div></div><div class="toggle on" onclick="this.classList.toggle('on');toast('2FA updated')"></div></div><div class="set"><div class="sx"><b>Password</b><div class="sub">Last changed 3 months ago.</div></div><button class="btn g sm" onclick="toast('Password reset link sent')">Change</button></div><div class="set"><div class="sx"><b>Recovery codes</b><div class="sub">Saved offline.</div></div><button class="btn g sm" onclick="toast('Generated new recovery codes')">Regenerate</button></div></div>`;
+ if(sub==='notify'){
+  const seg=[['instant','Instant · real-time'],['hourly','Hourly digest'],['daily','Daily digest'],['weekly','Weekly summary']].map(o=>`<button class="${freq===o[0]?'on':''}" onclick="setFreq('${o[0]}')">${o[1]}</button>`).join('');
+  pane=`
+   <div class="card"><div class="ch"><h3>How often do you want squawks?</h3></div>
+    <div style="padding:14px 16px"><div class="seg">${seg}</div>
+     <div class="sub" style="font-size:12px;color:var(--mut);margin-top:10px">${freq==='instant'?'Get pinged the moment a change hits — best for active deals &amp; closings.':freq==='hourly'?'One roundup per hour of anything that moved.':freq==='daily'?'A single morning summary of the day&rsquo;s changes.':'A Monday recap of the week.'} <b style="color:var(--amber)">Liens always send instantly</b> regardless of this setting.</div></div>
+    <div class="set"><div class="sx"><b>Override: always instant for liens</b><div class="sub">New lien = immediate, no matter the frequency above.</div></div><div class="toggle on" onclick="this.classList.toggle('on');toast('Updated')"></div></div>
+    <div class="set"><div class="sx"><b>Quiet hours</b><div class="sub">Hold non-urgent squawks overnight.</div></div><select class="field" style="width:170px;margin:0"><option>Off</option><option selected>10 PM – 7 AM</option><option>9 PM – 8 AM</option></select></div>
+   </div>
+   <div class="card"><div class="ch"><h3>Channels</h3></div>
+    <div class="set"><div class="sx"><b>📧 Email squawks</b><div class="sub">jamin@acme.com</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set"><div class="sx"><b>📱 SMS squawks</b><div class="sub">+1 512 ••• 4021</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+   </div>
+   <div class="card"><div class="ch"><h3>Only alert me for…</h3></div>
+    <div class="set"><div class="sx"><b>New liens</b></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set"><div class="sx"><b>Ownership transfers</b></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set"><div class="sx"><b>Registration status changes</b></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set"><div class="sx"><b>Expiring soon (within 60 days)</b></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+   </div>
+   <button class="btn p sm" onclick="toast('Notification preferences saved')">Save preferences</button>`;
+ }
+ if(sub==='billing')pane=billingBody();
+ return `<div class="h1">My account</div><div class="crumb">${ROLES[state.role].plan}</div><div class="subtabs">${tabs}</div>${pane}`;
+}
+function billingBody(){
+ const cur=state.role;
+ const plans=[['owner','Owner','$14',['Up to 2 tails','Email + SMS','Full Trail']],['broker','Broker','$79',['Up to 25 tails','Team + roles','Digest']],['lender','Lender','$199+',['Unlimited','Portfolio + API','SLAs']]];
+ const cards=plans.map(p=>`<div class="pcard ${cur===p[0]?'cur':''}"><div class="nm">${p[1]}</div><div class="amt">${p[2]}<span style="font-size:12px;color:var(--mut)">/mo</span></div><ul>${p[3].map(x=>`<li>${x}</li>`).join('')}</ul>${cur===p[0]?'<div class="tag watch">CURRENT</div>':`<button class="btn g sm" style="width:100%" onclick="toast('Switched to ${p[1]} plan')">Switch</button>`}</div>`).join('');
+ return `<div class="pcards" style="margin-top:2px">${cards}</div>
+  <div class="card" style="margin-top:18px"><div class="ch"><h3>Payment method</h3><button class="btn g sm r" onclick="toast('Update card (Stripe)')">Update</button></div><div class="seat">Visa ending 6411 <span style="color:var(--mut);font-size:12px;margin-left:auto">exp 09/28</span></div></div>
+  <div class="card"><div class="ch"><h3>Invoices</h3></div>${INVOICES.map(i=>`<div class="seat"><span class="mono" style="font-size:12px">${i[0]}</span><span style="margin-left:auto;margin-right:16px" class="mono">${i[1]}</span><span class="tag clear">${i[2]}</span><a style="color:var(--aqua);font-size:12px;margin-left:12px" onclick="toast('Downloaded invoice ${i[0]}')">PDF</a></div>`).join('')}</div>`;
+}
+// profile dropdown
+function toggleMenu(e){e.stopPropagation();document.getElementById('umenu').classList.toggle('on');}
+function closeMenu(){document.getElementById('umenu').classList.remove('on');}
+function acct(sub){state.sub=sub;state.screen='account';closeMenu();render();}
+document.addEventListener('click',()=>closeMenu());
+
+// ---------- modals ----------
+const CAPS={owner:2,broker:25,lender:Infinity};
+function atCap(){return (ROLES[state.role].count+state.added.length)>=CAPS[state.role];}
+function upgradeModal(){const nx={owner:['Broker','up to 25 tails','$79/mo'],broker:['Lender / Enterprise','unlimited tails','$199+/mo'],lender:['Enterprise','custom limits','contact us']}[state.role];const lim=state.role==='owner'?'2 tails':state.role==='broker'?'25 tails':'unlimited tails';modal(`<span class="mx" onclick="closeModal()">✕</span><h3>You&rsquo;ve reached your tail limit</h3><div class="ms">Your current plan covers ${lim}. Upgrade to watch more.</div><div class="pcard cur" style="margin-bottom:12px"><div class="nm">${nx[0]}</div><div class="amt">${nx[2]}</div><ul><li>${nx[1]}</li></ul></div><button class="btn p" style="width:100%" onclick="closeModal();toast('Upgraded to ${nx[0]}')">Upgrade to ${nx[0]}</button>`);}
+function addTailModal(){if(atCap()){upgradeModal();return;}modal(`<span class="mx" onclick="closeModal()">✕</span><h3>Watch a tail</h3><div class="ms">Enter an N-number to put it under daily watch.</div><input class="field mono" id="ntl" placeholder="N321JT" style="letter-spacing:1px"><button class="btn p" style="width:100%;margin-top:14px" onclick="doAdd()">Squawk this tail</button>`);}
+function doAdd(){let n=(document.getElementById('ntl').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'')||'N000ST';state.added.unshift({t:n,m:'Pending first pull',o:'—',reg:'—',s:'watch',trail:[['reg',new Date().toISOString().slice(0,10),'Watching started','Daily FAA watch on']]});closeModal();toast('Now watching '+n);go('dash');}
+function lookupModal(){modal(`<span class="mx" onclick="closeModal()">✕</span><h3>Look up a tail</h3><div class="ms">Free — see current FAA status + a Trail teaser.</div><input class="field mono" id="lkt" placeholder="N321JT" style="letter-spacing:1px"><button class="btn p" style="width:100%;margin-top:14px" onclick="doLookup()">Look up</button>`);}
+function doLookup(){let n=(document.getElementById('lkt').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');closeModal();if(findTail(n)){openTail(n);}else{openTail('N321JT');}toast('Lookup: '+(n||'N321JT'));}
+function inviteModal(){modal(`<span class="mx" onclick="closeModal()">✕</span><h3>Invite a teammate</h3><div class="ms">They&rsquo;ll get access to the shared watchlist.</div><input class="field" placeholder="teammate@company.com"><label class="lbl">Role</label><select class="field"><option>Broker</option><option>Viewer</option><option>Admin</option></select><button class="btn p" style="width:100%;margin-top:14px" onclick="closeModal();toast('Invitation sent')">Send invite</button>`);}
+function noteModal(t){modal(`<span class="mx" onclick="closeModal()">✕</span><h3>Add a note · ${t}</h3><div class="ms">Private to your team.</div><textarea class="field" rows="3" placeholder="e.g. Buyer aware of lien; closing 07-15."></textarea><button class="btn p" style="width:100%;margin-top:14px" onclick="closeModal();toast('Note added to ${t}')">Save note</button>`);}
+
+// ---------- render ----------
+function render(){
+ const r=ROLES[state.role];
+ document.getElementById('rail').innerHTML=`<div class="plan">${r.short}</div><div class="grp">Workspace</div>`+
+  r.nav.map(n=>`<a class="${state.screen===n[0]?'on':''}" onclick="go('${n[0]}')"><span class="ic">${n[1]}</span>${n[2]}${n[3]?`<span class="navsub">(${n[3]})</span>`:''}</a>`).join('');
+ let html='';
+ switch(state.screen){
+  case 'tail':html=scrTail();break;
+  case 'squawks':html=scrSquawks();break;
+  case 'team':html=scrTeam();break;
+  case 'digest':html=scrDigest();break;
+  case 'import':html=scrImport();break;
+  case 'api':html=scrApi();break;
+  case 'account':html=scrAccount();break;
+  case 'tails':html=`<div class="h1">Financed tails</div><div class="crumb">1,240 tails · showing 8</div><div class="card" style="margin-top:16px">${listRows(8)}</div>`;break;
+  default:html=scrDash(r);
+ }
+ document.getElementById('main').innerHTML=html;
+ document.getElementById('umplan').textContent=r.plan.split(' · ').slice(0,2).join(' · ');
+ document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.r===state.role));
+}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setRole(b.dataset.r));
+render();
+</script>
+</body></html>
