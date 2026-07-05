@@ -51,6 +51,7 @@ header{background:#FFFFFF;color:var(--ink);border-bottom:1px solid var(--line);p
 .pill{font-size:10px;font-weight:700;letter-spacing:.3px;padding:4px 9px;border-radius:999px;white-space:nowrap}
 .pill.build{background:#fff7ed;color:var(--amber)}
 .pill.live{background:#ecfdf3;color:var(--green)}
+.pill.gtm{background:#f3ecff;color:#7c3aed}
 .pill.greenlit{background:#e8f7ee;color:#0f8a3d;border:1px solid #bfe8cf}
 .pill.review{background:#eef2ff;color:#3b5bdb;border:1px solid #c7d2fe}
 .pill.possible{background:#f5f0ff;color:#6d28d9;border:1px solid #ddd0fb}
@@ -100,7 +101,9 @@ footer{max-width:1100px;margin:0 auto;padding:8px 22px 30px;color:var(--ink2);fo
 <div class="logo"><img src="https://castingkarmallc.com/emblem.png" alt="Casting Karma"></div>
 <div><h1>Project Tracker</h1><div class="sub">Casting Karma LLC · <a href="https://castingkarmallc.com" target="_blank" rel="noreferrer" style="color:#A8863F;text-decoration:none">castingkarmallc.com ↗</a></div></div>
 </div>
-<div style="display:flex;align-items:center;gap:12px">
+<div style="display:flex;align-items:center;gap:16px">
+<a href="#" onclick="setTab('structure');window.scrollTo(0,0);return false" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">⚙ Structure</a>
+<a href="revenue.html" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">💰 Revenue</a>
 <span class="htag">PRIVATE</span>
 <span class="updated" id="updated">—</span>
 </div>
@@ -368,7 +371,7 @@ links:[
 {
 id:"hulldocs", group:"active", name:"HullDocs — Boat Maintenance History", platform:"Web PWA (boating) · Project #5",
 icon:`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 1024 1024" role="img" aria-label="HullDocs"><defs><linearGradient id="hdbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A2742"/><stop offset="1" stop-color="#173F63"/></linearGradient><clipPath id="hdround"><rect x="0" y="0" width="1024" height="1024" rx="230"/></clipPath></defs><g clip-path="url(#hdround)"><g transform="scale(5.12)"><rect x="0" y="0" width="200" height="200" fill="url(#hdbg)"/><ellipse cx="100" cy="32" rx="140" ry="80" fill="#FFFFFF" opacity="0.13"/><path d="M103,34 L122,40 L103,46 Z" fill="#E7A93A"/><path d="M94,88 L94,114 L60,114 Q76,84 94,68 Z" fill="#FFFFFF"/><path d="M103,40 L103,118 L158,118 Q138,74 103,40 Z" fill="#FFFFFF"/><rect x="110" y="75" width="20" height="4" rx="2" fill="#8AAEC6"/><rect x="110" y="86" width="30" height="4" rx="2" fill="#8AAEC6"/><rect x="110" y="97" width="36" height="4" rx="2" fill="#8AAEC6"/><rect x="110" y="108" width="26" height="4" rx="2" fill="#8AAEC6"/><line x1="100" y1="40" x2="100" y2="124" stroke="#FFFFFF" stroke-width="3"/><path d="M42,124 L164,124 Q156,142 136,150 Q102,158 68,150 Q50,142 42,124 Z" fill="#FFFFFF"/><circle cx="148" cy="116" r="14" fill="#E7A93A"/><circle cx="148" cy="116" r="10" fill="none" stroke="#FFFFFF" stroke-width="1.4"/><path d="M141,116 L146,121 L156,109" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g></g></svg>`,
-status:"build", mrr:0, customers:0, trials:0, source:"P-5 · Discovery v8 · 4.5 · GREEN-LIT 2026-06-27", potential:"4.5",
+status:"live", mrr:0, customers:0, trials:0, source:"P-5 · Discovery v8 · 4.5 · GREEN-LIT 2026-06-27", potential:"4.5",
 website:"https://hulldocs.com",
 links:[
 {label:"🌐 hulldocs.com (live · Vercel)", url:"https://hulldocs.com"},
@@ -392,7 +395,7 @@ risk:"Boat History Report bolts on maintenance using its 120M-record distributio
 id:"rangenodes", group:"active", name:"RangeNodes — Handload Database", platform:"Web app / PWA (firearms-adjacent) · Project #6",
 website:"https://rangenodes.com",
 icon:`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 1024 1024" role="img" aria-label="RangeNodes"><defs><linearGradient id="rnbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16181C"/><stop offset="1" stop-color="#0C0E11"/></linearGradient><radialGradient id="rnglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#3DD68C" stop-opacity="0.55"/><stop offset="1" stop-color="#3DD68C" stop-opacity="0"/></radialGradient><clipPath id="rnround"><rect x="0" y="0" width="1024" height="1024" rx="230"/></clipPath></defs><g clip-path="url(#rnround)"><g transform="scale(5.12)"><rect x="0" y="0" width="200" height="200" fill="url(#rnbg)"/><circle cx="100" cy="100" r="58" fill="#0F1216"/><ellipse cx="100" cy="74" rx="46" ry="22" fill="#FFFFFF" opacity="0.05"/><polyline points="62,138 80,118 95,104 100,100 112,100 126,88 140,64" fill="none" stroke="#C08A3E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="100" y1="42" x2="100" y2="158" stroke="#C08A3E" stroke-width="2.5" opacity="0.5"/><line x1="42" y1="100" x2="158" y2="100" stroke="#C08A3E" stroke-width="2.5" opacity="0.5"/><circle cx="100" cy="100" r="18" fill="url(#rnglow)"/><circle cx="100" cy="100" r="7" fill="#3DD68C"/><circle cx="100" cy="100" r="62" fill="none" stroke="#C08A3E" stroke-width="7"/></g></g></svg>`,
-status:"build", mrr:0, customers:0, trials:0, source:"P-6 · Discovery v10 · 4.3 · GREEN-LIT 2026-06-28", potential:"4.3",
+status:"live", mrr:0, customers:0, trials:0, source:"P-6 · Discovery v10 · 4.3 · GREEN-LIT 2026-06-28", potential:"4.3",
 note:"P-6 RangeNodes (renamed from 'The Load Vault') · 2026-07-04: 🚀🎉 DATA IS LIVE — CK-Legal formal sign-off + Jamin's logged risk-acceptance cleared the seed gate → Ops flipped all 7,171 loads pending→published in the production Supabase → the Accuracy-Node charge-ladder charts now RENDER (velocity-vs-charge, node flat-spot highlighted) where they were blank, and the site shows the real corpus (4,778 combos · 7,171 loads) instead of sample data. The full RangeNodes dataset is now PUBLIC. First Preflight GTM Check run = PASSED (0 blockers); key flag → the LIVE ToS is still the 2026-06-30 DRAFT (§13 governing-law [___] placeholder + LLC contact) → new build rule: client-facing docs use the PRODUCT name + project emails, not the LLC → CK-Legal to deploy the finalized v1.0-CK Texas ToS. 📈 GA4 property live (G-40WTRPW9W6) — tag install on the site pending. (Still pre-GTM / kept in the Build column: live-mode Stripe, branded SES sender, and finalized-ToS deploy remain before marketing.) · 2026-07-03: 🎨 On-brand checkout SHIPPED + PROVEN — replaced Stripe-hosted Checkout with an on-site Payment Element at /upgrade (RangeNodes-branded, Link disabled → no 'My Spirit Team'); full signup→6-digit OTP→on-brand checkout→SetupIntent succeeded→Pro-tools-unlock E2E PASSED on multiple clean-room retests → RangeNodes' account/auth/on-brand-checkout UX is now GTM-grade + the CK reference build. Built the /account (My Account) page (editable @handle, subscription/billing, change password, real Supabase TOTP 2FA opt-in, sign-out-everywhere, delete + export). Wired the contribution write-paths (were STUBS): /api/loads/submit + /api/report → new content_reports table + admin review queue. Explorer fixes: full 4,778 combos (was capped at 1,000 by the PostgREST row cap), lazy-loaded node charts + real empty states. · 2026-07-02: 🚀 LIVE-WIRED — all 7 Vercel env vars set + production redeploy GREEN; Stripe TEST billing built (Product 'RangeNodes — Pro' $7.99-mo + price/webhook/restricted-keys) + proven end-to-end (signup→trial→4242→webhook→subscriptions.trialing→isPro→Pro tools). · 2026-07-01: 🗄️ FULL SEED LOADED to Supabase — rangenodes project (LLC Pro org, Micro ~$10-mo) + schema + 7,171 loads · 4,778 combos · 257 calibers · 1,281 bullets · 212 powders (all status=pending / private until launch). ⚖️ CK-Legal seed review = GO-WITH-CONDITIONS; 3 of 5 conditions CLEARED (C2 term-scan 0 flagged · C3 attribution live · C5 outlier flag); remaining = C1 note-scrub (CK-Legal) + C4 takedown/opt-out routing (Ops). Brand LOCKED: RangeNodes · rangenodes.com; v1 = rifle + handgun. Pricing LOCKED: Free (raw data + contributing always free) / RangeNodes Pro $7.99-mo, 7-day trial — gate the doing, not the seeing. Data network effect = the moat; never markets data as 'verified/safe' (attestation + outlier-flagging every record) · purely informational, never sells a component · 18+ floor. Attorney + E&O OPTIONAL, not gates (07-01 policy) — CK-Legal's GO-WITH-CONDITIONS is the launch gate. 🔴 Remaining GTM (all non-UX): live-mode Stripe (task #52) · branded SES sender for OTP/receipts · promote real data live (⚠️ explorer charts stay empty until CK-Legal runs pending→published) · CK-Legal's 2 conditions (C1 + C4) · AvantLink/Brownells affiliate after seeded content is live.",
 kpis:[{k:"Est. @ 6 mo",v:"seed + MAU"},{k:"Est. @ 1 yr",v:"~$1.5–43k (back-loaded)"},{k:"Potential",v:"4.3/5",pot:true}],
 sc:{
@@ -723,7 +726,7 @@ const c = colors[p.status] || "#64748b";
 const ch = (p.name||"?").replace(/[^A-Za-z0-9]/,"").charAt(0).toUpperCase();
 return `<div class="cinitial" style="background:${c}">${ch}</div>`;
 }
-const STATUS = {build:["build","In build"], review:["review","In review"], live:["live","Live"], greenlit:["greenlit","Green-lit"], possible:["possible","Possible"], planned:["planned","Planned"], archived:["archived","Cut"]};
+const STATUS = {gtm:["gtm","GTM"], build:["build","In build"], review:["review","In review"], live:["live","Live"], greenlit:["greenlit","Green-lit"], possible:["possible","Possible"], planned:["planned","Planned"], archived:["archived","Cut"]};
 
 function renderTiles(){
 const inReview = PROJECTS.filter(p=>p.status==="review").length;
@@ -743,25 +746,29 @@ document.getElementById("tiles").innerHTML = tiles.map(t=>
 const isBuildPhase = p => p.group==="active" && (p.status==="build"||p.status==="greenlit"||p.status==="planned");
 const isReviewPhase = p => p.group==="active" && p.status==="review";
 const isLivePhase = p => p.group==="active" && p.status==="live";
+const isGtmPhase = p => p.group==="active" && p.status==="gtm";
 function renderTabs(){
 const nBuild = PROJECTS.filter(isBuildPhase).length;
 const nReview = PROJECTS.filter(isReviewPhase).length;
 const nLive = PROJECTS.filter(isLivePhase).length;
+const nGtm = PROJECTS.filter(isGtmPhase).length;
 const _h2=hiddenSet(); const nPoss = PROJECTS.filter(p=>p.group==="possible"&&!_h2.has(p.id)).length;
 const nArch = PROJECTS.filter(p=>p.group==="archive").length;
 document.getElementById("tabs").innerHTML =
-`<button class="tab ${TAB==='live'?'active':''}" onclick="setTab('live')">Live <span class="cnt">${nLive}</span></button>
-<button class="tab ${TAB==='review'?'active':''}" onclick="setTab('review')">In Review <span class="cnt">${nReview}</span></button>
+`<button class="tab ${TAB==='gtm'?'active':''}" onclick="setTab('gtm')">GTM <span class="cnt">${nGtm}</span></button>
+<button class="tab ${TAB==='live'?'active':''}" onclick="setTab('live')">Live <span class="cnt">${nLive}</span></button>
 <button class="tab ${TAB==='build'?'active':''}" onclick="setTab('build')">In Build <span class="cnt">${nBuild}</span></button>
+<button class="tab ${TAB==='review'?'active':''}" onclick="setTab('review')">In Review <span class="cnt">${nReview}</span></button>
 <button class="tab ${TAB==='possible'?'active':''}" onclick="setTab('possible')">Possible Projects <span class="cnt">${nPoss}</span></button>
-<button class="tab ${TAB==='archive'?'active':''}" onclick="setTab('archive')">Archive <span class="cnt">${nArch}</span></button>
-<button class="tab ${TAB==='structure'?'active':''}" onclick="setTab('structure')">Structure</button>`;
-document.getElementById("tabhint").innerHTML = TAB==="build"
+<button class="tab ${TAB==='archive'?'active':''}" onclick="setTab('archive')">Archive <span class="cnt">${nArch}</span></button>`;
+document.getElementById("tabhint").innerHTML = TAB==="gtm"
+? "Go-to-market — Marketing is actively pushing these for sales. A product enters GTM once we green-light the sales push (past Live)."
+: TAB==="build"
 ? "Projects actively being built (incl. green-lit, not yet submitted). Tap a card for full details."
 : TAB==="review"
 ? "Finished &amp; submitted — in marketplace review, awaiting approval. Tap a card for full details."
 : TAB==="live"
-? "Live to customers. TenderProof (tenderproof.io) launched 06-30 in demo mode; paid billing wiring + pilots next."
+? "Live — the product is deployed with a working public URL (pre- or early-GTM). Tap a card for full details."
 : TAB==="possible"
 ? "Researched &amp; scored, not committed — <b>ordered by what I'd build next</b> (#1 = my top pick). Tap a card for solution, market, pricing, integrations &amp; the build split."
 : TAB==="archive"
@@ -795,12 +802,13 @@ const struct = document.getElementById("structure");
 if(TAB==="structure"){ struct.style.display="block"; grid.style.display="none"; return; }
 struct.style.display="none"; grid.style.display="";
 let items;
-if(TAB==="build"){ items = PROJECTS.filter(isBuildPhase); }
+if(TAB==="gtm"){ items = PROJECTS.filter(isGtmPhase); }
+else if(TAB==="build"){ items = PROJECTS.filter(isBuildPhase); }
 else if(TAB==="review"){ items = PROJECTS.filter(isReviewPhase); }
 else if(TAB==="live"){ items = PROJECTS.filter(isLivePhase); }
 else if(TAB==="archive"){ items = PROJECTS.filter(p=>p.group==="archive"); }
 else { const h=hiddenSet(); items = PROJECTS.filter(p=>p.group==="possible"&&!h.has(p.id)); items.sort((a,b)=>(a.rank||99)-(b.rank||99)); }
-grid.innerHTML = items.length ? items.map(card).join("") : `<div style="grid-column:1/-1;color:var(--ink2);font-size:13px;padding:10px 2px">${TAB==='live'?'No products are live yet — first launch coming soon. Apps move here from In Review once they launch to customers.':'Nothing here yet.'}</div>`;
+grid.innerHTML = items.length ? items.map(card).join("") : `<div style="grid-column:1/-1;color:var(--ink2);font-size:13px;padding:10px 2px">${TAB==='live'?'No products are live yet — apps land here once their public URL is up.':TAB==='gtm'?'No products in active go-to-market yet — a product moves here when Marketing starts pushing it for sales.':'Nothing here yet.'}</div>`;
 if(TAB==="possible"){ const n=hiddenSet().size; if(n>0) grid.innerHTML = `<div style="grid-column:1/-1;font-size:12px;color:var(--ink2);margin:-4px 0 4px">${n} hidden from your view · <a href="#" onclick="unhideAll();return false" style="color:var(--blue);font-weight:700">show all</a></div>` + grid.innerHTML; }
 }
 
