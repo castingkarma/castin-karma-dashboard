@@ -103,7 +103,7 @@ footer{max-width:1100px;margin:0 auto;padding:8px 22px 30px;color:var(--ink2);fo
 </div>
 <div style="display:flex;align-items:center;gap:16px">
 <a href="#" onclick="setTab('structure');window.scrollTo(0,0);return false" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">⚙ Structure</a>
-<a href="revenue.html" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">💰 Revenue</a>
+<a href="#" onclick="setTab('revenue');window.scrollTo(0,0);return false" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">💰 Revenue</a>
 <span class="htag">PRIVATE</span>
 <span class="updated" id="updated">—</span>
 </div>
@@ -114,6 +114,7 @@ footer{max-width:1100px;margin:0 auto;padding:8px 22px 30px;color:var(--ink2);fo
 <div class="tabs" id="tabs"></div>
 <div class="tabhint" id="tabhint"></div>
 <div class="grid" id="grid"></div>
+<div id="revenueview" style="display:none"><iframe title="Revenue tracker" style="width:100%;height:80vh;border:1px solid var(--line);border-radius:14px;background:#fff"></iframe></div>
 
 <div id="structure" style="display:none">
 <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 8px">
@@ -763,6 +764,8 @@ document.getElementById("tabs").innerHTML =
 <button class="tab ${TAB==='archive'?'active':''}" onclick="setTab('archive')">Archive <span class="cnt">${nArch}</span></button>`;
 document.getElementById("tabhint").innerHTML = TAB==="gtm"
 ? "Go-to-market — Marketing is actively pushing these for sales. A product enters GTM once we green-light the sales push (past Live)."
+: TAB==="revenue"
+? "Revenue — the live MRR / paying-customer tracker across the portfolio."
 : TAB==="build"
 ? "Projects actively being built (incl. green-lit, not yet submitted). Tap a card for full details."
 : TAB==="review"
@@ -799,8 +802,10 @@ ${p.website?`<a class="wsite" href="${p.website}" target="_blank" rel="noreferre
 function renderGrid(){
 const grid = document.getElementById("grid");
 const struct = document.getElementById("structure");
-if(TAB==="structure"){ struct.style.display="block"; grid.style.display="none"; return; }
-struct.style.display="none"; grid.style.display="";
+const rev = document.getElementById("revenueview");
+if(TAB==="structure"){ struct.style.display="block"; grid.style.display="none"; rev.style.display="none"; return; }
+if(TAB==="revenue"){ const f=rev.querySelector("iframe"); if(!f.getAttribute("src")) f.setAttribute("src","revenue.html"); rev.style.display="block"; grid.style.display="none"; struct.style.display="none"; return; }
+struct.style.display="none"; rev.style.display="none"; grid.style.display="";
 let items;
 if(TAB==="gtm"){ items = PROJECTS.filter(isGtmPhase); }
 else if(TAB==="build"){ items = PROJECTS.filter(isBuildPhase); }
