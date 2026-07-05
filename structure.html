@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casting Karma LLC — The Whole System</title>
+<link rel="icon" href="https://castingkarmallc.com/emblem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#FBF8F1;-webkit-font-smoothing:antialiased}.page{max-width:1100px;margin:0 auto;padding:26px 22px 60px}</style>
+</head>
+<body>
+<div class="page">
+<style>
+.sysmap{--g:#2E3A28;--g2:#3d4a34;--gold:#C2A252;--sub:#6B6354;--pane:#FBF9F3;--line:#E7E1D2;--chip:#F2EEE2;color:#20261c;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+.sysmap .cin{font-family:'Cinzel',Georgia,serif;letter-spacing:.4px}
+.sysmap .hero{background:linear-gradient(135deg,#2E3A28,#3f5137);border-radius:16px;padding:26px 28px;color:#F3EFE4;position:relative;overflow:hidden}
+.sysmap .hero:after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;border:2px solid rgba(194,162,82,.25);border-radius:50%}
+.sysmap .hero h2{margin:0 0 6px;font-size:23px;color:#fff}
+.sysmap .hero p{margin:0;font-size:14px;color:#D9E0CE;max-width:760px}
+.sysmap .hero .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+.sysmap .band{margin-top:22px}
+.sysmap .band>h3{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--g);margin:0 0 3px;display:flex;align-items:center;gap:9px}
+.sysmap .band>h3 .n{width:22px;height:22px;border-radius:50%;background:var(--g);color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
+.sysmap .band>.lede{font-size:12.5px;color:var(--sub);margin:0 0 12px 31px}
+.sysmap .grid{display:grid;gap:12px}
+.sysmap .g2{grid-template-columns:repeat(2,1fr)}
+.sysmap .g3{grid-template-columns:repeat(3,1fr)}
+.sysmap .g4{grid-template-columns:repeat(4,1fr)}
+.sysmap .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+.sysmap .card.k{border-left:3px solid var(--gold)}
+.sysmap .card h4{margin:0 0 5px;font-size:14px;color:var(--g)}
+.sysmap .card h4 .pin{font-size:10.5px;font-weight:800;color:var(--gold);letter-spacing:.5px}
+.sysmap .card p{margin:0;font-size:12.5px;color:#43483c}
+.sysmap .card .path{display:inline-block;margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:#77705d;background:var(--chip);border-radius:5px;padding:2px 7px}
+.sysmap .loop{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.sysmap .step{flex:1 1 150px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 13px;position:relative}
+.sysmap .step .s{font-size:10.5px;font-weight:800;color:var(--gold);letter-spacing:.5px}
+.sysmap .step b{display:block;font-size:13px;color:var(--g);margin:2px 0 3px}
+.sysmap .step p{margin:0;font-size:11.5px;color:#54594c}
+.sysmap .arrow{align-self:center;color:var(--gold);font-weight:800;font-size:18px;flex:0 0 auto}
+.sysmap .docs{list-style:none;margin:0;padding:0}
+.sysmap .docs li{padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px;display:flex;gap:9px;align-items:baseline}
+.sysmap .docs li:last-child{border-bottom:none}
+.sysmap .docs .d{font-weight:700;color:var(--g);min-width:118px;flex:0 0 auto}
+.sysmap .docs .x{color:#54594c}
+.sysmap .tree{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#3a3e31;margin:0;white-space:pre;line-height:1.7}
+.sysmap .tree b{color:var(--g)}
+.sysmap .tree .c{color:var(--sub)}
+.sysmap .chips{display:flex;flex-wrap:wrap;gap:8px}
+.sysmap .chip{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12px;flex:1 1 150px}
+.sysmap .chip b{color:var(--g);font-size:12.5px}
+.sysmap .chip span{color:#6a6f60}
+.sysmap .mc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 13px}
+.sysmap .mc .pn{font-size:10.5px;font-weight:800;color:var(--gold);letter-spacing:.6px}
+.sysmap .mc b{display:block;font-size:13.5px;color:var(--g);margin:2px 0 3px}
+.sysmap .mc p{margin:0;font-size:11.5px;color:#54594c}
+.sysmap .quote{margin:22px 0 4px;text-align:center;font-family:'Cinzel',Georgia,serif;font-size:14px;color:var(--g);font-style:italic}
+.sysmap .rule{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.sysmap .rule .r{flex:1 1 220px;background:var(--pane);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px}
+.sysmap .rule .r b{color:var(--g)}
+@media(max-width:820px){.sysmap .g4{grid-template-columns:repeat(2,1fr)}.sysmap .g3{grid-template-columns:repeat(2,1fr)}.sysmap .g2{grid-template-columns:1fr}}
+@media(max-width:520px){.sysmap .g4,.sysmap .g3{grid-template-columns:1fr}}
+</style>
+<div class="sysmap">
+
+  <div class="hero">
+    <span class="tag cin">Casting Karma LLC · The Whole System</span>
+    <h2 class="cin">One master project. Many chats. A portfolio of micro-companies.</h2>
+    <p>Casting Karma is run inside <b>Claude Cowork</b> as a single master project. Claude operates each business function as its own chat ("lane"), acting as CEO / CTO / CMO. The chats <b>don't share memory</b> — so the living documents saved on the hard drive <b>are</b> the shared brain. Read the docs, do the work, write it back. That loop is what turns one operator into a whole company.</p>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">1</span> The brain — where Claude &amp; Jamin stand</h3>
+    <div class="grid g3">
+      <div class="card k"><h4>🧠 Claude (Cowork) — the operator</h4><p>Runs every lane end-to-end: researches, builds, ships, and grows the businesses with high autonomy. One mind, many chats — each chat is a focused role.</p></div>
+      <div class="card k"><h4>🧑‍✈️ Jamin — strategic partner &amp; final approver</h4><p>Sets direction and approves. <b>Spending money, creating accounts, entering credentials, publishing, DNS, anything irreversible = Jamin.</b> Claude pauses at these "human walls."</p></div>
+      <div class="card k"><h4>🔗 No shared memory</h4><p>Two chats can't see each other's context. The <b>living docs on disk</b> are the only shared truth — which is why writing changes back is the whole job.</p></div>
+    </div>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">2</span> Shared memory — the living docs (single source of truth)</h3>
+    <p class="lede">Read the relevant ones before acting; write every change back after. If it isn't written to a living doc, it doesn't exist for the other chats.</p>
+    <div class="grid g2">
+      <div class="card">
+        <ul class="docs">
+          <li><span class="d">★ Activity Log</span><span class="x">One chronological feed of every update, all lanes. <b>Read first.</b></span></li>
+          <li><span class="d">NOW — State</span><span class="x">30-second snapshot of every lane + open handoffs.</span></li>
+          <li><span class="d">Operating Map</span><span class="x">The rulebook: lanes, rules of the road, chat registry.</span></li>
+          <li><span class="d">Portfolio Tracker</span><span class="x">Per-project status, stage, MRR, key links.</span></li>
+          <li><span class="d">Vault + Renewals</span><span class="x">Every account, which email, where each secret lives, cost &amp; renewal.</span></li>
+          <li><span class="d">Standards</span><span class="x">Stack · Build (Definition of Done) · Email · Connectors register.</span></li>
+          <li><span class="d">Per app</span><span class="x">Running Log · Feature Matrix · Human-Walls Queue · Notification Map.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin-bottom:8px">Where they live — on the hard drive</div>
+        <p class="tree"><b>Casting Karma LLC/</b>
+├─ <b>00_Operations/</b>  <span class="c">maps, standards, registers, logs</span>
+├─ <b>01_Vault/</b>       <span class="c">accounts + where secrets live</span>
+├─ <b>02_Research/</b>    <span class="c">Discovery's pipeline</span>
+├─ <b>03_Businesses/</b>  <span class="c">one folder per app + the dashboard</span>
+├─ <b>04_Distribution/</b><span class="c">go-to-market playbooks</span>
+├─ <b>05_Finance/</b>     <span class="c">ledger + P&amp;L (CK-Finance)</span>
+├─ <b>06_Legal/</b>       <span class="c">legal register + packets (CK-Legal)</span>
+└─ <b>99_Archive/</b>     <span class="c">superseded, kept for trail</span></p>
+        <div style="margin-top:10px;font-size:11.5px;color:#6a6f60">Secrets themselves never sit here — real keys live in <b>Apple Passwords</b>; the Vault only indexes what exists and where.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="r"><b>READ ▸</b> NOW → Activity Log → Operating Map → the docs for what you're touching.</div>
+      <div class="r"><b>WRITE ▾</b> your app's Running Log (newest on top) + one line to the Activity Log. That line is how every other lane sees it.</div>
+      <div class="r"><b>Single writer</b> — Operations alone syncs the Tracker + dashboard from the Activity Log, so nothing forks.</div>
+    </div>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">3</span> The lanes — how the company is divided</h3>
+    <p class="lede">Each chat owns exactly one lane and stays in it. Operations runs the ground the app lanes stand on; it doesn't build the apps.</p>
+    <div class="grid g3">
+      <div class="card"><h4>🛰️ Operations <span class="pin">· THE HUB</span></h4><p>Accounts, DNS, email, hosting, GitHub/Render wiring, security, costs, tooling — and <b>mints every new chat.</b> Owns the maps, Vault &amp; registers.</p><span class="path">00_Operations · 01_Vault</span></div>
+      <div class="card"><h4>🔭 Discovery</h4><p>Venture scouting as a panel of experts — hunts &amp; validates the next businesses, proposes green-lights for Jamin to approve.</p><span class="path">02_Research</span></div>
+      <div class="card"><h4>📣 Distribution</h4><p>Go-to-market &amp; growth — gets every product found, installed, adopted. Grassroots first; paid only once proven.</p><span class="path">04_Distribution</span></div>
+      <div class="card"><h4>💰 CK-Finance</h4><p>The books — ledger, monthly &amp; per-project P&amp;L, budget-vs-actual, cash &amp; runway. Records &amp; analyzes; never moves money.</p><span class="path">05_Finance</span></div>
+      <div class="card"><h4>⚖️ CK-Legal</h4><p>General counsel — regulatory map + all user-facing legal docs. <b>Its review is the launch sign-off;</b> escalates to Jamin only for hard-stop categories.</p><span class="path">06_Legal</span></div>
+      <div class="card"><h4>🛠️ Build lanes · P-1…P-8</h4><p>One chat per app. Owns only its own folder + backend, builds on the paved road, never reconfigures shared infra.</p><span class="path">03_Businesses/&lt;app&gt;</span></div>
+    </div>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">4</span> Connectors &amp; tools — the shelf</h3>
+    <p class="lede">Connectors attach at the account level, so once enabled every lane can call them. The stack below is what Operations provisions for each app.</p>
+    <div class="grid g3">
+      <div class="card k"><h4>🌐 Chrome (Claude in Chrome)</h4><p>Drives Jamin's real, logged-in browser for authenticated dashboards (Vercel, Cloudflare, GitHub, Stripe, Supabase). Human-in-the-loop.</p></div>
+      <div class="card k"><h4>✉️ Gmail</h4><p>Reads/searches the ops inbox <b>jamin@castingkarmallc.com</b> — the front door for anything CK.</p></div>
+      <div class="card k"><h4>🔥 Firecrawl <span class="pin">· APP-CODE ONLY</span></h4><p>JS-heavy / anti-bot scraping — usable only from deployed app code, never in-chat. Rare.</p></div>
+    </div>
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--sub);text-transform:uppercase;margin:14px 0 8px">The paved-road stack + our own tools</div>
+    <div class="chips">
+      <div class="chip"><b>Vercel</b> · <span>hosting (Next.js)</span></div>
+      <div class="chip"><b>Supabase</b> · <span>Postgres + auth</span></div>
+      <div class="chip"><b>Cloudflare</b> · <span>registrar · DNS · R2 · email routing</span></div>
+      <div class="chip"><b>GitHub</b> · <span>castingkarma org · code + CI</span></div>
+      <div class="chip"><b>Stripe</b> · <span>one shared account, segmented per project</span></div>
+      <div class="chip"><b>Resend / AWS SES</b> · <span>transactional email</span></div>
+      <div class="chip"><b>GA4</b> · <span>analytics</span></div>
+      <div class="chip"><b>Google Workspace</b> · <span>identity / ops mailbox</span></div>
+      <div class="chip"><b>Apple Passwords</b> · <span>the real secret vault</span></div>
+      <div class="chip"><b>⚙ Preflight</b> · <span>our own CI — runs the Definition of Done on every push</span></div>
+    </div>
+    <div class="rule">
+      <div class="r"><b>Data-access ladder:</b> try <b>web_fetch</b> in-chat first → run the script on an open-network machine (Jamin's Mac / a deployed cron) → Firecrawl only for JS-heavy pages. Never route around a block.</div>
+    </div>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">5</span> The pipeline — how an idea becomes a company</h3>
+    <div class="loop">
+      <div class="step"><span class="s">DISCOVER</span><b>Discovery validates</b><p>Finds real demand + a distribution path; clears the gates.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="s">APPROVE</span><b>Jamin green-lights</b><p>The one human gate that starts a build.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="s">MINT</span><b>Operations opens a lane</b><p>New chat + Project #, registered on the map.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="s">BUILD</span><b>Build lane ships</b><p>On the paved road; Preflight + the Build Standard keep it honest.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="s">CLEAR</span><b>CK-Legal signs off</b><p>Legal hygiene = the launch gate.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="s">GROW</span><b>Distribution → revenue</b><p>GTM push; results flow back into the Activity Log.</p></div>
+    </div>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">6</span> The output — the micro-companies</h3>
+    <p class="lede">The result of the whole system: a portfolio of small, high-margin digital businesses, all powered by the one master project.</p>
+    <div class="grid g4">
+      <div class="mc"><span class="pn">P-1 · monday</span><b>Cert &amp; License Tracker</b><p>Expiry reminders as a monday.com marketplace app.</p></div>
+      <div class="mc"><span class="pn">P-2 · Jobber</span><b>DueBell</b><p>Maintenance-due reminders for field-service pros.</p></div>
+      <div class="mc"><span class="pn">P-3 · GHL</span><b>Jobcast</b><p>Field-service app on GoHighLevel.</p></div>
+      <div class="mc"><span class="pn">P-4</span><b>TenderProof</b><p>Freight-broker "ordinary care" defense file.</p></div>
+      <div class="mc"><span class="pn">P-5</span><b>HullDocs</b><p>Boat maintenance history that travels at sale.</p></div>
+      <div class="mc"><span class="pn">P-6</span><b>RangeNodes</b><p>Crowdsourced real-chronographed handload database.</p></div>
+      <div class="mc"><span class="pn">P-7</span><b>SquawkTrail</b><p>Aircraft title/lien change alerts from the FAA feed.</p></div>
+      <div class="mc"><span class="pn">P-8</span><b>StockShow Hub</b><p>National junior-livestock-show results aggregator.</p></div>
+    </div>
+  </div>
+
+  <div class="quote">"Distribution is the business; the product is the easy part."</div>
+
+</div>
+</div>
+</body>
+</html>

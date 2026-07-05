@@ -171,6 +171,9 @@ footer{max-width:1100px;margin:0 auto;padding:8px 22px 30px;color:var(--ink2);fo
 @media(max-width:520px){.sysmap .g4,.sysmap .g3{grid-template-columns:1fr}}
 </style>
 <div class="sysmap">
+  <div style="display:flex;justify-content:flex-end;margin:0 0 14px">
+    <button onclick="copyStructureLink(this)" style="font-family:-apple-system,'Segoe UI',Roboto,sans-serif;font-size:12.5px;font-weight:700;color:#2E3A28;background:#fff;border:1px solid #E6E0D2;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">🔗 Copy link to this view</button>
+  </div>
 
   <div class="hero">
     <span class="tag cin">Casting Karma LLC · The Whole System</span>
@@ -831,6 +834,7 @@ document.getElementById("tabhint").innerHTML = TAB==="gtm"
 : "How the lanes coordinate — one Project, many chats, shared living docs. Mirrors <code>00_Operations/Coordination_System_Map.svg</code>.";
 }
 function setTab(t){ TAB=t; renderTabs(); renderGrid(); }
+function copyStructureLink(btn){ const url=new URL('structure.html',location.href).href; const done=()=>{const o=btn.textContent; btn.textContent='✓ Copied!'; setTimeout(()=>{btn.textContent=o;},1600);}; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done).catch(()=>window.prompt('Copy this link:',url)); } else { window.prompt('Copy this link:',url); } }
 
 function card(p){
 const [cls,label] = STATUS[p.status];
