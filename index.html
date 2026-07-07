@@ -99,11 +99,12 @@ footer{max-width:1100px;margin:0 auto;padding:8px 22px 30px;color:var(--ink2);fo
 <!-- structure redesign · deploy refresh -->
 
 <header>
-<div class="brand">
+<div class="brand" onclick="goHome()" style="cursor:pointer" title="Back to the dashboard home">
 <div class="logo"><img src="https://castingkarmallc.com/emblem.png" alt="Casting Karma"></div>
-<div><h1>Project Tracker</h1><div class="sub">Casting Karma LLC · <a href="https://castingkarmallc.com" target="_blank" rel="noreferrer" style="color:#A8863F;text-decoration:none">castingkarmallc.com ↗</a></div></div>
+<div><h1>Project Tracker</h1><div class="sub">Casting Karma LLC · <a href="https://castingkarmallc.com" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" style="color:#A8863F;text-decoration:none">castingkarmallc.com ↗</a></div></div>
 </div>
 <div style="display:flex;align-items:center;gap:16px">
+<a href="#" onclick="goHome();return false" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">🏠 Home</a>
 <a href="#" onclick="setTab('structure');window.scrollTo(0,0);return false" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">⚙ Structure</a>
 <a href="#" onclick="setTab('revenue');window.scrollTo(0,0);return false" style="font-size:12.5px;font-weight:700;color:#A8863F;text-decoration:none">💰 Revenue</a>
 <span class="htag">PRIVATE</span>
@@ -834,6 +835,7 @@ document.getElementById("tabhint").innerHTML = TAB==="gtm"
 : "How the lanes coordinate — one Project, many chats, shared living docs. Mirrors <code>00_Operations/Coordination_System_Map.svg</code>.";
 }
 function setTab(t){ TAB=t; renderTabs(); renderGrid(); }
+function goHome(){ setTab('gtm'); window.scrollTo(0,0); }
 function copyStructureLink(btn){ const url=new URL('structure.html',location.href).href; const done=()=>{const o=btn.textContent; btn.textContent='✓ Copied!'; setTimeout(()=>{btn.textContent=o;},1600);}; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done).catch(()=>window.prompt('Copy this link:',url)); } else { window.prompt('Copy this link:',url); } }
 
 function card(p){
