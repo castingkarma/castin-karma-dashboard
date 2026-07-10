@@ -116,7 +116,28 @@
   </div>
 
   <div class="band">
-    <h3><span class="n">3</span> The lanes — how the company is divided</h3>
+    <h3><span class="n">3</span> Our tech stack — the third-party platforms we run on</h3>
+    <p class="lede">Everything is built on a small, deliberate "paved road" of outside platforms — each picked for one job. Operations provisions these per app; the real secrets for all of them live in Apple Passwords, never in files.</p>
+    <div class="grid g3">
+      <div class="card k"><h4>🧠 Claude (Cowork) <span class="pin">· THE OPERATOR</span></h4><p>The platform the whole company runs on — every lane (research, build, ship, ops, finance, legal) is Claude in a focused chat. One operator, many roles.</p></div>
+      <div class="card"><h4>🐙 GitHub <span class="pin">· CODE</span></h4><p>Version-controlled home for all code — every app repo, this dashboard, and the off-device Ops-brain backup. Vercel &amp; Cloudflare Pages auto-deploy from it on every push.</p></div>
+      <div class="card"><h4>☁️ Cloudflare <span class="pin">· INFRA</span></h4><p>The infrastructure backbone: domain registrar, DNS, static-site hosting (Pages), R2 object storage, and inbound email routing for every domain.</p></div>
+      <div class="card"><h4>▲ Vercel <span class="pin">· APP HOSTING</span></h4><p>Runs the Next.js products — auto-deploys from GitHub and serves the live apps over HTTPS with no cold starts.</p></div>
+      <div class="card"><h4>⚡ Supabase <span class="pin">· DATABASE + AUTH</span></h4><p>Postgres database + user authentication for every product (one LLC org, Pro). The system of record for accounts, app data, and sessions.</p></div>
+      <div class="card"><h4>💳 Stripe <span class="pin">· PAYMENTS</span></h4><p>Subscriptions &amp; checkout — one shared LLC account segmented per project (products, prices, webhooks, restricted keys). The revenue rails.</p></div>
+      <div class="card"><h4>✉️ Resend <span class="pin">· EMAIL SENDING</span></h4><p>Delivers transactional mail — OTP, password reset, receipts, product alerts — from one shared Pro account covering all product domains.</p></div>
+      <div class="card"><h4>🟧 AWS <span class="pin">· SES + STORAGE</span></h4><p>SES is the going-forward email-sending standard; also the home for future immutable S3/WORM storage. The LLC's root cloud account.</p></div>
+      <div class="card"><h4>🤖 OpenAI <span class="pin">· AI FEATURES</span></h4><p>Powers the in-product AI — document auto-fill, historical import, parsing — metered with per-project spend caps.</p></div>
+      <div class="card"><h4>📇 Google Workspace <span class="pin">· IDENTITY</span></h4><p>The business identity + ops inbox (<b>jamin@castingkarmallc.com</b>); every inbound email across all domains lands here.</p></div>
+      <div class="card"><h4>🔐 Apple Passwords <span class="pin">· SECRETS</span></h4><p>Where the real secrets live — passwords, API keys, 2FA seeds. Never in files or git; the Vault only indexes what exists and where.</p></div>
+      <div class="card"><h4>📈 Google Analytics + Search Console <span class="pin">· MEASUREMENT</span></h4><p>GA4 for traffic &amp; behavior analytics; Search Console for indexing + SEO health. Both are a pre-GTM gate for every site.</p></div>
+      <div class="card"><h4>🏪 monday · Jobber · GoHighLevel <span class="pin">· MARKETPLACES</span></h4><p>The host platforms our marketplace apps live inside (P-1 monday, P-2 Jobber, P-3 GHL) — distribution and billing ride the marketplace.</p></div>
+      <div class="card"><h4>⏱️ cron-job.org · Render <span class="pin">· SCHEDULING / LEGACY</span></h4><p>cron-job.org fires DueBell's external cron jobs; Render hosts two marketplace backends (DueBell, Jobcast), being consolidated onto the paved road over time.</p></div>
+    </div>
+  </div>
+
+  <div class="band">
+    <h3><span class="n">4</span> The lanes — how the company is divided</h3>
     <p class="lede">Each chat owns exactly one lane and stays in it. Operations runs the ground the app lanes stand on; it doesn't build the apps.</p>
     <div class="grid g3">
       <div class="card"><h4>🛰️ Operations <span class="pin">· THE HUB</span></h4><p>Accounts, DNS, email, hosting, GitHub/Render wiring, security, costs, tooling — and <b>mints every new chat.</b> Owns the maps, Vault &amp; registers.</p><span class="path">00_Operations · 01_Vault</span></div>
@@ -130,7 +151,7 @@
   </div>
 
   <div class="band">
-    <h3><span class="n">4</span> Connectors &amp; tools — the shelf</h3>
+    <h3><span class="n">5</span> Connectors &amp; tools — the shelf</h3>
     <p class="lede">Connectors attach at the account level, so once enabled every lane can call them. The stack below is what Operations provisions for each app.</p>
     <div class="grid g3">
       <div class="card k"><h4>🌐 Chrome (Claude in Chrome)</h4><p>Drives Jamin's real, logged-in browser for authenticated dashboards (Vercel, Cloudflare, GitHub, Stripe, Supabase). Human-in-the-loop.</p></div>
@@ -156,7 +177,7 @@
   </div>
 
   <div class="band">
-    <h3><span class="n">5</span> The pipeline — how an idea becomes a company</h3>
+    <h3><span class="n">6</span> The pipeline — how an idea becomes a company</h3>
     <div class="loop">
       <div class="step"><span class="s">DISCOVER</span><b>Discovery validates</b><p>Finds real demand + a distribution path; clears the gates.</p></div>
       <div class="arrow">→</div>
@@ -173,7 +194,7 @@
   </div>
 
   <div class="band">
-    <h3><span class="n">6</span> The output — the micro-companies</h3>
+    <h3><span class="n">7</span> The output — the micro-companies</h3>
     <p class="lede">The result of the whole system: a portfolio of small, high-margin digital businesses, all powered by the one master project.</p>
     <div class="grid g4">
       <div class="mc"><span class="pn">P-1 · monday</span><b>Cert &amp; License Tracker</b><p>Expiry reminders as a monday.com marketplace app.</p></div>
