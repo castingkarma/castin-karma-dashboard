@@ -190,6 +190,21 @@ footer{max-width:1100px;margin:0 auto;padding:8px 22px 30px;color:var(--ink2);fo
     </table>
   </div>
 
+  <div class="pl-panel" id="kpiPanel">
+    <div class="pl-head" style="padding:11px 12px 3px">
+      <div class="pl-h1">📊 Portfolio KPIs — live, per project</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="pl-upd" id="kpiAsOf">loading…</span>
+        <button id="kpiRefresh" type="button" style="font-size:11.5px;font-weight:700;color:#2E3A28;background:#fff;border:1px solid #E6E0D2;border-radius:8px;padding:5px 11px;cursor:pointer">🔄 Refresh</button>
+      </div>
+    </div>
+    <table class="pl-tbl">
+      <thead><tr><th>Project</th><th class="r">Accounts</th><th class="r">Active subs</th><th class="r hidesm">Website visits</th></tr></thead>
+      <tbody id="kpiRows"><tr><td class="muted" colspan="4">Loading live metrics…</td></tr></tbody>
+    </table>
+  </div>
+  <div class="pl-foot" style="margin:-8px 0 16px">Live from the CK metrics endpoint — <b>Stripe</b> subs · <b>Supabase</b> accounts · <b>GA4</b> visits — refreshed on open + 🔄 (endpoint auto-refreshes ~2×/day). Per-tier subscription breakdown + website-visit counts fill in as each project's data source is wired; pre-launch projects show "—". Every product is pre-revenue today.</div>
+
   <div class="pl-note"><b>How this stays current:</b> the numbers come from <code>00_Operations/Accounts_Subscriptions_Renewals.md</code> + <code>05_Finance/Ledger</code> (CK-Finance owns them). It's a snapshot — usage-based lines (OpenAI/SES/R2) are pennies today. As products start billing, revenue (from the Revenue tab / Stripe) will offset this burn; the goal is net-positive.</div>
   <div class="pl-foot">Well within the $500–1,000/mo build-phase budget. Biggest lever = Claude Max ($106.60/mo). Every spend is Jamin-approved.</div>
 </div>
@@ -1048,6 +1063,51 @@ document.getElementById("updated").textContent = "Updated " + new Date().toLocal
 document.getElementById("footer").innerHTML =
 "Active builds (8) = TenderProof (P-4 · 🚀 PUBLIC LAUNCH 6/30 — tenderproof.io LIVE, demo mode, new 4-tier pricing live 7/1; CK-Legal reviewing retroactively) + monday Cert Tracker (v4 live · in review · awaiting reviewer Aya · ⚠️ dead-email fix queued in the live app) + DueBell (submitted to Jobber · App Review call w/ Liam Wilson was Jul 2 2pm CT — now past, no outcome logged yet · Render free DB expires ~Jul 8) + Jobcast / GHL Field-Service (in GHL re-review · DB migration Render→Supabase pending Ops) + HullDocs (P-5 · LIVE on Vercel, no cold-start · 7/9 big GTM-readiness build day shipped live — Gate-7 SEO live+verified, Captain 4242 checkout PROVEN live, welcome/receipt emails fixed, Sale Report real branded PDF (downloads+emails), top-nav + Public/Private toggle · remaining: Supabase Auth hardening, observability env, Stripe test→live, CK-Legal review + full E2E, GSC re-submit) + RangeNodes (P-6 · handload database · 🚀 FLAGGED GTM 7/6 — CK's FIRST go-to-market project; data public since 7/4 (7,171 loads, charge-ladder charts render, 4,778 combos); 7/6 big wiring day: Stripe LIVE mode BUILT #52, email LIVE+verified via Resend, GA4 + Google Search Console verified (measurement cleared), finalized v1.0-CK Texas ToS DEPLOYED live (legal gate closed both sides), prod schema deltas applied · only remaining GTM item = one real live-payment E2E (Jamin, real card); Distribution holds spend until it closes) + SquawkTrail (P-7 · GA aircraft title/lien alerts · 🟢 LIVE on Vercel — squawktrail.vercel.app, on real FAA data 314,483 aircraft · 3,482 liens, nightly cron; squawktrail.com DNS pointed 7/4 · 7/5 Stripe realigned for the on-brand Payment Element — awaiting Jamin's 3 secrets → redeploy → 4242 E2E · 7/6 built all 7 UX-feedback items + fixed the mobile portal blank-screen bug, both awaiting push · pre-GTM: GA4, CK-Legal ToS/FAA-republish, A2P 10DLC) + StockShowsHQ (P-8 · junior-livestock results · ShoWorks parser generalized 11/11, schema + skeleton). Possible Projects = 9 candidates (eBikeFit, LedgerPeppol, InvoiceIndex, EquiTrail, AgentLedger, BurnLedger, FormDraft, DarkTower, OrphanWellRadar); Archive = 16 moat-gate cuts. Standing lanes: Operations, Discovery, Distribution, Marketing, GTM, Website Dev, CK-Finance, CK-Legal. Code & live URLs on the Casting Karma LLC GitHub (castingkarma); Next.js apps host on Vercel; ops email jamin@castingkarmallc.com. Revenue figures are mid-case modeled ranges (±50%) — placeholders until live-data wiring. Ops 7/3: the shared Stripe account's business profile corrected off the old 'My Spirit Team' identity → Casting Karma LLC / SaaS / castingkarmallc.com + statement descriptor set to CASTINGKARMA → 'No active tasks' → the Jul 17 payout-pause + Jul 31 payment-pause risk CLEARED; new governing docs: CK Product Build Standard (Definition of Done) + GTM Readiness self-audit. New standards 7/4: connecting Google Analytics (GA4) is now a pre-GTM wall (Gate 5 of 6); a Feature Status Matrix is a standard every lane maintains; client-facing legal/contact docs use the PRODUCT name + project emails, never the LLC; a Domain Onboarding Runbook standardizes every new domain sweep; build-phase cards may carry a 🔧 Prototype link (removed at launch). New standards 7/5: a CK Transactional Email Standard + Notification-Coverage map are now Gate-2 [MUST] pre-GTM walls — every function's account/billing + product-alert emails must be covered, all on the project's own branding; P-4/P-5/P-6 completed their coverage maps (no 🔴 gaps) and moved their emails onto the standard, and the dashboard gained a GTM tab (Marketing-pushing phase) + a Structure map + Revenue link. New 7/6: RangeNodes flagged GTM (CK's first) — Stripe LIVE mode built (#52), email live+verified (Resend Pro), GA4 + Google Search Console verified (Gate-5 measurement now a [MUST] = GA4 + GSC), finalized Texas ToS deployed; observability = Pre-GTM Gate 6 [MUST]. New 7/8: LANE RESTRUCTURE — GTM split out of Distribution as its own standing execution lane (Distribution = strategy/planning, GTM = execution, Marketing = creative); full Claude account migration to the recoverable LLC-email identity COMPLETE (no data loss — connectors + 6 scheduled tasks recreated); P-8 officially renamed to StockShowsHQ (matches stockshowshq.com); dashboard KPI numbers recolored to brand palette. New 7/9: 🌐 castingkarmallc.com GO-LIVE COMPLETE — the corporate site (new 'AI Implementation' service line) now lives on the LLC Cloudflare account with GitHub→Cloudflare Pages auto-deploy (repo casting-karma-site); a new Website Dev lane owns it and shipped an SEO pass + contact cards (7/9); the public-domain DNS cutover of the latest SEO build remains an Ops item. 🎛️ GTM Portfolio Queue created — ONE GTM lane runs all products (Active/Next/Backlog board, 2–3 in Active at once): 🟢 P-6 RangeNodes · 🟡 P-7 SquawkTrail + P-4 TenderProof · ⚪ P-5 HullDocs + P-8 StockShowsHQ. 🎯 P-6 RangeNodes GTM warm-up clock STARTED — AccurateShooter account approved → both P0 community accounts live (last gating item) → earliest promo ≈ week of 7/20. ✈️ P-7 SquawkTrail red Preflight GTM Check fixed (retired-codename scrub in 2 engine files; needs push) + FAA daily-ingest cron healthy. 🐄 P-8 StockShowsHQ local unblocked build pass (Feature Status Matrix + Gate-7 SEO in code + entity-resolution v1); still infra/legal human-blocked. 🛡️ P-4 TenderProof onboarded on the migrated account + engine 35/35 green after a staleness test-rot + live-demo fix (staged, no push). 🔎 New universal Pre-GTM Gate 7 = SEO Readiness (crawlability + keyword map + structured data + Core Web Vitals + AI-answer discoverability). This run (7/10 sync): folded P-5 HullDocs' 7/9 big build day into its card + this footer (Gate-7 SEO live, Captain 4242 checkout proven, welcome/receipt emails fixed, Sale Report branded-PDF feature, top-nav) and the CK-Web milestone — castingkarmallc.com GSC Domain property VERIFIED + sitemap 'Success' (5 pages) + homepage indexed. P-4/P-6/P-7/P-8 cards already current from the 7/9 EOD sync; P-1/P-2/P-3 unchanged. All MRR/customers still $0/0 (nothing live-billing yet). Internal use only. Synced 2026-07-10.";
 renderTiles(); renderTabs(); renderGrid();
+</script>
+<script>
+/* ============================================================
+   Portfolio KPIs panel (P&L tab) — live per-project from the CK metrics endpoint.
+   Defensive: every value falls back to "—". Refresh button + on-open load.
+   ============================================================ */
+(function(){
+  "use strict";
+  const URL_="https://ck-metrics.vercel.app/api/metrics";
+  const LIST=[["rangenodes","RangeNodes"],["hulldocs","HullDocs"],["tenderproof","TenderProof"],["squawktrail","SquawkTrail"],["stockshow","StockShowsHQ"]];
+  const n=v=>(v==null?'—':Math.round(v).toLocaleString());
+  function subCell(pm){
+    if(!pm) return '—';
+    if(pm.subsByTier && Object.keys(pm.subsByTier).length)
+      return Object.keys(pm.subsByTier).map(k=>k+' '+pm.subsByTier[k]).join(' · ');
+    const a=(pm.activeSubs!=null?pm.activeSubs:(pm.subs!=null?pm.subs:null));
+    if(a==null) return '—';
+    let s=''+a;
+    if(pm.trialing) s+=' <span class="muted">(+'+pm.trialing+' trial)</span>';
+    return s;
+  }
+  function render(m){
+    const rows=document.getElementById('kpiRows'); if(!rows) return;
+    const P=(m&&m.projects)||{};
+    let tAcc=0,tSub=0,tVis=0,anyAcc=false,anySub=false,anyVis=false,html='';
+    LIST.forEach(function(row){
+      const slug=row[0],label=row[1],pm=P[slug];
+      const acc=pm&&pm.accounts!=null?pm.accounts:null;
+      const sub=pm&&pm.activeSubs!=null?pm.activeSubs:(pm&&pm.subs!=null?pm.subs:null);
+      const vis=pm&&pm.visits!=null?pm.visits:null;
+      if(acc!=null){tAcc+=acc;anyAcc=true;} if(sub!=null){tSub+=sub;anySub=true;} if(vis!=null){tVis+=vis;anyVis=true;}
+      html+='<tr><td class="item">'+label+'</td><td class="r">'+n(acc)+'</td><td class="r">'+subCell(pm)+'</td><td class="r hidesm">'+n(vis)+'</td></tr>';
+    });
+    html+='<tr class="total"><td>Portfolio total</td><td class="r">'+(anyAcc?n(tAcc):'—')+'</td><td class="r">'+(anySub?n(tSub):'—')+'</td><td class="r hidesm">'+(anyVis?n(tVis):'—')+'</td></tr>';
+    rows.innerHTML=html;
+    const as=document.getElementById('kpiAsOf');
+    if(as) as.textContent = (m&&m.updatedAt) ? 'as of '+new Date(m.updatedAt).toLocaleString() : 'live data unavailable';
+  }
+  function load(){
+    const as=document.getElementById('kpiAsOf'); if(as) as.textContent='refreshing…';
+    fetch(URL_,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(render);
+  }
+  const btn=document.getElementById('kpiRefresh'); if(btn) btn.addEventListener('click',load);
+  load();
+})();
 </script>
 <script>
 /* ============================================================
