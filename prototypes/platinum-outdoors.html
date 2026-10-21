@@ -371,6 +371,8 @@ PAGES.leads = () => {
     : l.st==='booked' ? `<button class="btn sm" onclick="go('jobs')">Open job</button>` : '';
   return `<div class="row between"><div><h1>Leads</h1><p class="sub">New homeowners in your service area, found every week from public records. You reach them first, before they start searching.</p></div>
     <span class="pill p-green">${leads.filter(l=>l.st==='new').length} new this week</span></div>
+  ${realCard()}
+  <h2 class="mt2">Your pipeline <span class="small muted" style="font-weight:400">(sample data)</span></h2>
   <div class="funnel">${funnel}</div>
   <div class="grid g3 mt">
     ${Object.entries(SIGNALS).map(([k,s])=>`<div class="card src"><div class="ic" style="background:${k==='build'?'var(--accent-soft)':k==='pool'?'var(--info-soft)':'var(--warn-soft)'}">${k==='build'?'🏠':k==='pool'?'🏊':'🔑'}</div>
@@ -383,13 +385,43 @@ PAGES.leads = () => {
     </div>
     <div class="tablewrap mt"><table>
       <thead><tr><th>${newOnes.length?`<input type="checkbox" aria-label="Select all new" ${allPicked?'checked':''} onchange="pickAllLeads(this.checked)">`:''}</th><th>Owner</th><th>Property</th><th>Signal</th><th>Found</th><th class="r">Lot</th><th class="r">Est. project</th><th>Stage</th></tr></thead>
-      <tbody>${list.length? list.map(l=>`<tr><td>${act(l)}</td><td><strong>${l.o}</strong></td><td>${l.a}<div class="small muted">${l.city}, AZ</div></td>
+      <tbody>${list.length? list.map(l=>`<tr><td>${act(l)}</td><td><strong>${l.o}</strong>${contactOf(l)}</td><td>${l.a}<div class="small muted">${l.city}, AZ</div></td>
         <td><span class="pill ${SIGNALS[l.sig].pill}">${SIGNALS[l.sig].l}</span></td><td>${l.date}</td><td class="r">${l.lot.toLocaleString()} sf</td><td class="r">${fmt(l.val)}</td>
         <td><span class="pill ${LEAD_ST[l.st][1]}">${LEAD_ST[l.st][0]}</span></td></tr>`).join('') : `<tr><td colspan="8" class="empty">No leads match this filter.</td></tr>`}</tbody>
     </table></div>
-    <p class="small muted" style="margin:12px 0 0">Sample data. Owner name and property address come from county records (Maricopa County publishes recorded home sales for free). Phone and email aren't in public records, so homeowners are reached by mail and door hangers.</p>
+    <p class="small muted" style="margin:12px 0 0">Sample data. Owner name and property address come from county records (Maricopa County publishes recorded home sales for free). Phone and email aren't in public records. They come from a paid lookup service, and every number is checked against the national Do-Not-Call list before anyone calls (numbers shown are placeholders).</p>
   </div>`;
 };
+// REAL counts — Maricopa County Assessor "Sales Affidavits" file (dated Oct 3, 2026, downloaded Oct 21, 2026).
+// Single-family, sale dates Apr–Jun 2026. New build = seller is a named homebuilder (undercounts). No names used.
+const REAL = [
+  {c:'Queen Creek', sales:406, nb:140},
+  {c:'Mesa', sales:1540, nb:71},
+  {c:'Gilbert', sales:969, nb:38},
+  {c:'Chandler', sales:789, nb:5},
+];
+function realCard(){
+  const s = REAL.reduce((a,r)=>a+r.sales,0), nb = REAL.reduce((a,r)=>a+r.nb,0);
+  return `<div class="card" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)">
+    <div class="row between"><h2 style="margin:0">Real numbers: your East Valley market</h2><span class="pill p-green">From county records</span></div>
+    <p class="small muted" style="margin:4px 0 14px">Apr–Jun 2026 · Queen Creek, Mesa, Gilbert, Chandler · single-family homes</p>
+    <div class="grid g3">
+      <div class="stat"><div class="k">Homes sold</div><div class="v">${s.toLocaleString()}</div><div class="d muted">about ${Math.round(s/3).toLocaleString()} new owners a month</div></div>
+      <div class="stat"><div class="k">New builds closed</div><div class="v">${nb}+</div><div class="d muted">about ${Math.round(nb/3)} a month, most with a bare-dirt yard</div></div>
+      <div class="stat"><div class="k">Typical new-build price</div><div class="v">$635k</div><div class="d muted">median, so these buyers can afford a backyard</div></div>
+    </div>
+    <div class="tablewrap mt"><table><thead><tr><th>City</th><th class="r">Homes sold</th><th class="r">New builds</th></tr></thead>
+      <tbody>${REAL.map(r=>`<tr><td>${r.c}</td><td class="r">${r.sales.toLocaleString()}</td><td class="r">${r.nb}+</td></tr>`).join('')}</tbody></table></div>
+    <p class="small muted" style="margin:12px 0 0">Source: Maricopa County Assessor sales records (free public download, file dated Oct 3, 2026). "New build" counts only sales where the seller is a named homebuilder, so the real number is higher. San Tan Valley is in Pinal County and isn't included yet. Pool permits are published differently by each city and would be connected city by city.</p>
+  </div>`;
+}
+// sample contact details only: 555-01xx is the reserved fictional range, example.com is a reserved domain
+const DNC = new Set([4,8]);
+function contactOf(l){
+  const first = l.o.replace(/^[A-Z]\. & [A-Z]\. /,'').split(' ')[0].replace('.','').toLowerCase();
+  if(DNC.has(l.id)) return `<div class="small" style="margin-top:2px"><span class="pill p-red">On Do-Not-Call list</span> <span class="muted">mail only</span></div>`;
+  return `<div class="small muted" style="margin-top:2px">(480) 555-01${String(l.id).padStart(2,'0')}<br>${first}${l.id}@example.com</div>`;
+}
 function toggleLead(id){ leadPick.has(id)?leadPick.delete(id):leadPick.add(id); render(); }
 function pickAllLeads(on){ leads.filter(l=>l.st==='new'&&(leadFilter==='all'||l.sig===leadFilter)).forEach(l=>on?leadPick.add(l.id):leadPick.delete(l.id)); render(); }
 function mailerModal(){
