@@ -385,6 +385,7 @@ PAGES.leads = () => {
     <p class="small muted" style="margin:12px 0 0">These are real recorded sales from Maricopa County's public sales file. Names and house numbers are shortened on this demo page only. In your app you see the full owner name and mailing address. Phone and email come from a paid lookup service and are checked against the national Do-Not-Call list before anyone calls.</p>
   </div>
   ${realCard()}
+  ${projCard()}
   <h2 class="mt2">Your pipeline <span class="small muted" style="font-weight:400">(sample data)</span></h2>
   <div class="funnel">${funnel}</div>`;
 };
@@ -412,6 +413,65 @@ function realCard(){
     <p class="small muted" style="margin:12px 0 0">Source: Maricopa County Assessor sales records (free public download, file dated Oct 3, 2026). "New build" counts only sales where the seller is a named homebuilder, so the real number is higher. San Tan Valley is in Pinal County and isn't included yet. Pool permits are published differently by each city and would be connected city by city.</p>
   </div>`;
 }
+// ---------- projected growth (assumptions are editable; defaults are deliberately modest) ----------
+const MONTHLY = {build: Math.round(REAL.reduce((a,r)=>a+r.nb,0)/3), resale: Math.round(REAL.reduce((a,r)=>a+r.sales-r.nb,0)/3)};
+const SCEN = {
+  low: {respB:1, respR:0.25, book:50, close:25},
+  mid: {respB:2, respR:0.5, book:60, close:30},
+  high:{respB:4, respR:1, book:70, close:35},
+};
+const proj = {aud:'build', scen:'mid', ...SCEN.mid, avg:35000, touches:3, cpp:0.85, base:40};
+function projCalc(){
+  const nB = MONTHLY.build, nR = proj.aud==='all' ? MONTHLY.resale : 0;
+  const resp = nB*proj.respB/100 + nR*proj.respR/100;
+  const booked = resp*proj.book/100, jobs = booked*proj.close/100;
+  const cost = (nB+nR)*proj.touches*proj.cpp;
+  return {mailed:nB+nR, resp, booked, jobs, rev:jobs*proj.avg, cost, jobsYr:jobs*12, revYr:jobs*12*proj.avg, costYr:cost*12};
+}
+const SLIDERS = [
+  ['respB','Reply rate, new builds',0.5,6,0.25,'%'],
+  ['respR','Reply rate, other new owners',0,2,0.05,'%'],
+  ['book','Replies that book an estimate',20,90,5,'%'],
+  ['close','Estimates you win',10,60,5,'%'],
+  ['avg','Average job size',10000,80000,1000,'$'],
+  ['base','Jobs you do a year today',10,150,5,''],
+];
+const sval = (k,v,u) => u==='$'?fmt(v):u==='%'?(Math.round(v*100)/100)+'%':v;
+function projCard(){
+  return `<div class="card mt">
+    <div class="row between"><div><h2 style="margin:0">Projected growth from these leads</h2>
+      <p class="small muted" style="margin:4px 0 0">Uses the real monthly lead counts above. Adjust every assumption to your own numbers.</p></div>
+      <div class="chips">${[['low','Conservative'],['mid','Expected'],['high','Strong']].map(([k,l])=>`<button class="chip ${proj.scen===k?'on':''}" onclick="setScen('${k}')">${l}</button>`).join('')}</div></div>
+    <div class="row mt" style="gap:8px"><span class="small muted">Mail to:</span>
+      ${[['build',`New builds only (~${MONTHLY.build}/mo)`],['all',`All new homeowners (~${(MONTHLY.build+MONTHLY.resale).toLocaleString()}/mo)`]].map(([k,l])=>`<button class="chip ${proj.aud===k?'on':''}" onclick="proj.aud='${k}';render()">${l}</button>`).join('')}</div>
+    <div class="grid g2 mt" style="gap:14px 28px">${SLIDERS.filter(s=>s[0]!=='respR'||proj.aud==='all').map(([k,l,mn,mx,st,u])=>`<div>
+      <div class="row between small"><label for="sl_${k}">${l}</label><strong id="sv_${k}">${sval(k,proj[k],u)}</strong></div>
+      <input type="range" id="sl_${k}" min="${mn}" max="${mx}" step="${st}" value="${proj[k]}" style="width:100%;accent-color:var(--accent)" oninput="setP('${k}',this.value,'${u}')"></div>`).join('')}</div>
+    <div id="projOut" class="mt2">${projOut()}</div>
+  </div>`;
+}
+function projOut(){
+  const p = projCalc(), growth = p.jobsYr/proj.base*100, roi = p.costYr? p.revYr/p.costYr : 0;
+  const bars = Array.from({length:12},(_,i)=>p.rev*(i+1)), max = bars[11]||1;
+  const mons = ['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+  return `<div class="grid g4">
+      <div class="stat"><div class="k">New jobs a year</div><div class="v">${p.jobsYr<10?p.jobsYr.toFixed(1):Math.round(p.jobsYr)}</div><div class="d muted">${p.jobs.toFixed(1)} a month</div></div>
+      <div class="stat"><div class="k">Added revenue a year</div><div class="v pos">${fmt(p.revYr)}</div><div class="d muted">${fmt(p.rev)} a month</div></div>
+      <div class="stat"><div class="k">Mailing cost a year</div><div class="v">${fmt(p.costYr)}</div><div class="d muted">${p.mailed.toLocaleString()} homes × ${proj.touches} postcards</div></div>
+      <div class="stat"><div class="k">Growth vs. today</div><div class="v pos">+${Math.round(growth)}%</div><div class="d muted">${Math.round(roi).toLocaleString()}× return on mailing cost</div></div>
+    </div>
+    <div class="mt2 small muted">Revenue added over the first 12 months (running total)</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:8px;border-bottom:1px solid var(--line)">
+      ${bars.map((b,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+        ${i%3===2?`<div class="small" style="font-size:11px;margin-bottom:3px;white-space:nowrap">${b>=1e6?'$'+(b/1e6).toFixed(1)+'M':'$'+Math.round(b/1000)+'k'}</div>`:''}
+        <div style="width:100%;max-width:38px;height:${Math.max(2,b/max*120)}px;background:var(--accent);border-radius:4px 4px 0 0;opacity:${0.45+0.55*(i+1)/12}"></div></div>`).join('')}
+    </div>
+    <div style="display:flex;gap:6px;margin-top:4px">${mons.map(m=>`<div class="small muted" style="flex:1;text-align:center;font-size:11px">${m}</div>`).join('')}</div>
+    <p class="small muted" style="margin:14px 0 0">The math: ${p.mailed.toLocaleString()} homes mailed → ${p.resp.toFixed(1)} replies → ${p.booked.toFixed(1)} estimates → ${p.jobs.toFixed(1)} jobs a month. This is a projection, not a promise. Real reply rates are measured in the first 60–90 days, then this updates from actual results. It assumes no ramp-up and that your crews have room for the extra work.</p>`;
+}
+function setP(k,v,u){ proj[k]=parseFloat(v); proj.scen=null; document.getElementById('sv_'+k).textContent=sval(k,proj[k],u); document.getElementById('projOut').innerHTML=projOut(); document.querySelectorAll('#main .card .chips')[0]?.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); }
+function setScen(k){ Object.assign(proj,SCEN[k]); proj.scen=k; render(); }
+
 // sample contact details only: 555-01xx is the reserved fictional range, example.com is a reserved domain
 const DNC = new Set([4,8]);
 function contactOf(l){
