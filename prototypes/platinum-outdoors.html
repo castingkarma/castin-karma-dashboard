@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Platinum Outdoors — Job Hub (Demo)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f2a37'/%3E%3Cpath d='M9 23V9h7.5a4.5 4.5 0 010 9H13' fill='none' stroke='%23d7dde4' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --ink:#18202b; --muted:#5d6878; --line:#e2e5ea;
+  --brand:#1f2a37; --plat:#c9d1da; --accent:#0f8a6a; --accent-soft:#e3f4ee;
+  --warn:#b26a00; --warn-soft:#fff3dc; --bad:#b42318; --bad-soft:#fde8e6; --info:#2856b6; --info-soft:#e7eefc;
+  --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.demo-bar{background:#fff3dc;color:#6b4200;text-align:center;font-size:12.5px;padding:6px 16px;border-bottom:1px solid #f1dfb8}
+header.top{background:var(--brand);color:#fff;display:flex;align-items:center;gap:14px;padding:12px 20px;position:sticky;top:0;z-index:20}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+.logo .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#e9edf1,#9aa6b3);display:grid;place-items:center;color:var(--brand);font-weight:800}
+.logo small{display:block;font-weight:500;color:var(--plat);font-size:11.5px;letter-spacing:.6px;text-transform:uppercase}
+.spacer{flex:1}
+.toggle{display:flex;background:rgba(255,255,255,.1);border-radius:999px;padding:3px}
+.toggle button{border:0;background:transparent;color:#dfe5ec;padding:6px 14px;border-radius:999px;cursor:pointer;font-size:13.5px;white-space:nowrap}
+.toggle button.on{background:#fff;color:var(--brand);font-weight:600}
+.layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 90px)}
+nav.side{background:var(--panel);border-right:1px solid var(--line);padding:16px 10px}
+nav.side .jobpick{padding:0 8px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+nav.side label{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+nav.side select{width:100%;margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+nav.side a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--ink);text-decoration:none;cursor:pointer;font-size:14.5px}
+nav.side a:hover{background:var(--bg)}
+nav.side a.on{background:var(--accent-soft);color:#075e48;font-weight:600}
+nav.side a .n{margin-left:auto;font-size:12px;background:var(--warn-soft);color:var(--warn);border-radius:999px;padding:1px 8px}
+main{padding:24px 28px 60px;min-width:0}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:16px;margin:0 0 12px}
+.sub{color:var(--muted);margin:0 0 20px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.stat .k{font-size:12.5px;color:var(--muted)}
+.stat .v{font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12.5px;margin-top:2px}
+.pos{color:var(--accent)} .neg{color:var(--bad)}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.p-green{background:var(--accent-soft);color:#075e48}
+.p-amber{background:var(--warn-soft);color:var(--warn)}
+.p-blue{background:var(--info-soft);color:var(--info)}
+.p-grey{background:#eef0f3;color:#4a5565}
+.p-red{background:var(--bad-soft);color:var(--bad)}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+tr.sec td{background:#f8f9fb;font-weight:700;font-size:13px;color:#334155}
+tr.tot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
+input.num{width:72px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;text-align:right;background:#fff}
+input.txt{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px}
+.btn{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#0b7558}
+.btn.dark{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.mt{margin-top:16px}.mt2{margin-top:28px}
+.muted{color:var(--muted)} .small{font-size:13px}
+.bar{height:8px;background:#eef0f3;border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar span.over{background:var(--bad)}
+/* jobs */
+.jobcard{cursor:pointer;transition:border-color .15s}
+.jobcard:hover{border-color:#9fb0c2}
+.jobcard .thumb{height:78px;border-radius:8px;margin:-4px -4px 12px;background:linear-gradient(135deg,#d9c3a1,#a9865c)}
+/* selections */
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+.opt{border:2px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;background:#fff;text-align:left;padding:0}
+.opt:hover{border-color:#9fb0c2}
+.opt.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.opt .sw{height:86px}
+.opt .b{padding:9px 10px}
+.opt .b strong{display:block;font-size:13.5px}
+.opt .b span{font-size:12.5px;color:var(--muted)}
+.opt[disabled]{cursor:default}
+/* schedule */
+.gantt{display:grid;grid-template-columns:200px 1fr;min-width:720px}
+.gantt .lbl{padding:8px 10px;border-bottom:1px solid var(--line);font-size:13.5px}
+.gantt .lane{position:relative;border-bottom:1px solid var(--line);background-image:linear-gradient(to right,var(--line) 1px,transparent 1px);background-size:calc(100%/30) 100%}
+.gantt .lane .t{position:absolute;top:7px;bottom:7px;border-radius:6px;color:#fff;font-size:11.5px;padding:2px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gantt .hdr{font-size:11.5px;color:var(--muted);display:grid;grid-template-columns:repeat(6,1fr);padding:6px 0;border-bottom:1px solid var(--line)}
+/* proposal */
+.proposal{max-width:820px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.proposal .hero{background:linear-gradient(120deg,#1f2a37,#3a4a5c);color:#fff;padding:28px}
+.proposal .hero h1{font-size:26px}
+.proposal .body{padding:24px 28px}
+.sigbox{border:1px dashed #9fb0c2;border-radius:10px;padding:16px;margin-top:16px;background:#fafbfc}
+.signed{font-family:"Brush Script MT","Segoe Script",cursive;font-size:30px;color:#1f2a37}
+/* client portal */
+.steps{display:flex;gap:0;margin:8px 0 4px;overflow-x:auto}
+.steps div{flex:1;min-width:92px;text-align:center;font-size:12px;color:var(--muted);position:relative;padding-top:22px}
+.steps div:before{content:"";position:absolute;top:6px;left:50%;width:12px;height:12px;border-radius:50%;background:#cfd5dc;transform:translateX(-50%);z-index:1}
+.steps div:after{content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:#cfd5dc}
+.steps div:first-child:after{display:none}
+.steps div.done{color:var(--ink)} .steps div.done:before,.steps div.done:after{background:var(--accent)}
+.steps div.now{color:var(--ink);font-weight:700} .steps div.now:before{background:#fff;border:3px solid var(--accent);width:14px;height:14px;top:5px}
+.todo{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.todo:last-child{border-bottom:0}
+.todo .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex:none}
+/* modal + toast */
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.scrim.show{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal h2{margin-bottom:6px}
+.field{margin-top:12px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:#18202b;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.2s;z-index:60;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+@media (max-width:900px){
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3,.g2{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  header.top{padding:10px 16px;flex-wrap:wrap}
+  .logo small{display:none}
+  .layout{grid-template-columns:1fr}
+  nav.side{border-right:0;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;gap:6px;overflow-x:auto;position:sticky;top:54px;z-index:15}
+  nav.side .jobpick{display:none}
+  nav.side a{flex:none;padding:7px 12px;font-size:14px;background:var(--bg)}
+  nav.side a .n{display:none}
+  main{padding:18px 16px 60px}
+  .proposal .body{padding:18px}
+  .proposal .hero{padding:20px}
+  .steps div{min-width:0;font-size:10.5px}
+}
+</style>
+</head>
+<body>
+<div class="demo-bar">Demo prototype · sample data only · built by Casting Karma for Platinum Outdoors</div>
+<header class="top">
+  <div class="logo"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
+  <div class="spacer"></div>
+  <div class="toggle" role="tablist" aria-label="View as">
+    <button id="vTeam" class="on" onclick="setView('team')">Team view</button>
+    <button id="vClient" onclick="setView('client')">Client view</button>
+  </div>
+</header>
+<div class="layout">
+  <nav class="side" id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- sample data (all fake) ----------
+const fmt = n => (n<0?'-':'') + '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
+const pct = n => (Math.round(n*10)/10).toFixed(1) + '%';
+
+const CODES = {DEMO:'Demo & Grading', PAV:'Pavers & Hardscape', TURF:'Turf & Planting', KIT:'Outdoor Kitchen', FIRE:'Fire Feature', LITE:'Lighting & Electrical'};
+
+const jobs = [
+  {id:1, name:'Henderson Backyard', client:'Mark & Dana Henderson', email:'dana.h@example.com', city:'Scottsdale', status:'In progress', thumb:'linear-gradient(135deg,#d9c3a1,#a9865c)'},
+  {id:2, name:'Alvarez Pool Deck & Turf', client:'Rosa Alvarez', city:'Gilbert', status:'Proposal sent', value:48600, thumb:'linear-gradient(135deg,#a9c7d6,#5f8aa3)'},
+  {id:3, name:'Nguyen Front Yard Refresh', client:'Kevin Nguyen', city:'Chandler', status:'Estimating', value:21900, thumb:'linear-gradient(135deg,#bcd3a8,#6f8f55)'},
+  {id:4, name:'Patel Outdoor Kitchen', client:'Priya Patel', city:'Paradise Valley', status:'Complete', value:63250, thumb:'linear-gradient(135deg,#c9c2b8,#7b7268)'},
+];
+
+// estimate for the demo job (Henderson)
+const est = {
+  status:'signed', signedBy:'Dana Henderson', signedAt:'Sep 18, 2026',
+  lines:[
+    {sec:'Site prep', code:'DEMO', d:'Remove existing grass & concrete pad', q:1, u:'ls', c:2800, m:30},
+    {sec:'Site prep', code:'DEMO', d:'Grade & compact base, 6" ABC', q:850, u:'sf', c:1.9, m:35},
+    {sec:'Patio', code:'PAV', d:'Travertine pavers, French pattern', q:620, u:'sf', c:11.5, m:38},
+    {sec:'Patio', code:'PAV', d:'Seat wall, stacked stone veneer', q:28, u:'lf', c:145, m:35},
+    {sec:'Patio', code:'PAV', d:'Polymeric sand & sealer', q:620, u:'sf', c:0.85, m:40},
+    {sec:'Turf', code:'TURF', d:'Artificial turf, 85oz pet-friendly', q:900, u:'sf', c:4.6, m:40},
+    {sec:'Turf', code:'TURF', d:'Desert plantings & drip zone', q:1, u:'ls', c:3200, m:35},
+    {sec:'Outdoor kitchen', code:'KIT', d:'12\' L-shaped island, block + stucco', q:1, u:'ea', c:7400, m:32},
+    {sec:'Outdoor kitchen', code:'KIT', d:'36" built-in grill (allowance)', q:1, u:'ea', c:3800, m:20},
+    {sec:'Outdoor kitchen', code:'KIT', d:'Granite countertop', q:34, u:'sf', c:68, m:30},
+    {sec:'Fire feature', code:'FIRE', d:'Gas fire pit, 48" round, w/ gas line', q:1, u:'ea', c:4100, m:35},
+    {sec:'Lighting', code:'LITE', d:'Low-voltage path & uplights (14 fixtures)', q:14, u:'ea', c:165, m:45},
+    {sec:'Lighting', code:'LITE', d:'Transformer, timer & GFCI', q:1, u:'ls', c:950, m:40},
+  ]
+};
+
+const cos = [
+  {n:1, title:'Add pergola footing & electrical stub', status:'approved', date:'Oct 2', lines:[{code:'LITE',d:'Electrical stub-out for future pergola',q:1,u:'ls',c:680,m:40},{code:'PAV',d:'4 concrete footings',q:4,u:'ea',c:210,m:35}]},
+  {n:2, title:'Upgrade grill to 42" Lynx', status:'sent', date:'Oct 15', lines:[{code:'KIT',d:'Grill upgrade over allowance',q:1,u:'ea',c:2150,m:20}]},
+];
+
+const selections = [
+  {id:'s1', cat:'Pavers', title:'Patio paver', allowance:7130, due:'Done', status:'locked', chosen:0, opts:[
+    {n:'Ivory travertine', v:'Belgard', p:7130, sw:'linear-gradient(135deg,#efe4cf,#d8c6a3)'},
+    {n:'Noce travertine', v:'Belgard', p:7440, sw:'linear-gradient(135deg,#c9a882,#9a7652)'},
+    {n:'Silver travertine', v:'Belgard', p:7750, sw:'linear-gradient(135deg,#d5d6d2,#a3a59f)'}]},
+  {id:'s2', cat:'Countertop', title:'Kitchen countertop', allowance:2312, due:'Oct 24', status:'open', chosen:null, opts:[
+    {n:'Black Pearl granite', v:'Arizona Tile', p:2312, sw:'linear-gradient(135deg,#3a3d42,#15171a)'},
+    {n:'Taj Mahal quartzite', v:'Arizona Tile', p:3060, sw:'linear-gradient(135deg,#f2ece1,#d9cdb8)'},
+    {n:'Concrete, honed', v:'In-house', p:2650, sw:'linear-gradient(135deg,#b8b6b0,#8b8983)'}]},
+  {id:'s3', cat:'Fire feature', title:'Fire pit finish', allowance:0, due:'Oct 28', status:'open', chosen:null, opts:[
+    {n:'Stacked stone, Desert Gold', v:'Coronado', p:0, sw:'linear-gradient(135deg,#c79b5d,#8a6334)'},
+    {n:'Smooth stucco, Sandstone', v:'In-house', p:0, sw:'linear-gradient(135deg,#dcc8a8,#b59a73)'},
+    {n:'Porcelain tile, Charcoal', v:'Arizona Tile', p:540, sw:'linear-gradient(135deg,#5b5e63,#2f3236)'}]},
+  {id:'s4', cat:'Lighting', title:'Fixture finish', allowance:2310, due:'Nov 3', status:'open', chosen:null, opts:[
+    {n:'Bronze', v:'FX Luminaire', p:2310, sw:'linear-gradient(135deg,#7a5a3c,#4b3522)'},
+    {n:'Black', v:'FX Luminaire', p:2310, sw:'linear-gradient(135deg,#3b3b3b,#111)'},
+    {n:'Natural brass', v:'FX Luminaire', p:2870, sw:'linear-gradient(135deg,#d8b86a,#a5823a)'}]},
+];
+
+const pos = [
+  {n:'PO-1041', v:'Belgard / SiteOne', d:'Travertine pavers 650 sf + sand', code:'PAV', amt:7620, date:'Oct 6', status:'billed'},
+  {n:'PO-1042', v:'Arizona Materials', d:'ABC base, 42 tons', code:'DEMO', amt:1690, date:'Oct 3', status:'billed'},
+  {n:'PO-1043', v:'SYNLawn Arizona', d:'Turf 900 sf + infill', code:'TURF', amt:4380, date:'Oct 20', status:'delivered'},
+  {n:'PO-1044', v:'Coronado Stone', d:'Seat wall veneer', code:'PAV', amt:2310, date:'Oct 22', status:'confirmed'},
+  {n:'PO-1045', v:'BBQ Island Supply', d:'Lynx 42" grill', code:'KIT', amt:5950, date:'Nov 4', status:'sent'},
+  {n:'PO-1046', v:'FX Luminaire / Ewing', d:'14 fixtures + transformer', code:'LITE', amt:2890, date:'Nov 6', status:'draft'},
+];
+const PO_FLOW = ['draft','sent','confirmed','delivered','billed'];
+
+// actual cost not tied to POs (labor, subs, misc) by code
+const otherActual = {DEMO:2400, PAV:2900, TURF:900, KIT:2100, FIRE:0, LITE:0};
+
+const schedule = [
+  {n:'Demo & haul-off', crew:'Crew A', s:0, d:3, c:'#64748b', st:'done'},
+  {n:'Grade & base', crew:'Crew A', s:3, d:3, c:'#64748b', st:'done'},
+  {n:'Paver install', crew:'Crew B', s:6, d:6, c:'#0f8a6a', st:'active'},
+  {n:'Seat wall', crew:'Crew B', s:10, d:4, c:'#0f8a6a', st:'next'},
+  {n:'Kitchen island build', crew:'Masonry sub', s:12, d:6, c:'#b26a00', st:'next'},
+  {n:'Gas & electrical', crew:'Electrical sub', s:15, d:3, c:'#2856b6', st:'next'},
+  {n:'Turf & planting', crew:'Crew C', s:19, d:4, c:'#4d7c0f', st:'next'},
+  {n:'Lighting & walkthrough', crew:'Crew A', s:24, d:3, c:'#2856b6', st:'next'},
+];
+
+const payments = [
+  {l:'Deposit at signing', p:.30, st:'paid'},
+  {l:'Materials delivered', p:.30, st:'paid'},
+  {l:'Kitchen & hardscape complete', p:.30, st:'due'},
+  {l:'Final walkthrough', p:.10, st:'upcoming'},
+];
+
+// alt job proposal (Alvarez) — unsigned, to demo the sign flow
+const alvarez = {signed:false, signer:null, lines:[
+  {sec:'Pool deck', d:'Remove & haul existing cool-deck', price:6400},
+  {sec:'Pool deck', d:'Porcelain pavers, 1,100 sf', price:24750},
+  {sec:'Turf', d:'Putting green 300 sf + side yard turf 600 sf', price:12650},
+  {sec:'Lighting', d:'Deck + landscape lighting, 10 fixtures', price:4800},
+]};
+
+// ---------- calc ----------
+const linePrice = l => l.q*l.c*(1+l.m/100);
+const lineCost = l => l.q*l.c;
+function totals(){
+  const estCost = est.lines.reduce((a,l)=>a+lineCost(l),0);
+  const estPrice = est.lines.reduce((a,l)=>a+linePrice(l),0);
+  const appr = cos.filter(c=>c.status==='approved');
+  const coCost = appr.reduce((a,c)=>a+c.lines.reduce((b,l)=>b+lineCost(l),0),0);
+  const coPrice = appr.reduce((a,c)=>a+c.lines.reduce((b,l)=>b+linePrice(l),0),0);
+  const contract = estPrice+coPrice, budget = estCost+coCost;
+  const byCode = {};
+  Object.keys(CODES).forEach(k=>byCode[k]={budget:0,actual:otherActual[k]||0,committed:0});
+  est.lines.forEach(l=>byCode[l.code].budget+=lineCost(l));
+  appr.forEach(c=>c.lines.forEach(l=>byCode[l.code].budget+=lineCost(l)));
+  pos.forEach(p=>{ if(p.status==='billed') byCode[p.code].actual+=p.amt; else if(p.status!=='draft') byCode[p.code].committed+=p.amt; });
+  const actual = Object.values(byCode).reduce((a,x)=>a+x.actual,0);
+  const committed = Object.values(byCode).reduce((a,x)=>a+x.committed,0);
+  return {estCost,estPrice,coPrice,contract,budget,byCode,actual,committed};
+}
+const coPriceOf = c => c.lines.reduce((b,l)=>b+linePrice(l),0);
+const selDiff = s => s.chosen==null ? 0 : s.opts[s.chosen].p - s.allowance;
+
+// ---------- app state + nav ----------
+let view = 'team', page = 'jobs';
+const TEAM_NAV = [['jobs','Jobs'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['costing','Job costing'],['schedule','Schedule & POs']];
+const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
+
+function badge(key){
+  if(key==='selections'||key==='c-selections'){const n=selections.filter(s=>s.status==='open').length;return n?`<span class="n">${n}</span>`:''}
+  if(key==='estimate'||key==='c-changes'){const n=cos.filter(c=>c.status==='sent').length;return n?`<span class="n">${n}</span>`:''}
+  return '';
+}
+function renderNav(){
+  const items = view==='team'?TEAM_NAV:CLIENT_NAV;
+  const pick = view==='team' ? `<div class="jobpick"><label>Current job</label><select onchange="pickJob(this.value)">${jobs.map(j=>`<option value="${j.id}" ${j.id===1?'selected':''}>${j.name}</option>`).join('')}</select></div>`
+    : `<div class="jobpick"><label>Signed in as</label><div style="margin-top:6px;font-weight:600">Dana Henderson</div><div class="small muted">Henderson Backyard</div></div>`;
+  document.getElementById('nav').innerHTML = pick + items.map(([k,l])=>`<a class="${page===k?'on':''}" onclick="go('${k}')">${l}${badge(k)}</a>`).join('');
+}
+function go(p){page=p;render();window.scrollTo({top:0})}
+function setView(v){
+  view=v; page = v==='team'?'jobs':'portal';
+  document.getElementById('vTeam').classList.toggle('on',v==='team');
+  document.getElementById('vClient').classList.toggle('on',v==='client');
+  render();
+}
+function pickJob(id){ if(+id===2){go('proposal')} else if(+id!==1){toast('In this demo, the Henderson and Alvarez jobs are fully built out.')} else go('estimate'); }
+function render(){ renderNav(); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+
+// ---------- pages ----------
+const PAGES = {};
+
+PAGES.jobs = () => {
+  const t = totals();
+  const pipeline = jobs.filter(j=>j.status==='Proposal sent'||j.status==='Estimating').reduce((a,j)=>a+j.value,0);
+  const stPill = s => ({'In progress':'p-green','Proposal sent':'p-blue','Estimating':'p-amber','Complete':'p-grey'}[s]);
+  return `
+  <h1>Jobs</h1><p class="sub">Every job from first estimate to final walkthrough, in one place.</p>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Active jobs</div><div class="v">1</div><div class="d muted">Henderson, in progress</div></div>
+    <div class="card stat"><div class="k">Open pipeline</div><div class="v">${fmt(pipeline)}</div><div class="d muted">2 estimates / proposals</div></div>
+    <div class="card stat"><div class="k">Awaiting client</div><div class="v">${selections.filter(s=>s.status==='open').length + cos.filter(c=>c.status==='sent').length}</div><div class="d muted">selections + change orders</div></div>
+    <div class="card stat"><div class="k">Henderson margin to date</div><div class="v">${pct((t.contract-t.budget)/t.contract*100)}</div><div class="d pos">on budget</div></div>
+  </div>
+  <div class="grid g2 mt">
+    ${jobs.map(j=>{
+      const val = j.id===1? t.contract : j.value;
+      return `<div class="card jobcard" onclick="pickJob(${j.id})">
+        <div class="thumb" style="background:${j.thumb}"></div>
+        <div class="row between"><strong>${j.name}</strong><span class="pill ${stPill(j.status)}">${j.status}</span></div>
+        <div class="small muted mt" style="margin-top:4px">${j.client} · ${j.city}, AZ</div>
+        <div class="row between" style="margin-top:10px"><span class="small muted">Contract value</span><strong>${fmt(val)}</strong></div>
+      </div>`}).join('')}
+  </div>`;
+};
+
+PAGES.estimate = () => {
+  const t = totals();
+  let sec = null, rows = '';
+  est.lines.forEach((l,i)=>{
+    if(l.sec!==sec){sec=l.sec; rows+=`<tr class="sec"><td colspan="7">${sec}</td></tr>`;}
+    rows += `<tr><td>${l.d}<div class="small muted">${CODES[l.code]}</div></td>
+      <td class="r"><input class="num" type="number" min="0" value="${l.q}" onchange="setLine(${i},'q',this.value)"></td><td>${l.u}</td>
+      <td class="r">${Number.isInteger(l.c)?fmt(l.c):'$'+l.c.toFixed(2)}</td>
+      <td class="r"><input class="num" type="number" min="0" value="${l.m}" onchange="setLine(${i},'m',this.value)">%</td>
+      <td class="r">${fmt(lineCost(l))}</td><td class="r"><strong>${fmt(linePrice(l))}</strong></td></tr>`;
+  });
+  const coSt = s => ({approved:'p-green',sent:'p-blue',draft:'p-grey',declined:'p-red'}[s]);
+  return `
+  <div class="row between"><div><h1>Henderson Backyard: estimate</h1><p class="sub">Built from your cost book. Change quantity or markup and every total updates.</p></div>
+  <span class="pill p-green">Signed by ${est.signedBy} · ${est.signedAt}</span></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Estimate price</div><div class="v">${fmt(t.estPrice)}</div></div>
+    <div class="card stat"><div class="k">Approved change orders</div><div class="v">${fmt(t.coPrice)}</div></div>
+    <div class="card stat"><div class="k">Contract total</div><div class="v">${fmt(t.contract)}</div></div>
+    <div class="card stat"><div class="k">Gross margin</div><div class="v">${pct((t.contract-t.budget)/t.contract*100)}</div><div class="d muted">${fmt(t.contract-t.budget)} profit</div></div>
+  </div>
+  <div class="card mt"><div class="tablewrap"><table>
+    <thead><tr><th>Item</th><th class="r">Qty</th><th>Unit</th><th class="r">Unit cost</th><th class="r">Markup</th><th class="r">Cost</th><th class="r">Price</th></tr></thead>
+    <tbody>${rows}
+    <tr class="tot"><td colspan="5">Estimate total</td><td class="r">${fmt(t.estCost)}</td><td class="r">${fmt(t.estPrice)}</td></tr></tbody>
+  </table></div></div>
+
+  <div class="row between mt2"><h2 style="margin:0">Change orders</h2><button class="btn primary" onclick="newCO()">+ New change order</button></div>
+  <div class="card mt">
+    ${cos.length? `<div class="tablewrap"><table><thead><tr><th>#</th><th>Change</th><th>Date</th><th>Status</th><th class="r">Amount</th><th></th></tr></thead><tbody>
+    ${cos.map((c,i)=>`<tr><td>CO-${c.n}</td><td>${c.title}</td><td>${c.date}</td><td><span class="pill ${coSt(c.status)}">${c.status==='sent'?'Waiting on client':c.status[0].toUpperCase()+c.status.slice(1)}</span></td><td class="r"><strong>${fmt(coPriceOf(c))}</strong></td>
+      <td class="r">${c.status==='draft'?`<button class="btn sm" onclick="sendCO(${i})">Send to client</button>`:''}</td></tr>`).join('')}
+    </tbody></table></div>` : `<div class="empty">No change orders yet.</div>`}
+    <p class="small muted" style="margin:12px 0 0">Approved change orders add to the contract and to the job budget automatically. Switch to <a href="#" onclick="setView('client');go('c-changes');return false">Client view</a> to approve CO-2 as the homeowner.</p>
+  </div>`;
+};
+function setLine(i,k,v){ est.lines[i][k]=Math.max(0,parseFloat(v)||0); render(); }
+function newCO(){
+  openModal(`<h2>New change order</h2><p class="muted small">Henderson Backyard</p>
+    <div class="field"><label for="coT">What's changing</label><input class="txt" id="coT" value="Add 2 extra uplights on palm trees"></div>
+    <div class="grid g2" style="gap:10px">
+      <div class="field"><label for="coC">Your cost</label><input class="txt" id="coC" type="number" value="420"></div>
+      <div class="field"><label for="coM">Markup %</label><input class="txt" id="coM" type="number" value="45"></div>
+    </div>
+    <div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveCO()">Save as draft</button></div>`);
+}
+function saveCO(){
+  const title=document.getElementById('coT').value.trim(); const c=parseFloat(document.getElementById('coC').value)||0; const m=parseFloat(document.getElementById('coM').value)||0;
+  if(!title){toast('Give the change order a short description.');return}
+  cos.push({n:cos.length+1,title,status:'draft',date:'Oct 21',lines:[{code:'LITE',d:title,q:1,u:'ls',c,m}]});
+  closeModal(); render(); toast('Change order saved as a draft. Send it when ready.');
+}
+function sendCO(i){ cos[i].status='sent'; render(); toast(`CO-${cos[i].n} sent. Dana gets an email with a link to approve it.`); }
+
+PAGES.selections = () => {
+  const open = selections.filter(s=>s.status==='open').length;
+  const net = selections.reduce((a,s)=>a+selDiff(s),0);
+  return `<h1>Henderson Backyard: selections</h1><p class="sub">The client picks finishes in their portal. You see what's still open and what it does to the budget.</p>
+  <div class="grid g3">
+    <div class="card stat"><div class="k">Still waiting on client</div><div class="v">${open}</div></div>
+    <div class="card stat"><div class="k">Picked</div><div class="v">${selections.length-open}</div></div>
+    <div class="card stat"><div class="k">Net over / under allowance</div><div class="v ${net>0?'neg':'pos'}">${net>0?'+':''}${fmt(net)}</div></div>
+  </div>
+  ${selections.map(s=>selCard(s,false)).join('')}`;
+};
+function selCard(s, client){
+  const diff = selDiff(s);
+  const st = s.status==='open' ? `<span class="pill p-amber">Waiting on client · due ${s.due}</span>` : s.status==='locked' ? `<span class="pill p-grey">Locked</span>` : `<span class="pill p-green">Client picked</span>`;
+  const canPick = client && s.status!=='locked';
+  return `<div class="card mt">
+    <div class="row between"><div><div class="small muted">${s.cat}</div><strong>${s.title}</strong></div>${st}</div>
+    <div class="small muted" style="margin-top:6px">Allowance ${fmt(s.allowance)}${s.chosen!=null?` · <span class="${diff>0?'neg':'pos'}">${diff===0?'on allowance':(diff>0?'+':'')+fmt(diff)+(diff>0?' over':' under')}</span>`:''}</div>
+    <div class="opts">${s.opts.map((o,i)=>`<button class="opt ${s.chosen===i?'on':''}" ${canPick?`onclick="pickSel('${s.id}',${i})"`:'disabled'} aria-pressed="${s.chosen===i}">
+      <div class="sw" style="background:${o.sw}"></div><div class="b"><strong>${o.n}</strong><span>${o.v} · ${o.p===s.allowance?'Included':(o.p>s.allowance?'+'+fmt(o.p-s.allowance):fmt(o.p))}</span></div></button>`).join('')}</div>
+    ${!client && s.status==='picked' && diff>0 ? `<div class="row mt"><button class="btn sm" onclick="selToCO('${s.id}')">Create change order for the ${fmt(diff)} overage</button></div>`:''}
+  </div>`;
+}
+function pickSel(id,i){ const s=selections.find(x=>x.id===id); s.chosen=i; s.status='picked'; render(); toast(`Saved: ${s.opts[i].n}. Platinum Outdoors has been notified.`); }
+function selToCO(id){
+  const s=selections.find(x=>x.id===id); const diff=selDiff(s);
+  cos.push({n:cos.length+1,title:`${s.title} upgrade: ${s.opts[s.chosen].n}`,status:'sent',date:'Oct 21',lines:[{code:s.cat==='Lighting'?'LITE':s.cat==='Fire feature'?'FIRE':'KIT',d:'Selection overage',q:1,u:'ea',c:diff,m:0}]});
+  s.status='locked'; render(); toast('Change order created and sent to the client.');
+}
+
+PAGES.proposal = () => proposalDoc(false);
+PAGES['c-proposal'] = () => proposalDoc(true);
+function proposalDoc(client){
+  const total = alvarez.lines.reduce((a,l)=>a+l.price,0);
+  let sec=null, rows='';
+  alvarez.lines.forEach(l=>{ if(l.sec!==sec){sec=l.sec;rows+=`<tr class="sec"><td colspan="2">${sec}</td></tr>`} rows+=`<tr><td>${l.d}</td><td class="r">${fmt(l.price)}</td></tr>` });
+  return `${client?'':`<div class="row between" style="max-width:820px;margin:0 auto 14px"><div><h1>Alvarez Pool Deck &amp; Turf: proposal</h1><p class="sub" style="margin:0">This is what the client sees. Your costs and markup stay hidden.</p></div>
+    <span class="pill ${alvarez.signed?'p-green':'p-blue'}">${alvarez.signed?'Signed':'Sent · not yet signed'}</span></div>`}
+  <div class="proposal">
+    <div class="hero"><div class="small" style="color:var(--plat);letter-spacing:.6px;text-transform:uppercase">Platinum Outdoors · Proposal #2026-118</div>
+      <h1 style="margin-top:6px">Pool Deck &amp; Turf Transformation</h1><div style="color:#dfe5ec">Prepared for Rosa Alvarez · Gilbert, AZ</div></div>
+    <div class="body">
+      <p>Thanks for having us out, Rosa. Here's the full scope we walked through, with one price and no surprises. Finishes you still need to choose will show up in your client portal once you approve.</p>
+      <div class="tablewrap"><table><tbody>${rows}<tr class="tot"><td>Total</td><td class="r">${fmt(total)}</td></tr></tbody></table></div>
+      <h2 class="mt2">Payment schedule</h2>
+      <div class="tablewrap"><table><tbody>${payments.map(p=>`<tr><td>${p.l}</td><td class="r">${Math.round(p.p*100)}%</td><td class="r">${fmt(total*p.p)}</td></tr>`).join('')}</tbody></table></div>
+      <h2 class="mt2">Timeline</h2><p class="muted" style="margin-top:0">About 3 weeks on site. We'll confirm a start date within 2 business days of your approval.</p>
+      <div class="sigbox">${alvarez.signed
+        ? `<div class="small muted">Accepted by</div><div class="signed">${alvarez.signer}</div><div class="small muted">Oct 21, 2026 · signature, time and device recorded</div>`
+        : `<div class="field" style="margin-top:0"><label for="sigName">Type your full name to accept this proposal</label><input class="txt" id="sigName" placeholder="Full name" oninput="document.getElementById('sigBtn').disabled=!this.value.trim()"></div>
+           <div class="row mt"><button class="btn primary" id="sigBtn" disabled onclick="signProposal()">Accept &amp; sign</button><span class="small muted">You can ask questions first. <a href="#" onclick="toast('Message sent to Platinum Outdoors.');return false">Message us</a></span></div>`}
+      </div>
+    </div>
+  </div>`;
+}
+function signProposal(){
+  const n=document.getElementById('sigName').value.trim(); if(!n) return;
+  const b=document.getElementById('sigBtn'); b.disabled=true; b.textContent='Signing…';
+  setTimeout(()=>{ alvarez.signed=true; alvarez.signer=n; jobs[1].status='In progress'; render(); toast('Proposal signed. The job is now sold and the deposit invoice has been created.'); },700);
+}
+
+PAGES.costing = () => {
+  const t = totals();
+  const rows = Object.entries(t.byCode).map(([k,x])=>{
+    const used = x.budget? (x.actual/x.budget*100):0; const v = x.budget - x.actual - x.committed;
+    return `<tr><td>${CODES[k]}</td><td class="r">${fmt(x.budget)}</td><td class="r">${fmt(x.actual)}</td><td class="r muted">${fmt(x.committed)}</td>
+      <td class="r ${v<0?'neg':''}">${fmt(v)}</td><td style="min-width:120px"><div class="bar"><span class="${used>100?'over':''}" style="width:${Math.min(used,100)}%"></span></div><div class="small muted">${Math.round(used)}% spent</div></td></tr>`;
+  }).join('');
+  const left = t.budget - t.actual - t.committed;
+  return `<h1>Henderson Backyard: job costing</h1><p class="sub">Budget comes from the signed estimate plus approved change orders. Actuals come from vendor bills and POs.</p>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Contract</div><div class="v">${fmt(t.contract)}</div></div>
+    <div class="card stat"><div class="k">Cost budget</div><div class="v">${fmt(t.budget)}</div></div>
+    <div class="card stat"><div class="k">Spent + committed</div><div class="v">${fmt(t.actual+t.committed)}</div><div class="d muted">${fmt(t.actual)} billed · ${fmt(t.committed)} on open POs</div></div>
+    <div class="card stat"><div class="k">Projected margin</div><div class="v ${left<0?'neg':'pos'}">${pct((t.contract-t.budget+Math.min(0,left))/t.contract*100)}</div><div class="d muted">${fmt(left)} budget left</div></div>
+  </div>
+  <div class="card mt"><div class="tablewrap"><table>
+    <thead><tr><th>Cost group</th><th class="r">Budget</th><th class="r">Actual</th><th class="r">Committed</th><th class="r">Remaining</th><th>Progress</th></tr></thead>
+    <tbody>${rows}<tr class="tot"><td>Total</td><td class="r">${fmt(t.budget)}</td><td class="r">${fmt(t.actual)}</td><td class="r">${fmt(t.committed)}</td><td class="r">${fmt(left)}</td><td></td></tr></tbody>
+  </table></div>
+  <p class="small muted" style="margin:12px 0 0">Mark a PO as billed on <a href="#" onclick="go('schedule');return false">Schedule &amp; POs</a> and watch it move from Committed to Actual here.</p></div>`;
+};
+
+PAGES.schedule = () => {
+  const gantt = schedule.map(s=>`<div class="lbl"><strong>${s.n}</strong><div class="small muted">${s.crew}</div></div>
+    <div class="lane"><div class="t" style="left:${s.s/30*100}%;width:${s.d/30*100}%;background:${s.c};opacity:${s.st==='done'?.55:1}" title="${s.n}">${s.st==='done'?'✓ ':''}${s.n}</div></div>`).join('');
+  const weeks = ['Oct 6','Oct 13','Oct 20','Oct 27','Nov 3','Nov 10'];
+  const poSt = s => ({draft:'p-grey',sent:'p-blue',confirmed:'p-blue',delivered:'p-amber',billed:'p-green'}[s]);
+  return `<h1>Henderson Backyard: schedule &amp; POs</h1><p class="sub">Crews and subs on one calendar. Materials ordered against the job, so cost lands in the right bucket.</p>
+  <div class="card"><div class="tablewrap"><div class="gantt">
+    <div class="lbl" style="font-size:12px;color:var(--muted)">Phase · crew</div><div class="hdr">${weeks.map(w=>`<div>Wk of ${w}</div>`).join('')}</div>
+    ${gantt}
+  </div></div></div>
+  <div class="row between mt2"><h2 style="margin:0">Purchase orders</h2><button class="btn primary" onclick="toast('In the real app this opens a PO form with your vendor list and cost codes.')">+ New PO</button></div>
+  <div class="card mt"><div class="tablewrap"><table>
+    <thead><tr><th>PO</th><th>Vendor</th><th>Items</th><th>Delivery</th><th>Status</th><th class="r">Amount</th><th></th></tr></thead>
+    <tbody>${pos.map((p,i)=>{const nx=PO_FLOW[PO_FLOW.indexOf(p.status)+1];
+      return `<tr><td>${p.n}</td><td>${p.v}</td><td>${p.d}<div class="small muted">${CODES[p.code]}</div></td><td>${p.date}</td><td><span class="pill ${poSt(p.status)}">${p.status[0].toUpperCase()+p.status.slice(1)}</span></td><td class="r">${fmt(p.amt)}</td>
+      <td class="r">${nx?`<button class="btn sm" onclick="advPO(${i})">Mark ${nx}</button>`:''}</td></tr>`}).join('')}</tbody>
+  </table></div></div>`;
+};
+function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]; render(); toast(p.status==='billed'?`${p.n} billed. ${fmt(p.amt)} now counts as actual cost on the job.`:`${p.n} marked ${p.status}.`); }
+
+// ---------- client pages ----------
+PAGES.portal = () => {
+  const t = totals();
+  const openSel = selections.filter(s=>s.status==='open');
+  const sentCO = cos.filter(c=>c.status==='sent');
+  const stages = ['Signed','Materials','Hardscape','Kitchen','Turf','Final walk'];
+  const todos = [
+    ...sentCO.map(c=>`<div class="todo"><div class="ic" style="background:var(--info-soft)">📝</div><div style="flex:1"><strong>Approve change order CO-${c.n}</strong><div class="small muted">${c.title} · ${fmt(coPriceOf(c))}</div></div><button class="btn sm" onclick="go('c-changes')">Review</button></div>`),
+    ...openSel.map(s=>`<div class="todo"><div class="ic" style="background:var(--warn-soft)">🎨</div><div style="flex:1"><strong>Choose your ${s.title.toLowerCase()}</strong><div class="small muted">Due ${s.due}</div></div><button class="btn sm" onclick="go('c-selections')">Choose</button></div>`),
+    `<div class="todo"><div class="ic" style="background:var(--accent-soft)">💳</div><div style="flex:1"><strong>Payment 3 of 4: ${fmt(t.contract*.3)}</strong><div class="small muted">Due when the kitchen &amp; hardscape are complete</div></div><button class="btn sm" onclick="toast('Online card/ACH payment is an option for v1. We would decide that with you in discovery.')">Pay</button></div>`
+  ];
+  return `<h1>Hi Dana, here's your backyard</h1><p class="sub">Henderson Backyard · Scottsdale · managed by Platinum Outdoors</p>
+  <div class="card"><div class="steps">${stages.map((s,i)=>`<div class="${i<2?'done':i===2?'now':''}">${s}</div>`).join('')}</div>
+    <p class="small muted" style="margin:14px 0 0">Pavers are going in this week. Next up: the seat wall and your outdoor kitchen.</p></div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>Needs your attention</h2>${todos.join('')}</div>
+    <div class="card"><h2>Your contract</h2>
+      <div class="row between"><span class="muted">Original proposal</span><strong>${fmt(t.estPrice)}</strong></div>
+      <div class="row between" style="margin-top:8px"><span class="muted">Approved changes</span><strong>${fmt(t.coPrice)}</strong></div>
+      <div class="row between" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><span>Total</span><strong>${fmt(t.contract)}</strong></div>
+      <h2 class="mt2">Payments</h2>
+      ${payments.map(p=>`<div class="row between" style="margin-top:6px"><span>${p.l}</span><span class="row" style="gap:8px">${fmt(t.contract*p.p)} <span class="pill ${p.st==='paid'?'p-green':p.st==='due'?'p-amber':'p-grey'}">${p.st}</span></span></div>`).join('')}
+    </div>
+  </div>
+  <div class="card mt"><h2>Coming up</h2>
+    ${schedule.filter(s=>s.st!=='done').slice(0,4).map(s=>`<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${s.n}</span><span class="small muted">${s.crew}</span></div>`).join('')}
+  </div>`;
+};
+PAGES['c-selections'] = () => `<h1>Your selections</h1><p class="sub">Tap the option you want. Anything above your allowance shows the difference before you choose.</p>${selections.map(s=>selCard(s,true)).join('')}`;
+PAGES['c-changes'] = () => {
+  if(!cos.length) return `<h1>Change orders</h1><div class="card empty">No change orders on your project.</div>`;
+  return `<h1>Change orders</h1><p class="sub">Nothing changes on your job, or your price, without your OK.</p>
+  ${cos.filter(c=>c.status!=='draft').map(c=>{ const i=cos.indexOf(c); return `<div class="card mt">
+    <div class="row between"><div><div class="small muted">CO-${c.n} · ${c.date}</div><strong>${c.title}</strong></div>
+    <span class="pill ${c.status==='approved'?'p-green':c.status==='declined'?'p-red':'p-blue'}">${c.status==='sent'?'Needs your approval':c.status[0].toUpperCase()+c.status.slice(1)}</span></div>
+    <div class="tablewrap mt"><table><tbody>${c.lines.map(l=>`<tr><td>${l.d}</td><td class="r">${fmt(linePrice(l))}</td></tr>`).join('')}<tr class="tot"><td>Change to your total</td><td class="r">+${fmt(coPriceOf(c))}</td></tr></tbody></table></div>
+    ${c.status==='sent'?`<div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="decCO(${i})">Decline</button><button class="btn primary" onclick="apprCO(${i},this)">Approve ${fmt(coPriceOf(c))}</button></div>`:''}
+  </div>`}).join('')}`;
+};
+function apprCO(i,b){ b.disabled=true; b.textContent='Approving…'; setTimeout(()=>{cos[i].status='approved';cos[i].date='Oct 21';render();toast(`CO-${cos[i].n} approved. Your contract total is updated.`)},600); }
+function decCO(i){ cos[i].status='declined'; render(); toast(`CO-${cos[i].n} declined. Platinum Outdoors will follow up.`); }
+
+// ---------- modal + toast ----------
+function openModal(h){ document.getElementById('modal').innerHTML=h; document.getElementById('scrim').classList.add('show'); const f=document.querySelector('#modal input'); if(f) f.focus(); }
+function closeModal(){ document.getElementById('scrim').classList.remove('show'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+let tt; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),3200); }
+
+render();
+</script>
+</body>
+</html>
