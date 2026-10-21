@@ -277,23 +277,25 @@ const alvarez = {signed:false, signer:null, lines:[
   {sec:'Lighting', d:'Deck + landscape lighting, 10 fixtures', price:4800},
 ]};
 
-// leads found from public records (sample people + masked addresses — not real records)
+// lead signal types (only new builds are populated with real records today)
 const SIGNALS = {
   build:{l:'New-build closing', pill:'p-green', why:'Bought a brand-new home from a builder. These yards are usually delivered as bare dirt.'},
   pool:{l:'Pool permit', pill:'p-blue', why:'Pulled a pool permit. A deck, turf and lighting usually follow.'},
   sale:{l:'Recent home sale', pill:'p-amber', why:'New owner of an existing home. Remodel spending peaks in the first year.'},
 };
+// REAL leads — 10 recorded new-build sales, Maricopa County Assessor sales file (dated Oct 3, 2026).
+// Masked on purpose: owner initials + hundred-block only. Phone/email deliberately NOT looked up or shown.
 const leads = [
-  {id:1, o:'J. & M. Ortega', a:'21xx W Saddle Ridge Ln', city:'Queen Creek', sig:'build', date:'Oct 17', lot:7800, val:38000, st:'new'},
-  {id:2, o:'Taylor Brooks', a:'40xx E Desert Bloom St', city:'San Tan Valley', sig:'build', date:'Oct 16', lot:6900, val:32000, st:'new'},
-  {id:3, o:'S. Whitfield', a:'33xx S Palo Verde Ct', city:'Gilbert', sig:'pool', date:'Oct 15', lot:10200, val:46000, st:'new'},
-  {id:4, o:'A. & R. Kowalski', a:'18xx E Ironwood Dr', city:'Mesa', sig:'sale', date:'Oct 14', lot:9100, val:29000, st:'new'},
-  {id:7, o:'B. Lindqvist', a:'45xx E Granite Peak Dr', city:'San Tan Valley', sig:'build', date:'Oct 9', lot:7200, val:34000, st:'mailed'},
-  {id:8, o:'H. & L. Park', a:'29xx S Mesquite Trl', city:'Gilbert', sig:'sale', date:'Oct 8', lot:9800, val:31000, st:'mailed'},
-  {id:9, o:'Marcus Webb', a:'37xx W Copper Sky Ln', city:'Queen Creek', sig:'build', date:'Oct 6', lot:8800, val:44000, st:'mailed'},
-  {id:10, o:'Nina Castillo', a:'14xx E Cholla Ct', city:'Mesa', sig:'pool', date:'Oct 3', lot:10600, val:48000, st:'responded'},
-  {id:11, o:'R. & E. Fischer', a:'52xx E Sonoran Vista Dr', city:'San Tan Valley', sig:'build', date:'Sep 29', lot:7600, val:36000, st:'booked'},
-  {id:12, o:'Grace Holloway', a:'31xx S Agave Ridge Way', city:'Gilbert', sig:'build', date:'Sep 24', lot:9300, val:43000, st:'sold'},
+  {id:1, o:'F. B.', a:'224xx S 180th Pl', city:'Queen Creek', b:'David Weekley Homes', date:'Sep 17', price:1611281, st:'new'},
+  {id:2, o:'D. D.', a:'212xx E Seagull Dr', city:'Queen Creek', b:'Shea Homes', date:'Sep 11', price:689520, st:'new'},
+  {id:3, o:'R. W.', a:'207xx E Camina Plata', city:'Queen Creek', b:'Taylor Morrison', date:'Sep 11', price:841329, st:'new'},
+  {id:4, o:'C. W.', a:'183xx E Creosote Dr', city:'Queen Creek', b:'Pulte Homes', date:'Sep 11', price:773935, st:'new'},
+  {id:5, o:'G. R.', a:'37xx S Peonie', city:'Mesa', b:'Taylor Morrison', date:'Sep 11', price:627483, st:'new'},
+  {id:6, o:'M. Y.', a:'111xx E Utah Ave', city:'Mesa', b:'Toll Brothers', date:'Sep 11', price:660000, st:'new'},
+  {id:7, o:'K. P.', a:'39xx S Tulip', city:'Mesa', b:'Taylor Morrison', date:'Sep 11', price:511794, st:'new'},
+  {id:8, o:'M. D.', a:'14xx E Tonto Ct', city:'Gilbert', b:'Tri Pointe Homes', date:'Sep 11', price:770357, st:'new'},
+  {id:9, o:'S. D.', a:'42xx S Quinn Ave', city:'Gilbert', b:'Toll Brothers', date:'Sep 4', price:1863813, st:'new'},
+  {id:10, o:'S. H.', a:'15xx E Coconino Way', city:'Gilbert', b:'Tri Pointe Homes', date:'Sep 3', price:887454, st:'new'},
 ];
 // earlier weeks rolled up so the funnel reads like a real month of data
 // response rates kept realistic for targeted direct mail (~5%), not flattering
@@ -360,7 +362,7 @@ PAGES.leads = () => {
   const stages = [['Found','found'],['Mailed','mailed'],['Responded','responded'],['Estimate booked','booked'],['Sold','sold']];
   const funnel = stages.map(([l,k],i)=>{const prev=i?f[stages[i-1][1]]:null;return `<div class="st"><div class="k">${l}</div><div class="v">${f[k]}</div>
     <div class="c">${prev?Math.round(f[k]/prev*100)+'% of previous':'last 30 days'}</div><div class="fb" style="width:${Math.max(6,f[k]/f.found*100)}%"></div></div>`}).join('');
-  const list = leads.filter(l=>leadFilter==='all'||l.sig===leadFilter);
+  const list = leads;
   const newOnes = list.filter(l=>l.st==='new');
   const allPicked = newOnes.length && newOnes.every(l=>leadPick.has(l.id));
   const act = l => l.st==='new' ? `<input type="checkbox" aria-label="Select ${l.o}" ${leadPick.has(l.id)?'checked':''} onchange="toggleLead(${l.id})">`
@@ -368,19 +370,19 @@ PAGES.leads = () => {
     : l.st==='responded' ? `<button class="btn sm primary" onclick="bookLead(${l.id})">Book estimate</button>`
     : l.st==='booked' ? `<button class="btn sm" onclick="go('jobs')">Open job</button>` : '';
   return `<div class="row between"><div><h1>Leads</h1><p class="sub">New homeowners in your service area, found every week from public records. You reach them first, before they start searching.</p></div>
-    <span class="pill p-green">${leads.filter(l=>l.st==='new').length} new this week</span></div>
+    <span class="pill p-green">Real county records</span></div>
   <div class="card">
     <div class="row between">
-      <div class="chips">${[['all','All'],['build','New builds'],['pool','Pool permits'],['sale','Home sales']].map(([k,l])=>`<button class="chip ${leadFilter===k?'on':''}" onclick="leadFilter='${k}';render()">${l}</button>`).join('')}</div>
+      <div><strong>10 of last month's new-build closings</strong><div class="small muted">Recorded Sep 2026 · Queen Creek, Mesa, Gilbert</div></div>
       <button class="btn primary" ${leadPick.size?'':'disabled'} onclick="mailerModal()">Send postcard to ${leadPick.size||''} selected</button>
     </div>
     <div class="tablewrap mt"><table>
-      <thead><tr><th>${newOnes.length?`<input type="checkbox" aria-label="Select all new" ${allPicked?'checked':''} onchange="pickAllLeads(this.checked)">`:''}</th><th>Owner</th><th>Property</th><th>Signal</th><th>Found</th><th class="r">Lot</th><th class="r">Est. project</th><th>Stage</th></tr></thead>
-      <tbody>${list.length? list.map(l=>`<tr><td>${act(l)}</td><td><strong>${l.o}</strong>${contactOf(l)}</td><td style="min-width:180px">${l.a}<div class="small muted">${l.city}, AZ</div></td>
-        <td><span class="pill ${SIGNALS[l.sig].pill}">${SIGNALS[l.sig].l}</span></td><td style="white-space:nowrap">${l.date}</td><td class="r" style="white-space:nowrap">${l.lot.toLocaleString()} sf</td><td class="r">${fmt(l.val)}</td>
-        <td><span class="pill ${LEAD_ST[l.st][1]}">${LEAD_ST[l.st][0]}</span></td></tr>`).join('') : `<tr><td colspan="8" class="empty">No leads match this filter.</td></tr>`}</tbody>
+      <thead><tr><th>${newOnes.length?`<input type="checkbox" aria-label="Select all new" ${allPicked?'checked':''} onchange="pickAllLeads(this.checked)">`:''}</th><th>Owner</th><th>Property</th><th>Signal</th><th>Closed</th><th class="r">Home price</th><th>Stage</th></tr></thead>
+      <tbody>${list.length? list.map(l=>`<tr><td>${act(l)}</td><td><strong>${l.o}</strong><div class="small muted" style="margin-top:2px">Phone + email: via lookup</div></td><td style="min-width:180px">${l.a}<div class="small muted">${l.city}, AZ</div></td>
+        <td><span class="pill p-green">New build</span><div class="small muted" style="margin-top:3px">from ${l.b}</div></td><td style="white-space:nowrap">${l.date}</td><td class="r">${fmt(l.price)}</td>
+        <td><span class="pill ${LEAD_ST[l.st][1]}">${LEAD_ST[l.st][0]}</span></td></tr>`).join('') : `<tr><td colspan="7" class="empty">No new leads yet this month.</td></tr>`}</tbody>
     </table></div>
-    <p class="small muted" style="margin:12px 0 0">Sample data. Owner name and property address come from county records (Maricopa County publishes recorded home sales for free). Phone and email aren't in public records. They come from a paid lookup service, and every number is checked against the national Do-Not-Call list before anyone calls (numbers shown are placeholders).</p>
+    <p class="small muted" style="margin:12px 0 0">These are real recorded sales from Maricopa County's public sales file. Names and house numbers are shortened on this demo page only. In your app you see the full owner name and mailing address. Phone and email come from a paid lookup service and are checked against the national Do-Not-Call list before anyone calls.</p>
   </div>
   ${realCard()}
   <h2 class="mt2">Your pipeline <span class="small muted" style="font-weight:400">(sample data)</span></h2>
@@ -421,7 +423,7 @@ function toggleLead(id){ leadPick.has(id)?leadPick.delete(id):leadPick.add(id); 
 function pickAllLeads(on){ leads.filter(l=>l.st==='new'&&(leadFilter==='all'||l.sig===leadFilter)).forEach(l=>on?leadPick.add(l.id):leadPick.delete(l.id)); render(); }
 function mailerModal(){
   const n = leadPick.size;
-  openModal(`<h2>Postcard to ${n} new homeowner${n>1?'s':''}</h2><p class="muted small">Printed and mailed for you. It arrives in 3–5 days.</p>
+  openModal(`<h2>Postcard to ${n} new homeowner${n>1?'s':''}</h2><p class="muted small">Demo only: nothing is printed or sent. In the real app it's printed and mailed for you and arrives in 3–5 days.</p>
     <div class="postcard"><div class="front"><div class="small" style="color:var(--plat);text-transform:uppercase;letter-spacing:.6px">Platinum Outdoors · East Valley</div>
       <h3>Welcome to the neighborhood. Let's finish that backyard.</h3><div style="color:#dfe5ec;font-size:14px">Turf, pavers, BBQ islands and shade, designed for your new lot. Free design visit for new homeowners.</div></div>
       <div class="back">Addressed to each owner, with a personal QR code that tells you who responded · Financing available · Licensed, bonded &amp; insured</div></div>
@@ -430,7 +432,7 @@ function mailerModal(){
 }
 function sendMailer(){
   const b=document.getElementById('mailBtn'); b.disabled=true; b.textContent='Sending…';
-  setTimeout(()=>{ const n=leadPick.size; leads.forEach(l=>{if(leadPick.has(l.id)) l.st='mailed'}); leadPick.clear(); closeModal(); render(); toast(`${n} postcards queued. Each one has its own QR code, so you'll see who responds.`); },700);
+  setTimeout(()=>{ const n=leadPick.size; leads.forEach(l=>{if(leadPick.has(l.id)) l.st='mailed'}); leadPick.clear(); closeModal(); render(); toast(`Demo: ${n} postcards marked as mailed. Nothing was actually sent.`); },700);
 }
 function leadTo(id,st){ const l=leads.find(x=>x.id===id); l.st=st; render(); toast(`${l.o} marked as responded.`); }
 function bookLead(id){
