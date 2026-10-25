@@ -26,6 +26,8 @@ header.top{background:var(--brand);color:#fff;display:flex;align-items:center;ga
 .toggle{display:flex;background:rgba(255,255,255,.1);border-radius:999px;padding:3px}
 .toggle button{border:0;background:transparent;color:#dfe5ec;padding:6px 14px;border-radius:999px;cursor:pointer;font-size:13.5px;white-space:nowrap}
 .toggle button.on{background:#fff;color:var(--brand);font-weight:600}
+.hdr-btn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:7px 14px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;white-space:nowrap}
+.hdr-btn:hover,.hdr-btn.on{background:#fff;color:var(--brand)}
 .layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 90px)}
 nav.side{background:var(--panel);border-right:1px solid var(--line);padding:16px 10px}
 nav.side .jobpick{padding:0 8px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
@@ -150,6 +152,7 @@ td input[type=checkbox]{width:17px;height:17px}
 @media (max-width:760px){
   header.top{padding:10px 16px;flex-wrap:wrap}
   .logo small{display:none}
+  .hdr-btn{padding:6px 11px;font-size:12.5px}
   .layout{grid-template-columns:1fr}
   nav.side{border-right:0;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;gap:6px;overflow-x:auto;position:sticky;top:54px;z-index:15}
   nav.side .jobpick{display:none}
@@ -167,6 +170,7 @@ td input[type=checkbox]{width:17px;height:17px}
 <header class="top">
   <div class="logo"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
   <div class="spacer"></div>
+  <button class="hdr-btn" id="tradBtn" onclick="go('trad')">Traditional Development</button>
   <div class="toggle" role="tablist" aria-label="View as">
     <button id="vTeam" class="on" onclick="setView('team')">Team view</button>
     <button id="vClient" onclick="setView('client')">Client view</button>
@@ -350,7 +354,7 @@ function setView(v){
   render();
 }
 function pickJob(id){ if(+id===2){go('proposal')} else if(+id!==1){toast('In this demo, the Henderson and Alvarez jobs are fully built out.')} else go('estimate'); }
-function render(){ renderNav(); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad');document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -413,6 +417,60 @@ function realCard(){
     <p class="small muted" style="margin:12px 0 0">Source: Maricopa County Assessor sales records (free public download, file dated Oct 3, 2026). "New build" counts only sales where the seller is a named homebuilder, so the real number is higher. San Tan Valley is in Pinal County and isn't included yet. Pool permits are published differently by each city and would be connected city by city.</p>
   </div>`;
 }
+// ---------- traditional development comparison (industry ballpark rates, not vendor quotes) ----------
+const ROLES = [
+  {r:'Product manager / business analyst', what:'Discovery, requirements, specs, backlog', h:220, us:150, off:45},
+  {r:'UX / UI designer', what:'Screens, client portal, proposal design, mobile', h:260, us:140, off:40},
+  {r:'Solutions architect', what:'Data model, security, integrations, hosting plan', h:120, us:185, off:60},
+  {r:'Front-end developers (2)', what:'Team app, client portal, proposal + e-sign screens', h:700, us:160, off:40},
+  {r:'Back-end developers (2)', what:'Database, logins + roles, job costing, POs, leads data feed', h:750, us:170, off:45},
+  {r:'QA tester', what:'Test plans, regression, device testing', h:320, us:110, off:28},
+  {r:'DevOps / hosting engineer', what:'Servers, deploys, backups, monitoring', h:100, us:175, off:50},
+];
+const MODS = [
+  ['Foundation: logins, roles, database, hosting',550],['Estimating + change orders',380],['Proposal, e-sign + client portal',420],
+  ['Selections',220],['Job costing (budget vs. actual)',300],['Scheduling + purchase orders',260],['Leads engine (public records + mailers)',340],
+];
+PAGES.trad = () => {
+  const H = ROLES.reduce((a,x)=>a+x.h,0), US = ROLES.reduce((a,x)=>a+x.h*x.us,0), OFF = ROLES.reduce((a,x)=>a+x.h*x.off,0);
+  const k = v => '$'+Math.round(v/1000)+'k';
+  return `<h1>What this app costs to build the traditional way</h1>
+  <p class="sub">The same app (5 job modules, client portal and leads engine) built by a hired software team. Hours and rates are industry ballparks for 2026, not vendor quotes.</p>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Build hours</div><div class="v">${H.toLocaleString()}</div><div class="d muted">across 7 roles, about 9 people</div></div>
+    <div class="card stat"><div class="k">US agency</div><div class="v">${k(US)}</div><div class="d muted">typical range ${k(US*0.8)}–${k(US*1.25)}</div></div>
+    <div class="card stat"><div class="k">Offshore agency</div><div class="v">${k(OFF)}</div><div class="d muted">typical range ${k(OFF*0.8)}–${k(OFF*1.25)}</div></div>
+    <div class="card stat"><div class="k">Time to launch</div><div class="v">6–10 mo</div><div class="d muted">US 6–8 months · offshore 7–10</div></div>
+  </div>
+  <div class="card mt"><h2>By role</h2><div class="tablewrap"><table>
+    <thead><tr><th>Role</th><th class="r">Hours</th><th class="r">US rate</th><th class="r">US cost</th><th class="r">Offshore rate</th><th class="r">Offshore cost</th></tr></thead>
+    <tbody>${ROLES.map(x=>`<tr><td><strong>${x.r}</strong><div class="small muted">${x.what}</div></td><td class="r">${x.h}</td><td class="r">$${x.us}/h</td><td class="r">${fmt(x.h*x.us)}</td><td class="r">$${x.off}/h</td><td class="r">${fmt(x.h*x.off)}</td></tr>`).join('')}
+    <tr class="tot"><td>Total</td><td class="r">${H.toLocaleString()}</td><td></td><td class="r">${fmt(US)}</td><td></td><td class="r">${fmt(OFF)}</td></tr></tbody>
+  </table></div></div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>By part of the app</h2>
+      ${MODS.map(([m,h])=>`<div style="margin-top:10px"><div class="row between small"><span>${m}</span><strong>${h} h</strong></div><div class="bar" style="margin-top:4px"><span style="width:${h/550*100}%"></span></div></div>`).join('')}
+    </div>
+    <div class="card"><h2>After launch, every year</h2>
+      <div class="row between" style="margin-top:6px"><span class="muted">Maintenance, US team</span><strong>${k(US*0.15)}–${k(US*0.2)}</strong></div>
+      <div class="row between" style="margin-top:8px"><span class="muted">Maintenance, offshore team</span><strong>${k(OFF*0.15)}–${k(OFF*0.2)}</strong></div>
+      <div class="row between" style="margin-top:8px"><span class="muted">Hosting + tools</span><strong>$1k–$5k</strong></div>
+      <p class="small muted" style="margin:12px 0 0">Industry rule of thumb: keeping custom software running costs 15–20% of the build every year (fixes, updates, security, small changes).</p>
+      <h2 class="mt2">What the hidden costs look like</h2>
+      <p class="small muted" style="margin:0">Offshore rates are lower, but time-zone gaps, handoffs and rework usually add 20–40% to the hours. Either way you also spend your own time in meetings, testing and approvals across 6–10 months.</p>
+    </div>
+  </div>
+  <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)">
+    <div class="row between"><h2 style="margin:0">Built with Casting Karma's AI build system</h2><span class="pill p-green">The same app</span></div>
+    <div class="grid g3 mt">
+      <div class="stat"><div class="k">Team</div><div class="v">1 builder + AI</div><div class="d muted">no team to hire or manage</div></div>
+      <div class="stat"><div class="k">Time to launch</div><div class="v">Weeks</div><div class="d muted">not months</div></div>
+      <div class="stat"><div class="k">Price</div><div class="v">Quoted to you</div><div class="d muted">a fraction of the traditional cost</div></div>
+    </div>
+    <p class="small muted" style="margin:12px 0 0">And you own it: the code, the data and the accounts are in your name.</p>
+  </div>`;
+};
+
 // ---------- projected growth (assumptions are editable; defaults are deliberately modest) ----------
 const MONTHLY = {build: Math.round(REAL.reduce((a,r)=>a+r.nb,0)/3), resale: Math.round(REAL.reduce((a,r)=>a+r.sales-r.nb,0)/3)};
 const SCEN = {
