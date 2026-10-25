@@ -170,6 +170,7 @@ td input[type=checkbox]{width:17px;height:17px}
 <header class="top">
   <div class="logo"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
   <div class="spacer"></div>
+  <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
   <button class="hdr-btn" id="tradBtn" onclick="go('trad')">Traditional Development</button>
   <div class="toggle" role="tablist" aria-label="View as">
     <button id="vTeam" class="on" onclick="setView('team')">Team view</button>
@@ -354,7 +355,7 @@ function setView(v){
   render();
 }
 function pickJob(id){ if(+id===2){go('proposal')} else if(+id!==1){toast('In this demo, the Henderson and Alvarez jobs are fully built out.')} else go('estimate'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad');document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -417,6 +418,53 @@ function realCard(){
     <p class="small muted" style="margin:12px 0 0">Source: Maricopa County Assessor sales records (free public download, file dated Oct 3, 2026). "New build" counts only sales where the seller is a named homebuilder, so the real number is higher. San Tan Valley is in Pinal County and isn't included yet. Pool permits are published differently by each city and would be connected city by city.</p>
   </div>`;
 }
+// ---------- project overview (client-facing: no prices) ----------
+const MVP = [
+  ['📐','Estimating + change orders','Build estimates from your own cost book with your markups. Change orders get client approval and update the contract automatically.','estimate'],
+  ['🎨','Selections','Clients pick pavers, stone, countertops and finishes in their portal. You see what\'s open and what it does to the budget.','selections'],
+  ['✍️','Proposal + client portal','A branded proposal they sign online, then one place to see progress, approve changes and pay.','proposal'],
+  ['📊','Job costing','Budget vs. actual on every job, so you know your margin while the job is running, not after.','costing'],
+  ['🗓️','Scheduling + purchase orders','Crews and subs on one calendar. Materials ordered against the job so costs land in the right place.','schedule'],
+];
+const NEXT = [
+  ['Leads engine','New homeowners in your area every month from public records, with postcards and tracking. (See the Leads tab.)','Grow'],
+  ['Online payments','Clients pay deposits and progress payments by card or bank transfer from their portal.','Grow'],
+  ['Reviews + referrals','Automatic review and referral requests when a job wraps up.','Grow'],
+  ['Maintenance plans','Recurring turf, lighting and paver care plans: steady monthly revenue from past clients.','Grow'],
+  ['QuickBooks sync','Invoices, bills and payments flow into your books without double entry.','Run'],
+  ['Crew mobile app','Daily job sheets, photos, punch lists and time on the phone.','Run'],
+  ['Automatic client updates','Texts and emails when a phase starts, finishes or needs a decision.','Run'],
+  ['HOA approval packets','The plan, materials and specs your clients need for HOA approval, generated from the estimate.','Run'],
+  ['AI-assisted estimating','Draft an estimate from site photos, measurements and notes, then review and send.','Scale'],
+  ['Owner dashboard','Win rate, margin by job type, crew utilization and cash flow on one screen.','Scale'],
+];
+PAGES.overview = () => `
+  <h1>Project overview</h1>
+  <p class="sub">What Platinum Outdoors needs first, and where it can grow after that.</p>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <h2>Why you're reaching out</h2>
+    <p style="margin:0 0 10px">You run the business on <strong>JobTread</strong>, a system you rent every year and will never own. It makes your team work its way, your data lives on someone else's platform, and the bill keeps coming as you grow.</p>
+    <p style="margin:0"><strong>The goal:</strong> replace it with a system built around how Platinum Outdoors actually sells and builds backyards, one that runs on <strong>your own accounts</strong>, with code and data that <strong>belong to you</strong>.</p>
+  </div>
+  <div class="row between mt2"><h2 style="margin:0">Phase 1 · The MVP: replace JobTread</h2><span class="pill p-green">What we build first</span></div>
+  <p class="small muted" style="margin:6px 0 0">MVP means "minimum viable product": the smallest version that fully replaces what you use JobTread for today. Not a copy of all of JobTread, just the 20% you actually use, done well.</p>
+  <div class="grid g3 mt">${MVP.map(([i,t,d,p])=>`<div class="card"><div style="font-size:22px">${i}</div><strong style="display:block;margin-top:6px">${t}</strong>
+    <p class="small muted" style="margin:6px 0 10px">${d}</p><a href="#" class="small" onclick="setView('team');go('${p}');return false">See it in the demo →</a></div>`).join('')}
+    <div class="card"><div style="font-size:22px">🔐</div><strong style="display:block;margin-top:6px">Included with the MVP</strong>
+      <p class="small muted" style="margin:6px 0 0">Logins for your team and clients, works on phone and desktop, your open jobs moved over from JobTread, and training for your team.</p></div>
+  </div>
+  <div class="card mt"><h2>How we'll know the MVP is done</h2>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">1</div><div>A real job runs start to finish in the new system: estimate, proposal, signature, selections, change orders, costs, schedule.</div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">2</div><div>Your team uses it day to day without needing JobTread.</div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">3</div><div>You cancel JobTread. We run both side by side until then, so nothing is ever at risk.</div></div>
+  </div>
+  <div class="row between mt2"><h2 style="margin:0">After the MVP · What we can add</h2><span class="pill p-blue">Each one priced on its own</span></div>
+  <p class="small muted" style="margin:6px 0 0">Once the core is running, it can grow with the business. You choose what to add and when.</p>
+  ${['Grow','Run','Scale'].map(g=>`<h3 style="margin:20px 0 4px;font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">${g==='Grow'?'Grow revenue':g==='Run'?'Run smoother':'Scale up'}</h3>
+    <div class="grid g2">${NEXT.filter(n=>n[2]===g).map(([t,d])=>`<div class="card" style="padding:14px 16px"><strong>${t}</strong><div class="small muted" style="margin-top:4px">${d}</div></div>`).join('')}</div>`).join('')}
+  <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)"><h2>Yours, from day one</h2>
+    <p class="small" style="margin:0">Hosting, database, domain and code all sit in Platinum Outdoors' name. We're added as a collaborator. No vendor can raise your price, remove a feature or hold your data.</p></div>`;
+
 // ---------- traditional development comparison (industry ballpark rates, not vendor quotes) ----------
 const ROLES = [
   {r:'Product manager / business analyst', what:'Discovery, requirements, specs, backlog', h:220, us:150, off:45},
