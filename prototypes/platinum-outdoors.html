@@ -170,6 +170,7 @@ td input[type=checkbox]{width:17px;height:17px}
 <header class="top">
   <div class="logo"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
   <div class="spacer"></div>
+  <button class="hdr-btn" id="coBtn" onclick="go('company')">Company Overview</button>
   <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
   <button class="hdr-btn" id="tradBtn" onclick="go('trad')">Traditional Development</button>
   <div class="toggle" role="tablist" aria-label="View as">
@@ -355,7 +356,7 @@ function setView(v){
   render();
 }
 function pickJob(id){ if(+id===2){go('proposal')} else if(+id!==1){toast('In this demo, the Henderson and Alvarez jobs are fully built out.')} else go('estimate'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('coBtn').classList.toggle('on',page==='company');document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -418,6 +419,65 @@ function realCard(){
     <p class="small muted" style="margin:12px 0 0">Source: Maricopa County Assessor sales records (free public download, file dated Oct 3, 2026). "New build" counts only sales where the seller is a named homebuilder, so the real number is higher. San Tan Valley is in Pinal County and isn't included yet. Pool permits are published differently by each city and would be connected city by city.</p>
   </div>`;
 }
+// ---------- company overview: VERIFIED facts (public sources, checked Oct 2026) vs. ESTIMATES (ranges) ----------
+PAGES.company = () => {
+  const fact = (k,v,src) => `<div style="display:grid;grid-template-columns:110px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)"><span class="muted">${k}</span><span style="text-align:right">${v}<div class="small muted">${src}</div></span></div>`;
+  const est = (k,v,d) => `<div class="card stat"><div class="k">${k}</div><div class="v" style="font-size:21px">${v}</div><div class="d muted">${d}</div></div>`;
+  return `<h1>Company overview: Platinum Outdoors</h1>
+  <p class="sub">What public sources show about the business, plus our best estimates. Estimates are ranges from outside clues, not your books. Correct us and we'll update them.</p>
+  <div class="grid g2">
+    <div class="card"><div class="row between"><h2 style="margin:0">What we found</h2><span class="pill p-green">Verified</span></div>
+      ${fact('Legal name','Platinum Outdoors LLC','Arizona Registrar of Contractors')}
+      ${fact('License','ROC 350738 · Active','AZ ROC license lookup')}
+      ${fact('License class','CR-21 Hardscaping &amp; Irrigation Systems','AZ ROC')}
+      ${fact('Managers','Austin Brice (also Qualifying Party) · Joel Brice','AZ ROC')}
+      ${fact('Base','San Tan Valley / Queen Creek, AZ','AZ ROC · website')}
+      ${fact('Service area','East Valley + Phoenix metro: Queen Creek, Gilbert, Mesa, Chandler, Scottsdale, Tempe and more','platinumoutdoorsaz.com')}
+      ${fact('Services','Turf, pavers, travertine, concrete, pergolas, shade, BBQ islands, fireplaces, putting greens, xeriscape','platinumoutdoorsaz.com')}
+      ${fact('Track record','150+ backyard transformations · 5.0 Google rating','platinumoutdoorsaz.com')}
+      ${fact('Typical job','Starts at $10,000+ · 2–6 weeks on site','platinumoutdoorsaz.com')}
+      ${fact('Extras','Showroom · financing · family-owned · licensed, bonded &amp; insured','platinumoutdoorsaz.com')}
+    </div>
+    <div class="card"><div class="row between"><h2 style="margin:0">How we estimated the rest</h2><span class="pill p-amber">Estimates</span></div>
+      <ul class="small" style="margin:12px 0 0;padding-left:18px;line-height:1.7">
+        <li><strong>Years operating, about 2–3:</strong> the oldest Google reviews on the site are about 2 years old, and the Facebook page dates to about early 2024.</li>
+        <li><strong>Jobs:</strong> 150+ projects over about 2–3 years works out to about 50–75 a year.</li>
+        <li><strong>Job size:</strong> projects start at $10k. Turf, paver and outdoor-kitchen jobs in the East Valley commonly run $20k–$40k.</li>
+        <li><strong>Team:</strong> reviews name at least 3 people leading crews, which points to 2–3 crews in the field.</li>
+        <li><strong>Margins:</strong> industry ranges for residential landscape construction, not their numbers.</li>
+      </ul>
+    </div>
+  </div>
+  <h2 class="mt2">Best estimates · size</h2>
+  <div class="grid g4">
+    ${est('Annual revenue','$1M–$3M','best guess about $1.8M')}
+    ${est('Projects a month','4–6','about 50–75 a year')}
+    ${est('Average job','$20k–$40k','best guess about $30k')}
+    ${est('Employees','10–20','2–3 crews + office')}
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>Likely roles + headcount</h2><div class="tablewrap"><table>
+      <thead><tr><th>Role</th><th class="r">Est. people</th></tr></thead><tbody>
+      <tr><td>Owners / managers<div class="small muted">sales, design, running the company</div></td><td class="r">2</td></tr>
+      <tr><td>Estimator / designer<div class="small muted">site visits, layouts, proposals (often an owner)</div></td><td class="r">0–1</td></tr>
+      <tr><td>Office / admin / bookkeeping<div class="small muted">scheduling, billing, permits, HOA paperwork</div></td><td class="r">1–2</td></tr>
+      <tr><td>Crew leads<div class="small muted">run each job on site</div></td><td class="r">2–3</td></tr>
+      <tr><td>Installers / laborers<div class="small muted">pavers, turf, concrete, irrigation</div></td><td class="r">6–12</td></tr>
+      <tr><td>Subcontractors<div class="small muted">electrical, gas, masonry, pergola builds (not on payroll)</div></td><td class="r">as needed</td></tr>
+      <tr class="tot"><td>Total on payroll</td><td class="r">~10–20</td></tr></tbody></table></div></div>
+    <div class="card"><h2>KPIs worth tracking (estimated today)</h2><div class="tablewrap"><table>
+      <thead><tr><th>KPI</th><th class="r">Likely range</th></tr></thead><tbody>
+      <tr><td>Estimates sent a month</td><td class="r">12–20</td></tr>
+      <tr><td>Close rate (estimate → signed)</td><td class="r">25–40%</td></tr>
+      <tr><td>Gross margin per job</td><td class="r">30–45%</td></tr>
+      <tr><td>Revenue per field crew a year</td><td class="r">$500k–$900k</td></tr>
+      <tr><td>Change orders per job</td><td class="r">1–2</td></tr>
+      <tr><td>Days from signed to start</td><td class="r">14–30</td></tr>
+      <tr><td>Software spend (JobTread)</td><td class="r">$3k–$6k / yr</td></tr></tbody></table></div>
+      <p class="small muted" style="margin:12px 0 0">The new app tracks all of these automatically from real jobs, so these guesses get replaced by your actual numbers.</p></div>
+  </div>`;
+};
+
 // ---------- project overview (client-facing: no prices) ----------
 const MVP = [
   ['📐','Estimating + change orders','Build estimates from your own cost book with your markups. Change orders get client approval and update the contract automatically.','estimate'],
