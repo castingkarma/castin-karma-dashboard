@@ -1524,7 +1524,7 @@ const INFRA = [
 PAGES.infra = () => {
   const sum = (groups,i) => groups.reduce((a,[,rows])=>a+rows.reduce((b,r)=>b+r[i],0),0);
   const req = INFRA.slice(0,2), lo=sum(req,3), hi=sum(req,4);
-  return `<div class="row between noprint"><button class="btn" onclick="go('overview')">← Back to Project overview</button><button class="btn primary" onclick="window.print()">Print / Save as PDF</button></div>
+  return `<div class="row noprint"><button class="btn" onclick="go('overview')">← Back to Project overview</button></div>
   <h1 class="mt">Infrastructure + monthly costs</h1>
   <p class="sub">Every account the real build needs. <strong>All of them are opened in Platinum Outdoors' name and paid on your card.</strong> We're added as a collaborator. List prices checked October 2026, confirmed again at signup.</p>
   <div class="grid g4">
