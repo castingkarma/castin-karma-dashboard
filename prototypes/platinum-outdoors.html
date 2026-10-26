@@ -999,13 +999,50 @@ function fixQbo(i){ QBO_LOG[i].st='Synced'; QBO_LOG[i].note=''; render(); toast(
 // ---------- quotes + design workflow ----------
 const QSTAGES = ['Request','Design','Pricing','Review','Sent','Signed','In production'];
 const QUOTES = [
-  {id:'Q-2041', client:'Avery Lopez', city:'Gilbert', scope:'Pergola, pavers, turf + fire pit', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null},
-  {id:'Q-2038', client:'Drew Carter', city:'Mesa', scope:'Pool deck pavers + shade structure', stage:'Design', designer:'Mia R.', specs:['Pool deck ~900 sf','Shade 12×20 ft','Budget around $50k'], files:[], takeoff:[], lines:[], val:49800},
-  {id:'Q-2035', client:'Riley Brooks', city:'Chandler', scope:'Front yard xeriscape + lighting', stage:'Sent', designer:'Mia R.', specs:[], files:[{n:'Brooks_frontyard_v2.pdf',t:'PDF'}], takeoff:[], lines:[], val:18400},
-  {id:'Q-2033', client:'Jamie Ortiz', city:'Queen Creek', scope:'Turf, putting green + BBQ island', stage:'Signed', designer:'Mia R.', specs:[], files:[{n:'Ortiz_backyard_v3.dwg',t:'DWG'}], takeoff:[], lines:[], val:36900},
+  {id:'Q-2041', client:'Avery Lopez', city:'Gilbert', scope:'Pergola, pavers, turf + fire pit', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:45000},
+  {id:'Q-2038', client:'Drew Carter', city:'Mesa', scope:'Pool deck pavers + shade structure', stage:'Design', designer:'Mia R.', specs:['Pool deck ~900 sf','Shade 12×20 ft','Budget around $50k'], files:[], takeoff:[], lines:[], val:49800, budget:50000},
+  {id:'Q-2035', client:'Riley Brooks', city:'Chandler', scope:'Front yard xeriscape + lighting', stage:'Sent', designer:'Mia R.', specs:[], files:[{n:'Brooks_frontyard_v2.pdf',t:'PDF'}], takeoff:[], lines:[], val:18400, budget:15000},
+  {id:'Q-2033', client:'Jamie Ortiz', city:'Queen Creek', scope:'Turf, putting green + BBQ island', stage:'Signed', designer:'Mia R.', specs:[], files:[{n:'Ortiz_backyard_v3.dwg',t:'DWG'}], takeoff:[], lines:[], val:36900, budget:38000},
 ];
 let selQ = 'Q-2041';
 const qVal = q => q.lines.length ? q.lines.reduce((a,l)=>a+linePrice(l),0) : (q.val||0);
+// budget check: the client's anticipated budget vs. our price + cost, against the target margin
+const TARGET_M = 0.30;
+const MARKS = [['Cost','C','#b42318'],['Min. price at target','minP','#b26a00'],['Our price','P','#1f2a37'],['Client budget','B','#0f8a6a']];
+const qCost = q => q.lines.length ? q.lines.reduce((a,l)=>a+lineCost(l),0) : (q.val? q.val*0.70 : 0);
+function budgetFit(q){
+  if(!q.budget || !qVal(q)) return null;
+  const B=q.budget, P=qVal(q), C=qCost(q), m=(B-C)/B;
+  const v = m<0 ? ['Negative margin','p-red','neg'] : m<0.20 ? ['Low margin','p-amber','neg'] : m<=0.40 ? ['Expected margin','p-green','pos'] : ['High margin','p-blue','pos'];
+  return {B,P,C,m,ourM:(P-C)/P,gap:B-P,minP:C/(1-TARGET_M),v};
+}
+function budgetPanel(q){
+  const f = budgetFit(q);
+  if(!q.budget) return '';
+  if(!f) return `<div class="card" style="margin-top:12px;padding:12px;background:#f8f9fb"><strong>Budget saved: ${fmt(q.budget)}</strong><div class="small muted">The budget check appears as soon as the quote is priced.</div></div>`;
+  const max = Math.max(f.B,f.P)*1.12, x = v => Math.max(0,Math.min(100,v/max*100));
+  const advice = f.m<0 ? `At ${fmt(f.B)} this job loses money. Value-engineer the scope (smaller pergola, fewer pavers, turf instead of pavers) or reset the client's expectations before it's sent.`
+    : f.m<0.20 ? `The budget only covers a thin margin. Trim scope or show the client a "good / better" option before sending.`
+    : f.m<=0.40 ? (f.gap>=0 ? `The budget fits. You're ${fmt(f.gap)} under their number, so there's room for one upgrade (lighting, seat wall, pergola fan).` : `The budget fits at your target margin. Your price is ${fmt(-f.gap)} over their number, so price to the budget or explain the difference.`)
+    : `Strong margin at their budget. You could price closer to it, or include an upgrade to win the job.`;
+  return `<div class="card" style="margin-top:12px;padding:14px;border-color:#c9d3df">
+    <div class="row between"><strong>Budget check</strong><span class="pill ${f.v[1]}">${f.v[0]} at their budget</span></div>
+    <div class="grid g4" style="margin-top:10px;gap:10px">
+      <div class="stat"><div class="k">Client budget</div><div class="v" style="font-size:19px">${fmt(f.B)}</div></div>
+      <div class="stat"><div class="k">Our price</div><div class="v" style="font-size:19px">${fmt(f.P)}</div><div class="d ${f.gap>=0?'pos':'neg'}">${f.gap>=0?fmt(f.gap)+' under budget':fmt(-f.gap)+' over budget'}</div></div>
+      <div class="stat"><div class="k">Our cost</div><div class="v" style="font-size:19px">${fmt(f.C)}</div><div class="d muted">margin at our price ${pct(f.ourM*100)}</div></div>
+      <div class="stat"><div class="k">Margin at their budget</div><div class="v ${f.v[2]}" style="font-size:19px">${pct(f.m*100)}</div><div class="d muted">target ${Math.round(TARGET_M*100)}%</div></div>
+    </div>
+    <div style="position:relative;height:18px;margin:16px 6px 4px">
+      <div style="position:absolute;top:5px;left:0;right:0;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--bad-soft) 0 ${x(f.C)}%,#fff3dc ${x(f.C)}% ${x(f.minP)}%,var(--accent-soft) ${x(f.minP)}% 100%)"></div>
+      ${MARKS.map(([l,k,c])=>`<span title="${l}" style="position:absolute;left:${x(f[k])}%;top:0;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:${c};border:3px solid #fff;box-shadow:0 0 0 1px ${c}"></span>`).join('')}
+    </div>
+    <div class="row small" style="gap:14px;margin-top:8px">${MARKS.map(([l,k,c])=>`<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c};margin-right:5px"></span>${l} ${fmt(f[k])}</span>`).join('')}</div>
+    <p class="small" style="margin:14px 0 0">${advice}</p>
+    <p class="small muted" style="margin:6px 0 0">Lowest price that still hits the ${Math.round(TARGET_M*100)}% target: <strong>${fmt(f.minP)}</strong>. The target margin is set by Austin + Joel.</p>
+  </div>`;
+}
+function setBudget(id,v){ const q=QUOTES.find(x=>x.id===id); q.budget = Math.max(0,parseFloat(v)||0) || null; render(); if(q.budget) toast(`Client budget saved: ${fmt(q.budget)}.`); }
 const QACT = {
   Request:['Send specs to designer','specsOut'], Design:['Attach AutoCAD design','attachDwg'], Pricing:['Price it from the cost book','priceIt'],
   Review:['Owner approves + sends to client','approveQ'], Sent:['Client signs (demo)','signQ'], Signed:['Save + push to production','pushProd'],
@@ -1019,12 +1056,16 @@ PAGES.quotes = () => {
   <div class="grid qgrid">
     <div class="card"><h2>${role==='designer'?'Assigned to design':'All quotes'}</h2>
       ${QUOTES.map(x=>`<div class="qrow ${x.id===q.id?'on':''}" onclick="selQ='${x.id}';render();if(innerWidth<900)document.getElementById('qdetail').scrollIntoView({behavior:'smooth'})"><div class="row between"><strong>${x.client}</strong><span class="pill ${x.stage==='In production'?'p-green':x.stage==='Design'?'p-amber':'p-blue'}">${x.stage}</span></div>
-        <div class="small muted">${x.id} · ${x.city} · ${x.scope}</div><div class="small" style="margin-top:3px">${qVal(x)?fmt(qVal(x)):'Not priced yet'}</div></div>`).join('')}
+        <div class="small muted">${x.id} · ${x.city} · ${x.scope}</div><div class="row between small" style="margin-top:3px"><span>${qVal(x)?fmt(qVal(x)):'Not priced yet'}${x.budget?` · budget ${fmt(x.budget)}`:''}</span>${budgetFit(x)?`<span class="pill ${budgetFit(x).v[1]}" style="font-size:11px">${budgetFit(x).v[0].replace(' margin','')}</span>`:''}</div></div>`).join('')}
     </div>
     <div class="card" id="qdetail"><div class="row between"><div><div class="small muted">${q.id} · ${q.city}, AZ</div><h2 style="margin:2px 0 0">${q.client}: ${q.scope}</h2></div><strong>${qVal(q)?fmt(qVal(q)):''}</strong></div>
       <div class="qsteps">${QSTAGES.map((s,i)=>`<span class="${i<si?'done':i===si?'now':''}">${i<si?'✓ ':''}${s}</span>`).join('')}</div>
       ${act?`<div class="row mt"><button class="btn primary" id="qAct" onclick="${act[1]}('${q.id}',this)">${act[0]}</button><span class="small muted">${q.stage==='Request'?'Site-visit notes + photos go to the designer':q.stage==='Design'?'Quantities are read from the drawing layers':q.stage==='Pricing'?'Quantities × your cost book + markups':q.stage==='Review'?'Austin reviews margin before it goes out':q.stage==='Sent'?'Client e-signs from their phone':'Creates the job, budget, schedule and POs'}</span></div>`:''}
       ${q.designer?`<div class="small mt">Designer: <strong>${q.designer}</strong></div>`:''}
+      <div class="field" style="margin-top:14px"><label for="q_budget">Client's anticipated budget</label>
+        <div class="row"><input class="txt" id="q_budget" type="number" min="0" step="500" placeholder="Click to fill (demo)" value="${q.budget||''}" style="max-width:200px" onchange="setBudget('${q.id}',this.value)">
+        <span class="small muted">What the client said they want to spend</span></div></div>
+      ${budgetPanel(q)}
       ${q.specs.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design specs</h3><ul class="small" style="margin:0;padding-left:18px;line-height:1.7">${q.specs.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
       ${q.files.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design files</h3>${q.files.map(f=>`<div class="file"><span class="ext">${f.t}</span>${f.n}<span class="small muted" style="margin-left:auto">${f.t==='DWG'?'AutoCAD drawing':'Plan set'}</span></div>`).join('')}`:''}
       ${q.takeoff.length?`<h3 style="font-size:14px;margin:16px 0 4px">Takeoff pulled from the drawing</h3><div class="tablewrap"><table><thead><tr><th>From layer</th><th class="r">Qty</th><th>Unit</th></tr></thead><tbody>${q.takeoff.map(t=>`<tr><td>${t.item}</td><td class="r">${t.q.toLocaleString()}</td><td>${t.u}</td></tr>`).join('')}</tbody></table></div>`:''}
@@ -1066,8 +1107,8 @@ async function pushProd(id,b){
   q.made=[`Job "${last} Backyard" created on the Jobs board (Sold)`, `Budget set from ${q.lines.length} priced lines (${fmt(q.lines.reduce((a,l)=>a+lineCost(l),0))} cost)`, `${ph.length} phases drafted on the crew calendar (Nov 16–26)`, `${DATA[nid].pos.length} purchase orders drafted for materials`, `Deposit invoice ${fmt(dep)} sent + synced to QuickBooks`, 'Client portal opened for selections'];
   render(); flash('#qdetail'); toast('Pushed to production. Nothing was retyped.');
 }
-function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[n%SAMPLE_CUSTOMERS.length];
-  const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null});
+function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[sampleIdx++ % SAMPLE_CUSTOMERS.length];
+  const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:[40000,52000,30000][n%3]});
   selQ=id; render(); toast(`Quote request ${id} created for ${c.name}.`); }
 
 // ---------- crew calendar: drag to move, drag the right edge to stretch ----------
@@ -1431,6 +1472,7 @@ document.addEventListener('click', e=>{
   const el = e.target.closest('input.txt'); if(!el || el.value) return;
   if(el.id.startsWith('nj_')) fillNewJob();
   else if(el.id==='sigName'){ el.value = propSrc().client; el.dispatchEvent(new Event('input',{bubbles:true})); }
+  else if(el.id==='q_budget'){ const q=QUOTES.find(x=>x.id===selQ); setBudget(selQ, q.hint || Math.round((qVal(q)||40000)*1.1/500)*500); }
   else if(el.id==='fin_pw'){ el.value='demo-password'; document.getElementById('fin_code').value='482913'; }
   else if(el.id==='fin_code'){ el.value='482913'; const pw=document.getElementById('fin_pw'); if(!pw.value) pw.value='demo-password'; }
 });
