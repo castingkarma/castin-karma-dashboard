@@ -428,7 +428,7 @@ function setRole(r){
   document.getElementById('roleSel').value=r; render(); window.scrollTo({top:0});
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -571,7 +571,7 @@ const NEXT = [
   ['Owner dashboard','Win rate, margin by job type, crew utilization and cash flow on one screen.','Scale'],
 ];
 PAGES.overview = () => `
-  <h1>Project overview</h1>
+  <div class="row between"><h1 style="margin:0">Project overview</h1><button class="btn primary" onclick="go('infra')">🧱 Infrastructure + costs</button></div>
   <p class="sub">What Platinum Outdoors needs first, and where it can grow after that.</p>
   <div class="card" style="border-left:4px solid var(--accent)">
     <h2>Why you're reaching out</h2>
@@ -1496,6 +1496,59 @@ PAGES.reqdoc = () => {
     <h2 class="mt2">12. Open questions for discovery</h2>
     <ol class="small" style="line-height:1.7">${RQ_Q.map(x=>`<li>${x}</li>`).join('')}</ol>
   </div>`;
+};
+
+// ---------- infrastructure accounts + monthly cost (list prices checked Oct 2026; confirm at signup) ----------
+const INFRA = [
+  ['Core platform (required)', [
+    ['Supabase','Database, logins + 2-step codes, file storage (photos, receipts, drawings), nightly backups','Pro',25,25,'Includes 8 GB database, 100 GB files, daily backups. Point-in-time restore is an optional add-on.'],
+    ['Vercel','Runs the web app + phone app, automatic deploys','Pro · 1–2 seats',20,40,'$20 per seat that can deploy. Viewers are free.'],
+    ['GitHub','Holds the code, version history','Free (private repo)',0,0,'Paid only if they add a team plan later.'],
+    ['Resend','Sends proposals, approvals, sign-in codes, notifications','Pro',20,20,'50,000 emails/mo. The free tier caps at 100/day, too tight for a business.'],
+    ['Domain + DNS','e.g. app.platinumoutdoorsaz.com','Already owned',0,0,'Uses the domain they have. Just a new subdomain.'],
+    ['Error alerts (Sentry)','Tells us the moment something breaks','Free tier',0,0,'Enough for one company.'],
+  ]],
+  ['Third parties (required)', [
+    ['QuickBooks Online','Their books. The app syncs invoices, bills, receipts and pay into it','They already pay',0,0,'No new subscription. Connecting the app through Intuit\'s developer program is free at their volume.'],
+    ['Receipt + document reading (Claude AI)','Reads vendor, amount and date from receipt photos','Pay per use 💲',2,10,'About a penny or less per receipt. Turned on only with an approved budget.'],
+    ['E-signature','Client accepts proposals + change orders','Built in',0,0,'Typed-name e-sign with time, IP and device recorded. DocuSign (~$25+/mo per sender) only if they want it.'],
+    ['Maps','Job addresses, clock-in location','Free tier',0,0,'Well within the free monthly allowance.'],
+    ['AutoCAD file reading','Pulls quantities from drawings','Free with DXF export',0,0,'Free if the designer exports DXF. Reading raw DWG directly may need a paid converter. Confirm in discovery.'],
+  ]],
+  ['Optional', [
+    ['Stripe (online payments)','Card + bank (ACH) payments from the client portal','No monthly fee',0,0,'Cards about 2.9% + 30¢. Bank transfer about 0.8% (capped at $5). Fees can be passed to the client. QuickBooks Payments is the alternative.'],
+    ['Text messages (Twilio)','Schedule reminders, "crew on the way"','Pay per use',5,20,'About a penny per text plus carrier registration. Email-only is fine for v1.'],
+    ['Point-in-time restore','Roll the database back to any minute','Supabase add-on',0,100,'Only if Joel wants more than daily backups.'],
+  ]],
+];
+PAGES.infra = () => {
+  const sum = (groups,i) => groups.reduce((a,[,rows])=>a+rows.reduce((b,r)=>b+r[i],0),0);
+  const req = INFRA.slice(0,2), lo=sum(req,3), hi=sum(req,4);
+  return `<div class="row between noprint"><button class="btn" onclick="go('overview')">← Back to Project overview</button><button class="btn primary" onclick="window.print()">Print / Save as PDF</button></div>
+  <h1 class="mt">Infrastructure + monthly costs</h1>
+  <p class="sub">Every account the real build needs. <strong>All of them are opened in Platinum Outdoors' name and paid on your card.</strong> We're added as a collaborator. List prices checked October 2026, confirmed again at signup.</p>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Required, per month</div><div class="v">${fmt(lo)}–${fmt(hi)}</div><div class="d muted">core platform + third parties</div></div>
+    <div class="card stat"><div class="k">Required, per year</div><div class="v">${fmt(lo*12)}–${fmt(hi*12)}</div></div>
+    <div class="card stat"><div class="k">JobTread today</div><div class="v">~$4.5k / yr</div><div class="d muted">list price at ~10 users</div></div>
+    <div class="card stat"><div class="k">GoHighLevel today</div><div class="v">$97–$497 / mo</div><div class="d muted">depends on plan · Joel to confirm</div></div>
+  </div>
+  ${INFRA.map(([g,rows])=>`<div class="card mt"><h2>${g}</h2><div class="tablewrap"><table>
+    <thead><tr><th>Account</th><th>What it does</th><th>Plan</th><th class="r">Est. / month</th><th>Notes</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td><strong>${r[0]}</strong></td><td class="small">${r[1]}</td><td class="small">${r[2]}</td><td class="r" style="white-space:nowrap">${r[3]===r[4]?fmt(r[3]):`${fmt(r[3])}–${fmt(r[4])}`}</td><td class="small muted">${r[5]}</td></tr>`).join('')}</tbody>
+  </table></div></div>`).join('')}
+  <div class="card mt"><h2>Which platform to build on</h2><div class="tablewrap"><table>
+    <thead><tr><th></th><th>Option A · Supabase + Vercel <span class="pill p-green">Recommended</span></th><th>Option B · Cloudflare (Pages, Workers, D1, R2)</th></tr></thead><tbody>
+    <tr><td><strong>Monthly cost</strong></td><td>About $45–65 (plus email + AI)</td><td>About $5–10 (plus email + AI)</td></tr>
+    <tr><td><strong>Database</strong></td><td>Full Postgres: strong for finance reporting, job costing and QuickBooks reconciliation</td><td>SQLite (D1): lighter. Reporting and permissions take more custom code</td></tr>
+    <tr><td><strong>Security</strong></td><td>Row-level permissions in the database, 2-step codes built in</td><td>Permissions enforced in app code only. 2-step built by hand</td></tr>
+    <tr><td><strong>Files</strong></td><td>100 GB included</td><td>R2: very cheap, no download fees</td></tr>
+    <tr><td><strong>Best for</strong></td><td>A money-heavy business app with roles, reports and QuickBooks</td><td>Simple, high-traffic sites on a tight budget</td></tr>
+  </tbody></table></div>
+  <p class="small muted" style="margin:12px 0 0">We recommend Option A. The extra ~$40/month buys a real finance-grade database and built-in security, which matters for Joel's portal and QuickBooks. Either way, Platinum owns every account.</p></div>
+  <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)"><h2>The comparison that matters</h2>
+    <p style="margin:0">Running your own platform costs about <strong>${fmt(lo*12)}–${fmt(hi*12)} a year</strong> in accounts, compared with roughly <strong>$5.6k–$10.5k a year</strong> for JobTread + GoHighLevel at list price. And you own it: no per-seat fees as you hire, and no price increases you didn't choose.</p>
+    <p class="small muted" style="margin:8px 0 0">Support and maintenance are separate from these account costs.</p></div>`;
 };
 
 // ---------- client pages ----------
