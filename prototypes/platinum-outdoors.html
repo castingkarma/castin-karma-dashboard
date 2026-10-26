@@ -148,6 +148,46 @@ input.txt{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius
 .tour .treset:hover{background:rgba(255,255,255,.12)}
 @keyframes flashring{0%{box-shadow:0 0 0 0 rgba(15,138,106,.6)}70%{box-shadow:0 0 0 10px rgba(15,138,106,0)}100%{box-shadow:0 0 0 0 rgba(15,138,106,0)}}
 .flash{animation:flashring 1.1s ease-out 2;outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+/* roles */
+.rolewrap{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--plat);text-transform:uppercase;letter-spacing:.5px}
+.rolesel{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:7px 12px;font-size:13.5px;text-transform:none;letter-spacing:0;max-width:240px}
+.rolesel option{color:#18202b}
+.hdr-btn.gold{border-color:#d6b25e;color:#f3dc9b}
+.hdr-btn.gold:hover,.hdr-btn.gold.on{background:#d6b25e;color:#1f2a37}
+.rolecard{padding:0 8px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+/* quotes */
+.qsteps{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 2px}
+.qsteps span{font-size:11.5px;padding:3px 8px;border-radius:999px;background:#eef0f3;color:#4a5565}
+.qsteps span.done{background:var(--accent-soft);color:#075e48}
+.qsteps span.now{background:var(--brand);color:#fff}
+.qrow{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer;background:#fff}
+.qrow:hover{border-color:#9fb0c2}.qrow.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.file{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-top:6px;font-size:13.5px}
+.file .ext{font-size:11px;font-weight:700;background:#1f2a37;color:#fff;border-radius:5px;padding:3px 6px}
+.check{display:flex;gap:10px;align-items:center;padding:7px 0;font-size:14px}
+.check b{color:var(--accent)}
+.qgrid{grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px}
+@media (max-width:900px){.qgrid{grid-template-columns:1fr}}
+@media (max-width:1180px){header.top{flex-wrap:wrap;row-gap:8px}}
+/* crew calendar */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:720px;background:#fff}
+.cal .dh{font-size:12px;padding:6px;background:#f6f7f9;font-weight:700;text-align:center}
+.cal .dc{min-height:96px;border-top:1px solid var(--line);border-left:1px solid var(--line);padding:4px}
+.cal .dc:nth-child(7n+1){border-left:0}
+.cal .dc .dn{font-size:11.5px;color:var(--muted)}
+.cal .dc.wkend{background:#fafafa}.cal .dc.blank{background:#f3f4f6}
+.calchip{font-size:11px;color:#fff;border-radius:5px;padding:2px 12px 2px 6px;margin-top:3px;cursor:grab;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:none;user-select:none;min-height:19px;line-height:15px}
+.calchip.cont{opacity:.85}.calchip.conf{box-shadow:0 0 0 2px var(--bad)}
+.calhandle{position:absolute;right:0;top:0;bottom:0;width:10px;cursor:ew-resize;background:rgba(255,255,255,.4)}
+body.dragging{cursor:grabbing;user-select:none}
+/* field phone */
+.phone{max-width:380px;margin:0 auto;border:10px solid #1f2a37;border-radius:34px;padding:20px 16px;background:#fff}
+.bigbtn{width:100%;padding:15px;border-radius:12px;font-size:17px;font-weight:700;border:0;cursor:pointer;margin-top:10px}
+.bigbtn.go{background:var(--accent);color:#fff}.bigbtn.alt{background:#eef0f3;color:var(--ink)}
+.gate{max-width:420px;margin:24px auto}
+.lanes td{vertical-align:top;font-size:13px;min-width:130px}
+.lanes td a{display:block;margin-top:4px}
+.perm td,.perm th{text-align:center}.perm td:first-child,.perm th:first-child{text-align:left}
 /* leads */
 .funnel{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 .funnel .st{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;position:relative}
@@ -178,7 +218,8 @@ td input[type=checkbox]{width:17px;height:17px}
   nav.side{border-right:0;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;gap:6px;overflow-x:auto}
   .tour{padding:10px 16px;top:0 !important}
   header.top{position:static}
-  nav.side .jobpick{display:none}
+  nav.side .jobpick,nav.side .rolecard{display:none}
+  .rolewrap span{display:none}
   nav.side a{flex:none;padding:7px 12px;font-size:14px;background:var(--bg)}
   nav.side a .n{display:none}
   main{padding:18px 16px 60px}
@@ -196,10 +237,8 @@ td input[type=checkbox]{width:17px;height:17px}
   <button class="hdr-btn" id="coBtn" onclick="go('company')">Company Overview</button>
   <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
   <button class="hdr-btn" id="tradBtn" onclick="go('trad')">Traditional Development</button>
-  <div class="toggle" role="tablist" aria-label="View as">
-    <button id="vTeam" class="on" onclick="setView('team')">Team view</button>
-    <button id="vClient" onclick="setView('client')">Client view</button>
-  </div>
+  <button class="hdr-btn gold" id="adBtn" onclick="setRole('admin')">Master Admin</button>
+  <label class="rolewrap"><span>View as</span><select id="roleSel" class="rolesel" onchange="setRole(this.value)"></select></label>
 </header>
 <div class="tour" id="tour"></div>
 <div class="layout">
@@ -215,7 +254,7 @@ td input[type=checkbox]{width:17px;height:17px}
 const fmt = n => (n<0?'-':'') + '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
 const pct = n => (Math.round(n*10)/10).toFixed(1) + '%';
 
-const CODES = {DEMO:'Demo & Grading', PAV:'Pavers & Hardscape', TURF:'Turf & Planting', KIT:'Outdoor Kitchen', FIRE:'Fire Feature', LITE:'Lighting & Electrical'};
+const CODES = {DEMO:'Demo & Grading', PAV:'Pavers & Hardscape', TURF:'Turf & Planting', KIT:'Outdoor Kitchen', FIRE:'Fire Feature', LITE:'Lighting & Electrical', PERG:'Pergolas & Shade'};
 
 const jobs = [
   {id:1, name:'Henderson Backyard', client:'Mark & Dana Henderson', email:'dana.h@example.com', city:'Scottsdale', status:'In progress', thumb:'linear-gradient(135deg,#d9c3a1,#a9865c)'},
@@ -363,7 +402,7 @@ const coPriceOf = c => c.lines.reduce((b,l)=>b+linePrice(l),0);
 const selDiff = s => s.chosen==null ? 0 : s.opts[s.chosen].p - s.allowance;
 
 // ---------- app state + nav ----------
-let view = 'team', page = 'jobs';
+let view = 'team', page = 'jobs', role = 'owner';
 const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['costing','Job costing'],['schedule','Schedule & POs']];
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
@@ -374,20 +413,19 @@ function badge(key){
   return '';
 }
 function renderNav(){
-  const items = view==='team'?TEAM_NAV:CLIENT_NAV;
-  const pick = view==='team' ? `<div class="jobpick"><label>Current job</label><select onchange="pickJob(this.value)">${jobs.map(j=>`<option value="${j.id}" ${j.id===curJob?'selected':''}>${j.name}</option>`).join('')}</select></div>`
-    : `<div class="jobpick"><label>Signed in as</label><div style="margin-top:6px;font-weight:600">Dana Henderson</div><div class="small muted">Henderson Backyard</div></div>`;
+  const items = ROLES[role].nav;
+  const pick = ['owner','production'].includes(role) ? `<div class="jobpick"><label>Current job</label><select onchange="pickJob(this.value)">${jobs.map(j=>`<option value="${j.id}" ${j.id===curJob?'selected':''}>${j.name}</option>`).join('')}</select></div>`
+    : `<div class="rolecard"><label>Signed in as</label><div style="margin-top:6px;font-weight:600">${ROLES[role].who}</div><div class="small muted">${ROLES[role].sub}</div></div>`;
   document.getElementById('nav').innerHTML = pick + items.map(([k,l])=>`<a class="${page===k?'on':''}" onclick="go('${k}')">${l}${badge(k)}</a>`).join('');
 }
 function go(p){page=p;render();window.scrollTo({top:0})}
-function setView(v){
-  view=v; page = v==='team'?'jobs':'portal';
-  document.getElementById('vTeam').classList.toggle('on',v==='team');
-  document.getElementById('vClient').classList.toggle('on',v==='client');
-  render();
+function setView(v){ setRole(v==='client'?'client':'owner'); }
+function setRole(r){
+  role=r; view = r==='client'?'client':'team'; page = ROLES[r].home;
+  document.getElementById('roleSel').value=r; render(); window.scrollTo({top:0});
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('coBtn').classList.toggle('on',page==='company');document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -557,7 +595,7 @@ PAGES.overview = () => `
     <p class="small" style="margin:0">Hosting, database, domain and code all sit in Platinum Outdoors' name. We're added as a collaborator. No vendor can raise your price, remove a feature or hold your data.</p></div>`;
 
 // ---------- traditional development comparison (industry ballpark rates, not vendor quotes) ----------
-const ROLES = [
+const TEAM_ROLES = [
   {r:'Product manager / business analyst', what:'Discovery, requirements, specs, backlog', h:220, us:150, off:45},
   {r:'UX / UI designer', what:'Screens, client portal, proposal design, mobile', h:260, us:140, off:40},
   {r:'Solutions architect', what:'Data model, security, integrations, hosting plan', h:120, us:185, off:60},
@@ -571,7 +609,7 @@ const MODS = [
   ['Selections',220],['Job costing (budget vs. actual)',300],['Scheduling + purchase orders',260],['Leads engine (public records + mailers)',340],
 ];
 PAGES.trad = () => {
-  const H = ROLES.reduce((a,x)=>a+x.h,0), US = ROLES.reduce((a,x)=>a+x.h*x.us,0), OFF = ROLES.reduce((a,x)=>a+x.h*x.off,0);
+  const H = TEAM_ROLES.reduce((a,x)=>a+x.h,0), US = TEAM_ROLES.reduce((a,x)=>a+x.h*x.us,0), OFF = TEAM_ROLES.reduce((a,x)=>a+x.h*x.off,0);
   const k = v => '$'+Math.round(v/1000)+'k';
   return `<h1>What this app costs to build the traditional way</h1>
   <p class="sub">The same app (5 job modules, client portal and leads engine) built by a hired software team. Hours and rates are industry ballparks for 2026, not vendor quotes.</p>
@@ -583,7 +621,7 @@ PAGES.trad = () => {
   </div>
   <div class="card mt"><h2>By role</h2><div class="tablewrap"><table>
     <thead><tr><th>Role</th><th class="r">Hours</th><th class="r">US rate</th><th class="r">US cost</th><th class="r">Offshore rate</th><th class="r">Offshore cost</th></tr></thead>
-    <tbody>${ROLES.map(x=>`<tr><td><strong>${x.r}</strong><div class="small muted">${x.what}</div></td><td class="r">${x.h}</td><td class="r">$${x.us}/h</td><td class="r">${fmt(x.h*x.us)}</td><td class="r">$${x.off}/h</td><td class="r">${fmt(x.h*x.off)}</td></tr>`).join('')}
+    <tbody>${TEAM_ROLES.map(x=>`<tr><td><strong>${x.r}</strong><div class="small muted">${x.what}</div></td><td class="r">${x.h}</td><td class="r">$${x.us}/h</td><td class="r">${fmt(x.h*x.us)}</td><td class="r">$${x.off}/h</td><td class="r">${fmt(x.h*x.off)}</td></tr>`).join('')}
     <tr class="tot"><td>Total</td><td class="r">${H.toLocaleString()}</td><td></td><td class="r">${fmt(US)}</td><td></td><td class="r">${fmt(OFF)}</td></tr></tbody>
   </table></div></div>
   <div class="grid g2 mt">
@@ -912,6 +950,346 @@ PAGES.schedule = () => {
 };
 function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]; render(); toast(p.status==='billed'?`${p.n} billed. ${fmt(p.amt)} now counts as actual cost on the job.`:`${p.n} marked ${p.status}.`); }
 
+// ---------- user roles: each role sees only the screens it touches ----------
+const FLOW = ['flow','Who does what'];
+const ROLES = {
+  owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['qbo','QuickBooks'],FLOW]},
+  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['qbo','QuickBooks'],['users','Users & permissions'],FLOW]},
+  designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
+  production:{l:'Production manager (Justin)', who:'Justin', sub:'Production manager', home:'calendar', nav:[['jobs','Jobs'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['time','Time & pay'],['costing','Job costing'],FLOW]},
+  field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
+  client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
+};
+function populateRoles(){ document.getElementById('roleSel').innerHTML = Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${r.l}</option>`).join(''); document.getElementById('roleSel').value=role; }
+const roleLink = (r,p,label) => `<a href="#" onclick="setRole('${r}');go('${p}');return false">${label} →</a>`;
+
+// ---------- QuickBooks sync log (demo: no real QuickBooks connection) ----------
+const QBO_LOG = [
+  {t:'Oct 25 · 4:12 PM', type:'Invoice', ref:'INV-1184 · Henderson payment 3', job:'Henderson Backyard', amt:18489, st:'Synced'},
+  {t:'Oct 24 · 5:40 PM', type:'Bill (1099 sub)', ref:'Week of 10/12 · 5 installers', job:'Multiple', amt:6380, st:'Synced'},
+  {t:'Oct 24 · 11:03 AM', type:'Expense (receipt)', ref:'Home Depot #2231', job:'Nguyen Front Yard', amt:142.18, st:'Needs review', note:'No cost code picked in the field'},
+  {t:'Oct 23 · 9:15 AM', type:'Bill (vendor)', ref:'PO-1043 · SYNLawn Arizona', job:'Henderson Backyard', amt:4380, st:'Synced'},
+  {t:'Oct 22 · 2:30 PM', type:'Payment received', ref:'Alvarez deposit', job:'Alvarez Pool Deck', amt:14580, st:'Synced'},
+];
+const money2 = n => '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+PAGES.qbo = () => `<div class="row between"><div><h1>QuickBooks sync</h1><p class="sub">Invoices, payments, vendor bills, field receipts and crew pay flow into QuickBooks on their own, tagged to the right job.</p></div>
+    <span class="pill p-amber">Demo · not connected to a real QuickBooks</span></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Synced this week</div><div class="v">${QBO_LOG.filter(x=>x.st==='Synced').length}</div></div>
+    <div class="card stat"><div class="k">Needs review</div><div class="v ${QBO_LOG.some(x=>x.st!=='Synced')?'neg':''}">${QBO_LOG.filter(x=>x.st!=='Synced').length}</div></div>
+    <div class="card stat"><div class="k">Last sync</div><div class="v" style="font-size:20px">${QBO_LOG[0].t.split(' · ')[1]}</div><div class="d muted">${QBO_LOG[0].t.split(' · ')[0]}</div></div>
+    <div class="card stat"><div class="k">Double entry</div><div class="v pos">None</div><div class="d muted">entered once, in the field or office</div></div>
+  </div>
+  <div class="card mt"><h2>Sync log</h2><div class="tablewrap"><table>
+    <thead><tr><th>When</th><th>Type</th><th>Reference</th><th>Job</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead>
+    <tbody>${QBO_LOG.map((x,i)=>`<tr><td style="white-space:nowrap">${x.t}</td><td>${x.type}</td><td>${x.ref}${x.note?`<div class="small neg">${x.note}</div>`:''}</td><td>${x.job}</td><td class="r">${money2(x.amt)}</td>
+      <td><span class="pill ${x.st==='Synced'?'p-green':'p-amber'}">${x.st}</span></td><td class="r">${x.st!=='Synced'?`<button class="btn sm" onclick="fixQbo(${i})">Set cost code + sync</button>`:''}</td></tr>`).join('')}</tbody>
+  </table></div></div>
+  <div class="card mt"><h2>What maps to what</h2><div class="tablewrap"><table><tbody>
+    <tr><td>Customers + jobs</td><td>→ QuickBooks customers + projects</td></tr>
+    <tr><td>Signed proposals, progress payments</td><td>→ invoices + payments received</td></tr>
+    <tr><td>Purchase orders, vendor bills</td><td>→ bills, tagged to the job</td></tr>
+    <tr><td>Field receipts (photo from the crew app)</td><td>→ expenses with the receipt image attached</td></tr>
+    <tr><td>Approved time cards</td><td>→ 1099 subcontractor bills or payroll, split by job</td></tr>
+    <tr><td>Cost groups (pavers, turf, lighting…)</td><td>→ your QuickBooks items / classes</td></tr>
+  </tbody></table></div>
+  <p class="small muted" style="margin:12px 0 0">The exact mapping is set with Joel in discovery to match how your books are set up today.</p></div>`;
+function fixQbo(i){ QBO_LOG[i].st='Synced'; QBO_LOG[i].note=''; render(); toast('Cost code set to Turf & Planting. Synced to QuickBooks.'); }
+
+// ---------- quotes + design workflow ----------
+const QSTAGES = ['Request','Design','Pricing','Review','Sent','Signed','In production'];
+const QUOTES = [
+  {id:'Q-2041', client:'Avery Lopez', city:'Gilbert', scope:'Pergola, pavers, turf + fire pit', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null},
+  {id:'Q-2038', client:'Drew Carter', city:'Mesa', scope:'Pool deck pavers + shade structure', stage:'Design', designer:'Mia R.', specs:['Pool deck ~900 sf','Shade 12×20 ft','Budget around $50k'], files:[], takeoff:[], lines:[], val:49800},
+  {id:'Q-2035', client:'Riley Brooks', city:'Chandler', scope:'Front yard xeriscape + lighting', stage:'Sent', designer:'Mia R.', specs:[], files:[{n:'Brooks_frontyard_v2.pdf',t:'PDF'}], takeoff:[], lines:[], val:18400},
+  {id:'Q-2033', client:'Jamie Ortiz', city:'Queen Creek', scope:'Turf, putting green + BBQ island', stage:'Signed', designer:'Mia R.', specs:[], files:[{n:'Ortiz_backyard_v3.dwg',t:'DWG'}], takeoff:[], lines:[], val:36900},
+];
+let selQ = 'Q-2041';
+const qVal = q => q.lines.length ? q.lines.reduce((a,l)=>a+linePrice(l),0) : (q.val||0);
+const QACT = {
+  Request:['Send specs to designer','specsOut'], Design:['Attach AutoCAD design','attachDwg'], Pricing:['Price it from the cost book','priceIt'],
+  Review:['Owner approves + sends to client','approveQ'], Sent:['Client signs (demo)','signQ'], Signed:['Save + push to production','pushProd'],
+};
+PAGES.quotes = () => {
+  const q = QUOTES.find(x=>x.id===selQ) || QUOTES[0];
+  const si = QSTAGES.indexOf(q.stage);
+  const act = QACT[q.stage];
+  return `<div class="row between"><div><h1>${role==='designer'?'Design queue':'Quotes & design'}</h1><p class="sub">From the first site visit to a signed quote. Saving a signed quote pushes it straight into production: no retyping.</p></div>
+    <button class="btn primary" onclick="newQuote()">+ New quote request</button></div>
+  <div class="grid qgrid">
+    <div class="card"><h2>${role==='designer'?'Assigned to design':'All quotes'}</h2>
+      ${QUOTES.map(x=>`<div class="qrow ${x.id===q.id?'on':''}" onclick="selQ='${x.id}';render();if(innerWidth<900)document.getElementById('qdetail').scrollIntoView({behavior:'smooth'})"><div class="row between"><strong>${x.client}</strong><span class="pill ${x.stage==='In production'?'p-green':x.stage==='Design'?'p-amber':'p-blue'}">${x.stage}</span></div>
+        <div class="small muted">${x.id} · ${x.city} · ${x.scope}</div><div class="small" style="margin-top:3px">${qVal(x)?fmt(qVal(x)):'Not priced yet'}</div></div>`).join('')}
+    </div>
+    <div class="card" id="qdetail"><div class="row between"><div><div class="small muted">${q.id} · ${q.city}, AZ</div><h2 style="margin:2px 0 0">${q.client}: ${q.scope}</h2></div><strong>${qVal(q)?fmt(qVal(q)):''}</strong></div>
+      <div class="qsteps">${QSTAGES.map((s,i)=>`<span class="${i<si?'done':i===si?'now':''}">${i<si?'✓ ':''}${s}</span>`).join('')}</div>
+      ${act?`<div class="row mt"><button class="btn primary" id="qAct" onclick="${act[1]}('${q.id}',this)">${act[0]}</button><span class="small muted">${q.stage==='Request'?'Site-visit notes + photos go to the designer':q.stage==='Design'?'Quantities are read from the drawing layers':q.stage==='Pricing'?'Quantities × your cost book + markups':q.stage==='Review'?'Austin reviews margin before it goes out':q.stage==='Sent'?'Client e-signs from their phone':'Creates the job, budget, schedule and POs'}</span></div>`:''}
+      ${q.designer?`<div class="small mt">Designer: <strong>${q.designer}</strong></div>`:''}
+      ${q.specs.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design specs</h3><ul class="small" style="margin:0;padding-left:18px;line-height:1.7">${q.specs.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
+      ${q.files.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design files</h3>${q.files.map(f=>`<div class="file"><span class="ext">${f.t}</span>${f.n}<span class="small muted" style="margin-left:auto">${f.t==='DWG'?'AutoCAD drawing':'Plan set'}</span></div>`).join('')}`:''}
+      ${q.takeoff.length?`<h3 style="font-size:14px;margin:16px 0 4px">Takeoff pulled from the drawing</h3><div class="tablewrap"><table><thead><tr><th>From layer</th><th class="r">Qty</th><th>Unit</th></tr></thead><tbody>${q.takeoff.map(t=>`<tr><td>${t.item}</td><td class="r">${t.q.toLocaleString()}</td><td>${t.u}</td></tr>`).join('')}</tbody></table></div>`:''}
+      ${q.lines.length?`<h3 style="font-size:14px;margin:16px 0 4px">Priced quote</h3><div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Cost</th><th class="r">Price</th></tr></thead><tbody>${q.lines.map(l=>`<tr><td>${l.d}<div class="small muted">${CODES[l.code]}</div></td><td class="r">${l.q.toLocaleString()} ${l.u}</td><td class="r">${fmt(lineCost(l))}</td><td class="r">${fmt(linePrice(l))}</td></tr>`).join('')}
+        <tr class="tot"><td colspan="2">Total · margin ${pct((qVal(q)-q.lines.reduce((a,l)=>a+lineCost(l),0))/qVal(q)*100)}</td><td class="r">${fmt(q.lines.reduce((a,l)=>a+lineCost(l),0))}</td><td class="r">${fmt(qVal(q))}</td></tr></tbody></table></div>`:''}
+      ${q.jobId?`<h3 style="font-size:14px;margin:16px 0 4px">Pushed to production</h3>${q.made.map(m=>`<div class="check"><b>✓</b>${m}</div>`).join('')}
+        <div class="row mt"><button class="btn sm" onclick="setRole('owner');go('jobs')">See it on the Jobs board</button><button class="btn sm" onclick="setRole('production');go('calendar')">See it on the crew calendar</button></div>`:''}
+      <p class="small muted" style="margin:16px 0 0">AutoCAD: the app reads quantities from the DWG/DXF the designer saves (areas and counts by layer). Which layers and blocks to read is set with your designer in discovery.</p>
+    </div>
+  </div>`;
+};
+async function busy(b,label){ if(b){ b.disabled=true; b.textContent=label; } await wait(600); }
+async function specsOut(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…');
+  q.specs=['Backyard ~42×60 ft, north-facing, gentle slope to the east','Attached pergola 14×16 ft off the patio door','Pavers about 520 sf, seat wall along the back','Turf about 700 sf including a dog run','Gas fire pit; budget around $45k','Site photos + measurements attached'];
+  q.designer='Mia R.'; q.stage='Design'; render(); toast('Specs and site photos sent to Mia. It\'s in her design queue.'); }
+async function attachDwg(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Reading drawing…'); const last=q.client.split(' ').pop();
+  q.files=[{n:`${last}_backyard_v1.dwg`,t:'DWG'},{n:`${last}_backyard_v1.pdf`,t:'PDF'}];
+  q.takeoff=[{item:'PAVERS (area)',q:524,u:'sf'},{item:'WALLS (length)',q:18,u:'lf'},{item:'TURF (area)',q:710,u:'sf'},{item:'DEMO (area)',q:1240,u:'sf'},{item:'PERGOLA (block)',q:1,u:'ea'},{item:'FIREPIT (block)',q:1,u:'ea'},{item:'LIGHT (blocks)',q:12,u:'ea'}];
+  q.stage='Pricing'; render(); toast('Design attached. 7 quantities pulled from the drawing layers.'); }
+async function priceIt(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Pricing…');
+  q.lines=[TL('Site prep','DEMO','Demo + base prep',1240,'sf',1.6,35),TL('Patio','PAV','Concrete pavers, Belgard Catalina',524,'sf',9.75,38),TL('Patio','PAV','Seat wall, stacked stone',18,'lf',140,35),
+    TL('Turf','TURF','Artificial turf + dog run',710,'sf',5.2,40),TL('Shade','PERG','Attached pergola 14×16',1,'ea',7800,30),TL('Fire feature','FIRE','Gas fire pit, 42" round',1,'ea',3600,35),TL('Lighting','LITE','Low-voltage lighting',12,'ea',165,45)];
+  q.stage='Review'; render(); toast(`Priced at ${fmt(qVal(q))} from your cost book.`); }
+async function approveQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…'); q.stage='Sent'; render(); toast(`Approved by Austin and emailed to ${q.client.split(' ')[0]}.`); }
+async function signQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Signing…'); q.stage='Signed'; render(); toast(`${q.client} signed. Ready to push to production.`); }
+async function pushProd(id,b){
+  const q=QUOTES.find(x=>x.id===id); await busy(b,'Pushing…');
+  if(!q.lines.length){ q.lines=[TL('Turf','TURF','Turf + putting green',820,'sf',5.4,40),TL('Outdoor kitchen','KIT','BBQ island 10 ft',1,'ea',6900,32),TL('Site prep','DEMO','Demo + base prep',900,'sf',1.6,35)]; }
+  const nid=Math.max(...jobs.map(j=>j.id))+1, last=q.client.split(' ').pop();
+  jobs.push({id:nid, name:`${last} Backyard`, client:q.client, city:q.city, status:'Sold', thumb:'linear-gradient(135deg,#d9cba8,#8c7a52)'});
+  const ph=[['Demo + base','Crew A',16,2],['Hardscape','Crew B',18,4],['Install','Crew C',23,3],['Walkthrough','Crew A',26,1]];
+  DATA[nid]={est:{status:'signed',signedBy:q.client,signedAt:'Oct 26, 2026',lines:q.lines.map(l=>({...l}))}, cos:[], selections:[], otherActual:{},
+    schedule:ph.map(([n,crew,s,d],i)=>({n,crew,s:s-16,d,c:['#64748b','#0f8a6a','#4d7c0f','#2856b6'][i],st:'next'})),
+    pos:[...new Set(q.lines.map(l=>l.code))].filter(c=>c!=='DEMO').map((c,i)=>({n:'PO-11'+(60+i),v:'Vendor (set in discovery)',d:CODES[c]+' materials',code:c,amt:Math.round(q.lines.filter(l=>l.code===c).reduce((a,l)=>a+lineCost(l),0)*0.6),date:'Nov 16',status:'draft'}))};
+  ph.forEach(([n,crew,s,d],i)=>CAL.push({id:CAL.length+1, jid:nid, job:`${last} Backyard`, label:n, crew, start:s, len:d, c:['#64748b','#0f8a6a','#4d7c0f','#2856b6'][i]}));
+  const dep = qVal(q)*0.3;
+  QBO_LOG.unshift({t:'Oct 26 · 9:02 AM', type:'Invoice', ref:`INV-1188 · ${last} deposit 30%`, job:`${last} Backyard`, amt:Math.round(dep), st:'Synced'});
+  q.jobId=nid; q.stage='In production';
+  q.made=[`Job "${last} Backyard" created on the Jobs board (Sold)`, `Budget set from ${q.lines.length} priced lines (${fmt(q.lines.reduce((a,l)=>a+lineCost(l),0))} cost)`, `${ph.length} phases drafted on the crew calendar (Nov 16–26)`, `${DATA[nid].pos.length} purchase orders drafted for materials`, `Deposit invoice ${fmt(dep)} sent + synced to QuickBooks`, 'Client portal opened for selections'];
+  render(); flash('#qdetail'); toast('Pushed to production. Nothing was retyped.');
+}
+function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[n%SAMPLE_CUSTOMERS.length];
+  const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null});
+  selQ=id; render(); toast(`Quote request ${id} created for ${c.name}.`); }
+
+// ---------- crew calendar: drag to move, drag the right edge to stretch ----------
+const CAL = [
+  {id:1, jid:1, job:'Henderson Backyard', label:'Kitchen island', crew:'Masonry sub', start:2, len:5, c:'#b26a00'},
+  {id:2, jid:1, job:'Henderson Backyard', label:'Turf + planting', crew:'Crew C', start:9, len:3, c:'#4d7c0f'},
+  {id:3, jid:1, job:'Henderson Backyard', label:'Lighting + walkthrough', crew:'Crew A', start:12, len:2, c:'#2856b6'},
+  {id:4, jid:2, job:'Alvarez Pool Deck', label:'Deck demo + pavers', crew:'Crew B', start:9, len:8, c:'#0f8a6a'},
+  {id:5, jid:3, job:'Nguyen Front Yard', label:'Front yard refresh', crew:'Crew C', start:11, len:4, c:'#7c3aed'},
+];
+const NOV_START = new Date(2026,10,1).getDay(), NOV_DAYS = 30;
+function calConflicts(){ const out=[]; CAL.forEach((a,i)=>CAL.slice(i+1).forEach(b=>{ if(a.crew===b.crew && a.start<=b.start+b.len-1 && b.start<=a.start+a.len-1) out.push([a,b]); })); return out; }
+PAGES.calendar = () => {
+  const conf = calConflicts(), confIds = new Set(conf.flat().map(e=>e.id));
+  const cells = []; for(let i=0;i<NOV_START;i++) cells.push(`<div class="dc blank"></div>`);
+  for(let d=1; d<=NOV_DAYS; d++){
+    const wd=(NOV_START+d-1)%7;
+    const evs = CAL.filter(e=>d>=e.start && d<=e.start+e.len-1);
+    cells.push(`<div class="dc ${wd===0||wd===6?'wkend':''}" data-day="${d}"><div class="dn">${d}</div>${evs.map(e=>{const first=d===e.start||wd===0, last=d===e.start+e.len-1;
+      return `<div class="calchip ${first?'':'cont'} ${confIds.has(e.id)?'conf':''}" data-ev="${e.id}" style="background:${e.c}" title="${e.job}: ${e.label} · ${e.crew}">${first?`${e.label} · ${e.crew}`:'&nbsp;'}${last?'<span class="calhandle" title="Drag to stretch"></span>':''}</div>`}).join('')}</div>`);
+  }
+  while(cells.length%7) cells.push(`<div class="dc blank"></div>`);
+  return `<div class="row between"><div><h1>Crew calendar · November 2026</h1><p class="sub">Drag a job to move it. Drag its right edge to make it longer or shorter. Crews and clients are notified automatically.</p></div></div>
+  ${conf.length?`<div class="card" style="border-color:#f3b4ad;background:var(--bad-soft)"><strong class="neg">⚠ ${conf.length} crew conflict${conf.length>1?'s':''}</strong>${conf.map(([a,b])=>`<div class="small" style="margin-top:4px">${a.crew} is on <strong>${a.job}</strong> (${a.label}) and <strong>${b.job}</strong> (${b.label}) at the same time. Drag one to fix it.</div>`).join('')}</div>`
+    :`<div class="card" style="border-color:#9fd8c6;background:var(--accent-soft)"><strong>✓ No crew conflicts</strong><div class="small muted">Every crew is booked on one job at a time.</div></div>`}
+  <div class="card mt" style="padding:12px"><div class="tablewrap"><div class="cal">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dh">${x}</div>`).join('')}${cells.join('')}</div></div></div>
+  <div class="row mt" style="gap:16px">${[...new Map(CAL.map(e=>[e.job,e.c])).entries()].map(([j,c])=>`<span class="small"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};margin-right:5px"></span>${j}</span>`).join('')}</div>`;
+};
+let calDrag = null;
+document.addEventListener('pointerdown', e=>{
+  const ch = e.target.closest('.calchip'); if(!ch) return;
+  const ev = CAL.find(x=>x.id==ch.dataset.ev), day = +ch.closest('[data-day]').dataset.day;
+  calDrag = {ev, mode: e.target.classList.contains('calhandle')?'resize':'move', grab: day-ev.start, moved:false};
+  document.body.classList.add('dragging'); e.preventDefault();
+});
+document.addEventListener('pointermove', e=>{
+  if(!calDrag) return;
+  const cell = document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-day]'); if(!cell) return;
+  const d = +cell.dataset.day, ev = calDrag.ev;
+  if(calDrag.mode==='move'){ const ns=Math.min(Math.max(1,d-calDrag.grab), NOV_DAYS-ev.len+1); if(ns!==ev.start){ ev.start=ns; calDrag.moved=true; render(); } }
+  else { const nl=Math.min(Math.max(1,d-ev.start+1), NOV_DAYS-ev.start+1); if(nl!==ev.len){ ev.len=nl; calDrag.moved=true; render(); } }
+});
+document.addEventListener('pointerup', ()=>{
+  if(!calDrag) return; const {ev,moved,mode}=calDrag; calDrag=null; document.body.classList.remove('dragging');
+  if(moved) toast(`${ev.job}: ${ev.label} is now Nov ${ev.start}${ev.len>1?'–'+(ev.start+ev.len-1):''} (${ev.len} day${ev.len>1?'s':''}). ${ev.crew} and the client were notified.`);
+  else if(mode==='move') toast(`${ev.job}: ${ev.label} · ${ev.crew}. Drag to move, or drag the right edge to stretch.`);
+});
+
+// ---------- time cards + crew pay (replaces Google Forms → Sheets) ----------
+const JOBCODE = {HEN:'Henderson Backyard', ALV:'Alvarez Pool Deck', NGU:'Nguyen Front Yard', PAT:'Patel Outdoor Kitchen'};
+const WEEK = ['Mon 10/19','Tue 10/20','Wed 10/21','Thu 10/22','Fri 10/23','Sat 10/24'];
+const CREW_TIME = [
+  {n:'Marco T.', r:'Crew lead · 1099 sub', type:'Day rate', rate:260, days:['HEN','HEN','HEN','HEN','HEN',''], st:'Submitted'},
+  {n:'Luis P.', r:'Installer · 1099 sub', type:'Day rate', rate:190, days:['HEN','HEN','ALV½','HEN','HEN',''], st:'Submitted'},
+  {n:'Andre K.', r:'Installer · 1099 sub', type:'Day rate', rate:180, days:['HEN','HEN','HEN','','HEN','HEN½'], st:'Submitted'},
+  {n:'Sam D.', r:'Installer · 1099 sub', type:'Day rate', rate:180, days:['NGU','NGU','NGU½','HEN','HEN',''], st:'Submitted'},
+  {n:'Victor S.', r:'Installer · 1099 sub', type:'Per job', rate:650, days:['','','PAT','PAT','',''], st:'Submitted', note:'Patel punch list, flat'},
+  {n:'Chris B.', r:'Material handler · employee', type:'Hourly', rate:22, hours:[8,8,9,8,10,0], days:['HEN','HEN','HEN','ALV','HEN',''], st:'Submitted'},
+];
+const dayFrac = x => !x ? 0 : x.endsWith('½') ? 0.5 : 1;
+function payOf(w){
+  if(w.type==='Day rate') return w.days.reduce((a,x)=>a+dayFrac(x),0)*w.rate;
+  if(w.type==='Hourly'){ const h=w.hours.reduce((a,x)=>a+x,0); return Math.min(h,40)*w.rate + Math.max(0,h-40)*w.rate*1.5; }
+  return w.rate;
+}
+function laborByJob(){ const out={}; CREW_TIME.forEach(w=>{ const total=payOf(w), parts=w.days.map(dayFrac), sum=parts.reduce((a,x)=>a+x,0)||1;
+  w.days.forEach((x,i)=>{ if(!x) return; const j=x.replace('½',''); out[j]=(out[j]||0)+total*parts[i]/sum; }); }); return out; }
+PAGES.time = () => {
+  const total = CREW_TIME.reduce((a,w)=>a+payOf(w),0), lj = laborByJob(), pending = CREW_TIME.filter(w=>w.st==='Submitted').length;
+  return `<div class="row between"><div><h1>${role==='admin'?'Payroll':'Time & pay'} · week of Oct 19</h1><p class="sub">Crews clock in on the field app, so this fills itself. It replaces the Google Forms → Sheets setup. Pay rules match how you pay today: day rate, half day, hourly with overtime, or a flat price per job.</p></div>
+    <button class="btn primary" ${pending?'':'disabled'} onclick="approveTime(this)">Approve ${pending||''} + send to QuickBooks</button></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Crew pay this week</div><div class="v">${fmt(total)}</div></div>
+    <div class="card stat"><div class="k">Waiting for approval</div><div class="v ${pending?'':'pos'}">${pending}</div></div>
+    <div class="card stat"><div class="k">Crew days worked</div><div class="v">${CREW_TIME.filter(w=>w.type==='Day rate').reduce((a,w)=>a+w.days.reduce((b,x)=>b+dayFrac(x),0),0)}</div></div>
+    <div class="card stat"><div class="k">Labor on Henderson</div><div class="v">${fmt(lj.HEN||0)}</div><div class="d muted">posts to job costing</div></div>
+  </div>
+  <div class="card mt"><div class="tablewrap"><table>
+    <thead><tr><th>Crew member</th><th>Pay type</th>${WEEK.map(d=>`<th class="r" style="font-size:11px">${d}</th>`).join('')}<th class="r">Pay</th><th>Status</th></tr></thead>
+    <tbody>${CREW_TIME.map(w=>`<tr><td><strong>${w.n}</strong><div class="small muted">${w.r}</div></td><td>${w.type}<div class="small muted">${w.type==='Hourly'?'$'+w.rate+'/h, OT after 40':w.type==='Per job'?w.note:'$'+w.rate+' / day'}</div></td>
+      ${w.days.map((x,i)=>`<td class="r small">${x?`<span class="pill p-grey" title="${JOBCODE[x.replace('½','')]}">${x.replace('½','')}${x.endsWith('½')?' ½':''}</span>${w.type==='Hourly'?`<div class="muted">${w.hours[i]}h</div>`:''}`:'<span class="muted">·</span>'}</td>`).join('')}
+      <td class="r"><strong>${fmt(payOf(w))}</strong></td><td><span class="pill ${w.st==='Approved'?'p-green':'p-amber'}">${w.st}</span></td></tr>`).join('')}
+    <tr class="tot"><td colspan="8">Total</td><td class="r">${fmt(total)}</td><td></td></tr></tbody>
+  </table></div>
+  <p class="small muted" style="margin:12px 0 0">Job codes: ${Object.entries(JOBCODE).map(([k,v])=>`${k} = ${v}`).join(' · ')}. Labor by job this week: ${Object.entries(lj).map(([k,v])=>`${k} ${fmt(v)}`).join(' · ')}.</p></div>`;
+};
+async function approveTime(b){ b.disabled=true; b.textContent='Approving…'; await wait(700);
+  CREW_TIME.forEach(w=>w.st='Approved'); const subs=CREW_TIME.filter(w=>w.r.includes('1099')), emp=CREW_TIME.filter(w=>!w.r.includes('1099'));
+  QBO_LOG.unshift({t:'Oct 25 · 6:05 PM', type:'Bill (1099 sub)', ref:`Week of 10/19 · ${subs.length} installers`, job:'Split by job', amt:subs.reduce((a,w)=>a+payOf(w),0), st:'Synced'},
+                  {t:'Oct 25 · 6:05 PM', type:'Payroll', ref:`Week of 10/19 · ${emp.length} employee`, job:'Split by job', amt:emp.reduce((a,w)=>a+payOf(w),0), st:'Synced'});
+  render(); toast('Time approved. Pay sent to QuickBooks and labor posted to each job.'); }
+
+// ---------- field crew app (phone) ----------
+const FIELD = {clocked:null, crew:{'Luis P.':true,'Andre K.':true,'Sam D.':false}, crewSent:false, receipt:null, photos:0};
+PAGES.field = () => `<div class="phone">
+  <div class="small muted">Platinum Outdoors · crew app</div>
+  <h1 style="font-size:21px;margin-top:4px">Good morning, Marco</h1>
+  <div class="card" style="margin-top:12px;padding:14px"><div class="small muted">Today · Mon Oct 26</div><strong>Henderson Backyard</strong><div class="small muted">Scottsdale · seat wall + paver cuts</div>
+    <div class="small" style="margin-top:8px">☐ Finish seat wall cap<br>☐ Paver cuts along the house<br>☐ Photos before you leave</div></div>
+  ${FIELD.clocked?`<div class="card" style="margin-top:10px;padding:12px;background:var(--accent-soft);border-color:#9fd8c6"><strong>✓ Clocked in ${FIELD.clocked}</strong><div class="small muted">Location saved at the job site</div></div>`
+    :`<button class="bigbtn go" onclick="FIELD.clocked='7:02 AM';render();toast('Clocked in at 7:02 AM on Henderson Backyard.')">Clock in</button>`}
+  ${FIELD.clocked?`<h2 style="font-size:15px;margin:16px 0 4px">Crew on site today</h2>${Object.entries(FIELD.crew).map(([n,on])=>`<label class="check" style="cursor:pointer"><input type="checkbox" ${on?'checked':''} ${FIELD.crewSent?'disabled':''} onchange="FIELD.crew['${n}']=this.checked;render()"> ${n} <span class="small muted" style="margin-left:auto">${on?'full day':'not here'}</span></label>`).join('')}
+    <button class="bigbtn alt" ${FIELD.crewSent?'disabled':''} onclick="sendCrewDay()">${FIELD.crewSent?'✓ Crew day sent':'Send crew day to Time & pay'}</button>`:''}
+  <h2 style="font-size:15px;margin:18px 0 4px">Receipts + photos</h2>
+  ${FIELD.receipt?`<div class="card" style="padding:12px"><div class="row between"><strong>${FIELD.receipt.v}</strong><strong>${money2(FIELD.receipt.amt)}</strong></div>
+      <div class="small muted">Job: ${FIELD.receipt.job} · ${FIELD.receipt.code}</div><div class="small muted">${FIELD.receipt.note}</div>
+      ${FIELD.receipt.sent?`<div class="small pos" style="margin-top:6px">✓ In QuickBooks as an expense on this job</div>`:`<button class="bigbtn go" onclick="sendReceipt()">Send to QuickBooks</button>`}</div>`
+    :`<button class="bigbtn alt" onclick="snapReceipt()">📷 Snap a receipt</button>`}
+  <button class="bigbtn alt" onclick="FIELD.photos+=3;render();toast('3 job photos added to Henderson Backyard. The client sees them in their portal.')">🖼 Add job photos ${FIELD.photos?`(${FIELD.photos})`:''}</button>
+</div>
+<p class="small muted" style="text-align:center;margin-top:12px">This is what the crew lead sees on their phone. No logins to QuickBooks, no paper.</p>`;
+async function snapReceipt(){ toast('Reading the receipt…'); await wait(700); FIELD.receipt={v:'SiteOne Landscape Supply', amt:86.42, job:'Henderson Backyard', code:'Pavers & Hardscape', note:'Read from the photo: 4 bags polymeric sand', sent:false}; render(); }
+function sendReceipt(){ FIELD.receipt.sent=true; DATA[1].otherActual.PAV=(DATA[1].otherActual.PAV||0)+86.42;
+  QBO_LOG.unshift({t:'Oct 26 · 10:14 AM', type:'Expense (receipt)', ref:'SiteOne #48213 · photo attached', job:'Henderson Backyard', amt:86.42, st:'Synced'});
+  render(); toast('Receipt sent. It\'s in QuickBooks and in Henderson\'s job costing.'); }
+function sendCrewDay(){ FIELD.crewSent=true; const n=Object.values(FIELD.crew).filter(Boolean).length; render(); toast(`Crew day sent: Marco + ${n} installer${n===1?'':'s'}, full day on Henderson. Pay is figured from each day rate.`); }
+
+// ---------- Master Admin (Joel): sign-in with a 6-digit code, then the whole business ----------
+let finOpen = false;
+function finGate(){
+  return `<div class="gate card"><div class="small muted">Platinum Outdoors · secure area</div><h1 style="margin-top:4px">Sign in to Master Admin</h1>
+    <p class="small muted">Finance and owner reports need a password <strong>and</strong> a 6-digit code from your authenticator app, every time.</p>
+    <div class="field"><label for="fin_email">Email</label><input class="txt" id="fin_email" value="joel@yourcompany.com" readonly></div>
+    <div class="field"><label for="fin_pw">Password</label><input class="txt" id="fin_pw" type="password" placeholder="Click to fill (demo)"></div>
+    <div class="field"><label for="fin_code">6-digit code from your authenticator</label><input class="txt" id="fin_code" inputmode="numeric" maxlength="6" placeholder="– – – – – –" style="letter-spacing:6px;font-size:18px"></div>
+    <button class="btn primary mt" id="finBtn" style="width:100%" onclick="finSignIn(this)">Verify + sign in</button>
+    <p class="small muted" style="margin:12px 0 0">Only Owner and Master Admin roles can open this. Every sign-in is logged.</p></div>`;
+}
+async function finSignIn(b){ const pw=document.getElementById('fin_pw').value, c=document.getElementById('fin_code').value;
+  if(!pw||c.length!==6){ toast('Enter your password and the 6-digit code.'); return; }
+  b.disabled=true; b.textContent='Verifying…'; await wait(700); finOpen=true; render(); toast('Signed in with 2-step verification.'); }
+const REV_MONTHS = [['Jan',98],['Feb',112],['Mar',141],['Apr',155],['May',168],['Jun',182],['Jul',176],['Aug',189],['Sep',201],['Oct',198]];
+function revChart(){ const max=Math.max(...REV_MONTHS.map(m=>m[1]));
+  return `<div style="display:flex;align-items:flex-end;gap:6px;height:140px;border-bottom:1px solid var(--line)">${REV_MONTHS.map(([m,v])=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="font-size:11px">$${v}k</div><div style="width:100%;max-width:34px;height:${v/max*110}px;background:var(--accent);border-radius:4px 4px 0 0"></div></div>`).join('')}</div>
+  <div style="display:flex;gap:6px;margin-top:4px">${REV_MONTHS.map(([m])=>`<div class="small muted" style="flex:1;text-align:center;font-size:11px">${m}</div>`).join('')}</div>`; }
+PAGES.admin = () => {
+  if(!finOpen) return finGate();
+  const sumSt = st => jobs.filter(j=>st.includes(j.status)).reduce((a,j)=>a+jobValue(j),0);
+  const openQ = QUOTES.filter(q=>!['Signed','In production'].includes(q.stage)).reduce((a,q)=>a+qVal(q),0);
+  const conf = calConflicts().length, pendingTime = CREW_TIME.filter(w=>w.st==='Submitted').length, qboReview = QBO_LOG.filter(x=>x.st!=='Synced').length;
+  const ytd = REV_MONTHS.reduce((a,m)=>a+m[1],0)*1000;
+  const k = (l,v,d,c='') => `<div class="card stat"><div class="k">${l}</div><div class="v ${c}">${v}</div><div class="d muted">${d}</div></div>`;
+  const alerts = [
+    conf?[`⚠ ${conf} crew double-booking on the calendar`,'production','calendar']:null,
+    pendingTime?[`${pendingTime} time cards waiting for approval`,'admin','time']:null,
+    qboReview?[`${qboReview} QuickBooks item needs a cost code`,'admin','qbo']:null,
+    ['2 invoices are over 30 days old ($21,600)','admin','finance'],
+    ['Turf is running over budget on 2 of the last 5 jobs','admin','costing'],
+  ].filter(Boolean);
+  return `<div class="row between"><div><h1>Master Admin</h1><p class="sub">The whole business on one screen: sales, production, crews and money. Every number links to the screen behind it.</p></div><span class="pill p-green">🔒 2-step verified · Joel</span></div>
+  <h2>Money</h2><div class="grid g4">
+    ${k('Revenue YTD',fmt(ytd),`goal $2.0M · ${Math.round(ytd/2e6*100)}% there`)}${k('Gross margin YTD','34.2%','goal 35%')}${k('Money owed to you (AR)','$86,400','2 invoices over 30 days')}${k('Last year','$960k','this year about 2×','pos')}
+  </div>
+  <h2 class="mt2">Sales</h2><div class="grid g4">
+    ${k('Open quotes',fmt(openQ),`${QUOTES.filter(q=>!['Signed','In production'].includes(q.stage)).length} in the pipeline`)}${k('Close rate (90 days)','31%','quotes sent → signed')}${k('Average job','$39,500','last 12 months')}${k('New-homeowner leads','~85 / mo','real county data · see Leads')}
+  </div>
+  <h2 class="mt2">Production</h2><div class="grid g4">
+    ${k('Sold, not started',fmt(sumSt(['Sold'])),'backlog')}${k('In progress',fmt(sumSt(['In progress'])),`${jobs.filter(j=>j.status==='In progress').length} jobs`)}${k('Jobs finished YTD','41','about 4 a month')}${k('On-time finish','88%','last 90 days')}
+  </div>
+  <h2 class="mt2">Crews + cost</h2><div class="grid g4">
+    ${k('Crew pay this week',fmt(CREW_TIME.reduce((a,w)=>a+payOf(w),0)),'day rate + hourly + per job')}${k('Labor as % of revenue','27%','goal under 30%')}${k('Crew utilization','86%','days booked ÷ days available')}${k('Jobs over budget','6 of 41','mostly turf + demo')}
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>Revenue by month (2026)</h2>${revChart()}</div>
+    <div class="card"><h2>Needs attention</h2>${alerts.map(([t,r,p])=>`<div class="todo"><div style="flex:1">${t}</div><button class="btn sm" onclick="setRole('${r}');go('${p}')">Open</button></div>`).join('')}</div>
+  </div>
+  <div class="card mt"><h2>Team scoreboard</h2><div class="tablewrap"><table><thead><tr><th>Who</th><th>Focus</th><th>This month</th></tr></thead><tbody>
+    <tr><td><strong>Austin</strong> · sales</td><td>Quotes + closing</td><td>14 quotes sent · 4 signed · ${fmt(openQ)} open</td></tr>
+    <tr><td><strong>Justin</strong> · production</td><td>Schedule + crews</td><td>9 of 10 phases on schedule · ${conf?`${conf} conflict to fix`:'no conflicts'}</td></tr>
+    <tr><td><strong>Designer</strong></td><td>Designs + takeoffs</td><td>${QUOTES.filter(q=>q.stage==='Design').length} in design · avg 3 days to a drawing</td></tr>
+    <tr><td><strong>Crews</strong></td><td>Install</td><td>~$720k revenue per crew per year</td></tr>
+  </tbody></table></div><p class="small muted" style="margin:12px 0 0">Revenue, margin and job counts are sample numbers sized to what Justin shared (about $1M last year, about $2M this year). The real app fills these from your jobs and QuickBooks.</p></div>`;
+};
+PAGES.finance = () => {
+  if(!finOpen) return finGate();
+  const rows = jobs.filter(j=>DATA[j.id]).map(j=>{ const keep=curJob; useJob(j.id); const t=totals(); useJob(keep); return {j, c:t.contract, b:t.budget, a:t.actual}; });
+  return `<div class="row between"><div><h1>Finance reports</h1><p class="sub">The reports Joel needs, defined with him in discovery. Everything ties back to QuickBooks.</p></div><span class="pill p-green">🔒 2-step verified</span></div>
+  <div class="grid g2">
+    <div class="card"><h2>Revenue by month (2026)</h2>${revChart()}</div>
+    <div class="card"><h2>Money owed to you (AR aging)</h2><div class="tablewrap"><table><tbody>
+      <tr><td>Current</td><td class="r">$64,800</td></tr><tr><td>1–30 days</td><td class="r">$0</td></tr><tr><td class="neg">31–60 days</td><td class="r neg">$21,600</td></tr><tr><td>60+ days</td><td class="r">$0</td></tr>
+      <tr class="tot"><td>Total</td><td class="r">$86,400</td></tr></tbody></table></div></div>
+  </div>
+  <div class="card mt"><h2>Job profitability (jobs in this demo)</h2><div class="tablewrap"><table><thead><tr><th>Job</th><th>Stage</th><th class="r">Contract</th><th class="r">Cost budget</th><th class="r">Actual cost</th><th class="r">Est. margin</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${r.j.name}</td><td>${r.j.status}</td><td class="r">${fmt(r.c)}</td><td class="r">${fmt(r.b)}</td><td class="r">${fmt(r.a)}</td><td class="r">${r.c?pct((r.c-r.b)/r.c*100):'n/a'}</td></tr>`).join('')}
+  </tbody></table></div></div>
+  <div class="card mt"><h2>Exports</h2><div class="row">${['Profit + loss by job (PDF)','Payroll summary (CSV)','Sales tax report (CSV)','Year-end 1099 totals (CSV)'].map(x=>`<button class="btn" onclick="toast('Demo: in the real app this downloads ${x}.')">${x}</button>`).join('')}</div></div>`;
+};
+const USERS = [
+  ['Austin','Owner / Sales','Everything','On','Today'],['Joel','Master Admin (finance)','Everything + finance','Required','Today'],['Justin','Production manager','Jobs, calendar, POs, time','On','Today'],
+  ['Mia R. (sample)','Designer','Quotes + design files','On','Yesterday'],['Marco T. (sample)','Field crew lead','Crew app only','Phone code','Today'],['Clients','Client portal','Their own job only','Email code','—'],
+];
+const PERMS = [['Leads + quotes','✓','✓','view','✓','—','—'],['Estimates + proposals','✓','✓','view','—','—','own'],['Crew calendar','✓','✓','✓','—','own jobs','—'],['Time + pay','✓','✓','approve','—','clock in','—'],
+  ['Job costing','✓','✓','✓','—','—','—'],['Finance reports + AR','✓','✓','—','—','—','—'],['QuickBooks settings','—','✓','—','—','—','—'],['Users + permissions','—','✓','—','—','—','—']];
+PAGES.users = () => {
+  if(!finOpen) return finGate();
+  return `<h1>Users & permissions</h1><p class="sub">Who can see and do what. Each person only sees the screens their job needs.</p>
+  <div class="card"><div class="tablewrap"><table><thead><tr><th>Person</th><th>Role</th><th>Access</th><th>2-step sign-in</th><th>Last active</th></tr></thead><tbody>
+    ${USERS.map(u=>`<tr><td><strong>${u[0]}</strong></td><td>${u[1]}</td><td>${u[2]}</td><td><span class="pill ${u[3]==='Required'?'p-green':'p-grey'}">${u[3]}</span></td><td>${u[4]}</td></tr>`).join('')}
+  </tbody></table></div><div class="row mt"><button class="btn primary" onclick="toast('Demo: invite a teammate by email and pick their role.')">+ Invite a teammate</button></div></div>
+  <div class="card mt"><h2>Permission matrix</h2><div class="tablewrap"><table class="perm"><thead><tr><th>Area</th><th>Owner</th><th>Master Admin</th><th>Production</th><th>Designer</th><th>Field crew</th><th>Client</th></tr></thead><tbody>
+    ${PERMS.map(r=>`<tr>${r.map((c,i)=>`<td>${i&&c==='✓'?'<span class="pos">✓</span>':c}</td>`).join('')}</tr>`).join('')}
+  </tbody></table></div><p class="small muted" style="margin:12px 0 0">Roles are set with you in discovery. Changing someone's role takes effect immediately.</p></div>`;
+};
+
+// ---------- who does what: every role's touchpoints across the workflow ----------
+PAGES.flow = () => {
+  const STG = ['Find + win','Quote + design','Sell','Build','Pay + close'];
+  const LANES = [
+    ['Owner / Sales (Austin)','owner',[[['Work the leads','leads']],[['Request + review quotes','quotes']],[['Proposal + e-sign','proposal']],[['Approve change orders','estimate']],[['Job costing','costing']]]],
+    ['Designer','designer',[[],[['Design queue: specs → AutoCAD → takeoff','quotes']],[['Client selections','selections']],[],[]]],
+    ['Production manager (Justin)','production',[[],[],[['Job lands on the board','jobs']],[['Drag-and-drop crew calendar','calendar'],['POs + materials','schedule']],[['Approve time cards','time']]]],
+    ['Field crew lead','field',[[],[],[],[['Clock in, crew day, receipts, photos','field']],[]]],
+    ['Master Admin (Joel)','admin',[[],[],[],[['QuickBooks sync','qbo']],[['Master Admin dashboard','admin'],['Finance reports + payroll','finance']]]],
+    ['Client (homeowner)','client',[[],[],[['Signs proposal','c-proposal'],['Picks finishes','c-selections']],[['Approves change orders','c-changes']],[['Pays from the portal','portal']]]],
+  ];
+  return `<h1>Who does what</h1><p class="sub">Every person who touches a job, and where. Click any step to see it from that person's view.</p>
+  <div class="card"><div class="tablewrap"><table class="lanes"><thead><tr><th>Role</th>${STG.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>
+    ${LANES.map(([l,r,cells])=>`<tr><td><strong>${l}</strong></td>${cells.map(c=>`<td>${c.length?c.map(([t,p])=>roleLink(r,p,t)).join(''):'<span class="muted">·</span>'}</td>`).join('')}</tr>`).join('')}
+  </tbody></table></div><p class="small muted" style="margin:12px 0 0">One job record moves through every lane. Nobody re-enters what someone before them already typed.</p></div>`;
+};
+
 // ---------- client pages ----------
 PAGES.portal = () => {
   const t = totals();
@@ -965,7 +1343,7 @@ const TOUR_ID = 99;
 const wait = ms => new Promise(r=>setTimeout(r,ms));
 async function typeIn(id,text){ const el=document.getElementById(id); if(!el) return; el.focus(); el.value=''; for(const ch of text){ el.value+=ch; await wait(12); } el.dispatchEvent(new Event('input',{bubbles:true})); }
 function flash(sel){ const el=typeof sel==='string'?document.querySelector(sel):sel; if(!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({behavior:'smooth',block:'center'}); }
-function teamOn(){ if(view!=='team'){ view='team'; document.getElementById('vTeam').classList.add('on'); document.getElementById('vClient').classList.remove('on'); } closeModal(); }
+function teamOn(){ if(role!=='owner'){ role='owner'; view='team'; document.getElementById('roleSel').value='owner'; } closeModal(); }
 const TL = (sec,code,d,q,u,c,m) => ({sec,code,d,q,u,c,m});
 const STEPS = [
   {t:'A new customer calls', d:'Create the customer and the job in one form. It lands on the Jobs board under Lead.', run: async()=>{
@@ -1053,12 +1431,14 @@ document.addEventListener('click', e=>{
   const el = e.target.closest('input.txt'); if(!el || el.value) return;
   if(el.id.startsWith('nj_')) fillNewJob();
   else if(el.id==='sigName'){ el.value = propSrc().client; el.dispatchEvent(new Event('input',{bubbles:true})); }
+  else if(el.id==='fin_pw'){ el.value='demo-password'; document.getElementById('fin_code').value='482913'; }
+  else if(el.id==='fin_code'){ el.value='482913'; const pw=document.getElementById('fin_pw'); if(!pw.value) pw.value='demo-password'; }
 });
 function startOver(){ location.href = location.pathname + '?start=' + Date.now(); }
 function syncTop(){ document.documentElement.style.setProperty('--hdr', document.querySelector('header.top').offsetHeight+'px'); }
 window.addEventListener('resize', syncTop);
 
-render(); renderTour(); syncTop();
+populateRoles(); render(); renderTour(); syncTop();
 </script>
 </body>
 </html>
