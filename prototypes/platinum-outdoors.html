@@ -1036,6 +1036,24 @@ async function nextStep(){
   tourStep++; tourBusy=true; renderTour();
   try{ await STEPS[tourStep-1].run(); } finally { tourBusy=false; renderTour(); }
 }
+// ---------- click-to-fill: clicking an empty demo field fills it, so nobody types during a demo ----------
+const SAMPLE_CUSTOMERS = [
+  {name:'Jordan Mitchell', email:'jordan.mitchell@example.com', phone:'(480) 555-0142', addr:'Sample address, Gilbert', city:'Gilbert', src:'Website form', scope:'Turf, pavers and a fire pit'},
+  {name:'Casey Nguyen', email:'casey.nguyen@example.com', phone:'(480) 555-0157', addr:'Sample address, Mesa', city:'Mesa', src:'Referral', scope:'Pool deck pavers + shade pergola'},
+  {name:'Morgan Ellis', email:'morgan.ellis@example.com', phone:'(480) 555-0168', addr:'Sample address, Queen Creek', city:'Queen Creek', src:'Postcard (Leads)', scope:'Full backyard: turf, BBQ island, lighting'},
+];
+let sampleIdx = 0;
+async function fillNewJob(){
+  const c = SAMPLE_CUSTOMERS[sampleIdx++ % SAMPLE_CUSTOMERS.length];
+  for(const k of ['name','email','phone','addr','city','scope']){ const el=document.getElementById('nj_'+k); if(el && !el.value){ el.value=''; for(const ch of c[k]){ el.value+=ch; await wait(6); } } }
+  const src=document.getElementById('nj_src'); if(src) src.value=c.src;
+}
+document.addEventListener('click', e=>{
+  if(tourBusy) return;
+  const el = e.target.closest('input.txt'); if(!el || el.value) return;
+  if(el.id.startsWith('nj_')) fillNewJob();
+  else if(el.id==='sigName'){ el.value = propSrc().client; el.dispatchEvent(new Event('input',{bubbles:true})); }
+});
 function startOver(){ location.href = location.pathname + '?start=' + Date.now(); }
 function syncTop(){ document.documentElement.style.setProperty('--hdr', document.querySelector('header.top').offsetHeight+'px'); }
 window.addEventListener('resize', syncTop);
