@@ -188,6 +188,9 @@ body.dragging{cursor:grabbing;user-select:none}
 .lanes td{vertical-align:top;font-size:13px;min-width:130px}
 .lanes td a{display:block;margin-top:4px}
 .perm td,.perm th{text-align:center}.perm td:first-child,.perm th:first-child{text-align:left}
+/* requirements doc + print */
+.reqdoc h2{font-size:17px;border-bottom:1px solid var(--line);padding-bottom:6px}
+@media print{header.top,.tour,nav.side,.demo-bar,.noprint,.toast{display:none !important}.layout{display:block}main{padding:0}.card{box-shadow:none;border:0}.reqdoc .tablewrap{overflow:visible}body{background:#fff}}
 /* leads */
 .funnel{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 .funnel .st{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;position:relative}
@@ -425,7 +428,7 @@ function setRole(r){
   document.getElementById('roleSel').value=r; render(); window.scrollTo({top:0});
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -611,7 +614,7 @@ const MODS = [
 PAGES.trad = () => {
   const H = TEAM_ROLES.reduce((a,x)=>a+x.h,0), US = TEAM_ROLES.reduce((a,x)=>a+x.h*x.us,0), OFF = TEAM_ROLES.reduce((a,x)=>a+x.h*x.off,0);
   const k = v => '$'+Math.round(v/1000)+'k';
-  return `<h1>What this app costs to build the traditional way</h1>
+  return `<div class="row between"><h1 style="margin:0">What this app costs to build the traditional way</h1><button class="btn primary" onclick="go('reqdoc')">📄 Traditional requirements doc</button></div>
   <p class="sub">The same app (5 job modules, client portal and leads engine) built by a hired software team. Hours and rates are industry ballparks for 2026, not vendor quotes.</p>
   <div class="grid g4">
     <div class="card stat"><div class="k">Build hours</div><div class="v">${H.toLocaleString()}</div><div class="d muted">across 7 roles, about 9 people</div></div>
@@ -1329,6 +1332,170 @@ PAGES.flow = () => {
   <div class="card"><div class="tablewrap"><table class="lanes"><thead><tr><th>Role</th>${STG.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>
     ${LANES.map(([l,r,cells])=>`<tr><td><strong>${l}</strong></td>${cells.map(c=>`<td>${c.length?c.map(([t,p])=>roleLink(r,p,t)).join(''):'<span class="muted">·</span>'}</td>`).join('')}</tr>`).join('')}
   </tbody></table></div><p class="small muted" style="margin:12px 0 0">One job record moves through every lane. Nobody re-enters what someone before them already typed.</p></div>`;
+};
+
+// ---------- traditional requirements document (what a client hands a dev agency) ----------
+const RQ_MODULES = [
+  ['Accounts, roles + security','AUTH',[
+    ['Users sign in with email + password. A forgotten password is reset by an emailed link that expires after 30 minutes.','Must'],
+    ['The system supports 6 roles: Owner/Sales, Master Admin (finance), Designer, Production manager, Field crew lead and Client. Each role only sees the screens and data its permissions allow.','Must'],
+    ['Master Admin and Owner sign-ins require a second factor (a 6-digit authenticator code) every time.','Must'],
+    ['Clients sign in with a one-time 6-digit email code and see only their own job.','Must'],
+    ['Admins can invite, deactivate and change the role of any user. Changes take effect immediately.','Must'],
+    ['Every sign-in, permission change and money-related action is written to an audit log (who, what, when, from where).','Must'],
+  ]],
+  ['Estimating + change orders','EST',[
+    ['Users build an estimate from a cost book of items (name, unit, unit cost, default markup, cost group).','Must'],
+    ['Each line shows quantity, unit cost, markup, cost and price. Totals, gross margin and profit recalculate instantly when any value changes.','Must'],
+    ['Lines are grouped into sections (Site prep, Patio, Turf…) and cost groups used for job costing.','Must'],
+    ['Change orders can be added to a sold job, sent to the client for approval, and once approved add to the contract total and the job budget.','Must'],
+    ['Estimates keep version history. A signed version cannot be edited, only revised.','Should'],
+  ]],
+  ['Quotes + design workflow','QUO',[
+    ['A quote request captures the customer, address, scope, site photos, measurements and the client\'s anticipated budget.','Must'],
+    ['Specs can be assigned to a designer, and the request appears in that designer\'s queue.','Must'],
+    ['The designer can attach design files (DWG/DXF, PDF). The system reads quantities (areas, lengths, counts) from agreed drawing layers and blocks into a takeoff.','Must'],
+    ['Takeoff quantities price automatically from the cost book into a draft estimate.','Must'],
+    ['A budget check compares the client\'s budget with price and cost, shows margin at the client\'s budget, and labels it Negative / Low / Expected / High against a configurable target margin.','Must'],
+    ['Quotes move through stages: Request → Design → Pricing → Review → Sent → Signed → In production. Owner approval is required before sending.','Must'],
+    ['Saving a signed quote creates the job, budget, draft schedule phases, draft purchase orders and the deposit invoice automatically, with no re-entry.','Must'],
+  ]],
+  ['Proposal, e-sign + client portal','POR',[
+    ['A branded proposal shows scope, price, payment schedule and timeline. Internal costs and markups are never shown to the client.','Must'],
+    ['The client accepts by typing their name. The system records name, date, time, IP and device, and locks the signed version.','Must'],
+    ['The client portal shows job progress, items needing approval, selections, change orders, documents, photos, schedule and payments due.','Must'],
+    ['Clients receive an email when something needs their action (proposal, change order, selection, payment).','Must'],
+  ]],
+  ['Selections','SEL',[
+    ['Per job, staff create selection categories (pavers, turf, countertop, lighting…) with options, photos, vendor and price.','Must'],
+    ['Each selection has an allowance. The system shows the over/under amount when the client picks.','Must'],
+    ['An over-allowance pick can generate a change order in one step.','Should'],
+    ['Selections have due dates, and overdue ones appear on the production dashboard.','Should'],
+  ]],
+  ['Jobs board + crew calendar','SCH',[
+    ['Jobs appear on a board by stage: Lead, Estimating, Proposal sent, Sold, In progress, Complete.','Must'],
+    ['A month calendar shows every job phase by crew. Users drag a phase to move it and drag its edge to change its length, and the backend updates on drop.','Must'],
+    ['The system warns when a crew is booked on two jobs on the same day.','Must'],
+    ['Affected crew leads and clients are notified when dates change.','Should'],
+  ]],
+  ['Purchase orders + job costing','COS',[
+    ['Users create purchase orders against a job and cost group. POs move through Draft → Sent → Confirmed → Delivered → Billed.','Must'],
+    ['Billed POs, vendor bills, field receipts and approved labor post as actual cost to the job.','Must'],
+    ['Each job shows budget vs. committed vs. actual by cost group, remaining budget and projected margin.','Must'],
+    ['Over-budget cost groups are flagged as they happen.','Must'],
+  ]],
+  ['Time cards + crew pay','PAY',[
+    ['Crew leads clock in and out on the phone app. The job and location are saved at clock-in.','Must'],
+    ['Crew leads mark which installers were on site (full or half day).','Must'],
+    ['Pay rules support day rate, half day, hourly with overtime after 40 hours, and a flat per-job amount, configurable per worker.','Must'],
+    ['Production approves time cards weekly. Approved pay is split by job and posted to job costing.','Must'],
+    ['Approved pay exports to QuickBooks as subcontractor (1099) bills or payroll entries.','Must'],
+  ]],
+  ['Field app','FLD',[
+    ['A phone-first view shows the crew lead today\'s job, address, tasks and crew.','Must'],
+    ['Crew leads photograph receipts. The system reads vendor, amount and date from the photo, and the user confirms the job and cost group.','Must'],
+    ['Job photos upload from the phone and can be shared to the client portal.','Should'],
+    ['The app works on a weak signal and syncs when back online.','Should'],
+  ]],
+  ['QuickBooks Online integration','QBO',[
+    ['Customers and jobs sync to QuickBooks customers and projects.','Must'],
+    ['Signed proposals and progress payments create invoices, and received payments are recorded.','Must'],
+    ['Vendor bills, field receipts (with the image attached) and approved pay push to QuickBooks, tagged to the job.','Must'],
+    ['A sync log shows every item and its status. Failed or incomplete items are held for review and can be fixed and re-sent.','Must'],
+    ['The item, account and class mapping is configurable by the Master Admin.','Must'],
+  ]],
+  ['Master Admin + finance reports','ADM',[
+    ['A dashboard shows money (revenue YTD vs. goal, margin, AR), sales (pipeline, close rate, average job), production (backlog, on-time %) and crew (pay, labor %, utilization) KPIs.','Must'],
+    ['It lists items needing attention (crew conflicts, pending time cards, sync errors, overdue invoices, over-budget jobs) with a link to each.','Must'],
+    ['Reports: revenue by month, AR aging, job profitability, payroll summary. Each exports to PDF or CSV.','Must'],
+    ['Report definitions are agreed with the Master Admin in discovery.','Must'],
+  ]],
+];
+const RQ_NFR = [
+  ['Security','All traffic over HTTPS. Passwords hashed (bcrypt/argon2). Data encrypted at rest. Role-based access enforced on the server for every request. Secrets kept in the host\'s secret store, never in code.'],
+  ['Privacy','Customer data is used only for Platinum Outdoors\' business. Clients can request an export or deletion of their data.'],
+  ['Performance','Pages load in under 2 seconds on a typical 4G phone. Calendar drag/drop responds in under 200 ms.'],
+  ['Availability','99.5% monthly uptime target. Nightly backups kept for 30 days, with a tested restore.'],
+  ['Devices','Works on current Chrome, Safari, Edge and Firefox. Every screen is usable on a phone (375 px wide and up). The field app is installable to the home screen.'],
+  ['Accessibility','Labeled inputs, keyboard navigation and readable contrast (WCAG 2.1 AA as the target).'],
+  ['Audit','Money, permission and signature events are kept in an audit log for at least 7 years.'],
+  ['Ownership','All hosting, database, domain, code repository and third-party accounts are in Platinum Outdoors\' name. The developer is added as a collaborator.'],
+];
+const RQ_INT = [['QuickBooks Online','Invoices, payments, bills, expenses, payroll/1099 bills, customers, projects'],['Email delivery','Proposals, approvals, sign-in codes, notifications'],['AutoCAD (DWG/DXF)','Read quantities from agreed layers and blocks'],['Receipt reading','Read vendor, amount and date from receipt photos'],['Online payments (optional)','Card / ACH deposits and progress payments from the client portal'],['Maps / location','Job addresses and clock-in location']];
+const RQ_DATA = ['Users + roles','Customers','Jobs','Quotes + quote requests','Design files + takeoffs','Cost book items + cost groups','Estimates + lines (versioned)','Change orders','Selections + options','Proposals + signatures','Schedule phases + crews','Purchase orders + vendor bills','Receipts','Time cards + pay rules','Invoices + payments','QuickBooks sync records','Audit log'];
+const RQ_OUT = ['Vehicle GPS tracking (clock-in location only)','A full accounting system (QuickBooks remains the books)','Native App Store / Play Store apps (mobile web + home-screen install instead)','HR, onboarding + applicant tracking','Leads engine from public records (separate add-on)','Subcontractor report cards + AI cost analysis','Licensing the platform to other companies'];
+const RQ_MS = [['M1 · Discovery + design sign-off','Requirements confirmed, screens approved, QuickBooks mapping and report definitions agreed','Weeks 1–2'],['M2 · Core','Accounts + roles, cost book, quotes + design, estimates, proposal + e-sign, client portal','Weeks 3–5'],['M3 · Production','Jobs board, crew calendar, selections, POs, job costing, field app, time + pay','Weeks 5–7'],['M4 · Money + admin','QuickBooks integration, Master Admin, finance reports, audit log','Weeks 7–8'],['M5 · Launch','Data migration from JobTread, training, run side by side with JobTread, cutover','Weeks 8–9']];
+const RQ_Q = ['Which drawing layers and blocks does the designer use, and in what file version?','What is the target margin, and does it differ by job type?','Exact pay rules per worker type, and the pay period','QuickBooks: which accounts, items and classes; who reconciles','Which reports does Joel need each week and month?','Online payments in v1: yes or no; which processor?','What has to move from JobTread: open jobs only, or history too?','Which work-eligibility checks happen in hiring and pay (for their accountant/attorney, not the software)?'];
+PAGES.reqdoc = () => {
+  const total = RQ_MODULES.reduce((a,m)=>a+m[2].length,0);
+  return `<div class="row between noprint"><button class="btn" onclick="go('trad')">← Back to Traditional Development</button><button class="btn primary" onclick="window.print()">Print / Save as PDF</button></div>
+  <div class="card mt reqdoc">
+    <div class="small muted">Software Requirements Specification · v0.1 draft · Oct 2026</div>
+    <h1 style="margin-top:4px">Platinum Outdoors Job Management Platform: MVP</h1>
+    <p class="muted" style="margin:0">Prepared for bidding by a software development team. It replaces JobTread and connects to QuickBooks Online. ${total} functional requirements across ${RQ_MODULES.length} modules.</p>
+    <table style="margin-top:14px"><tbody>
+      <tr><td style="width:180px" class="muted">Client</td><td>Platinum Outdoors LLC · San Tan Valley, AZ · ROC 350738</td></tr>
+      <tr><td class="muted">Decision makers</td><td>Austin Brice (Owner, sales) · Joel Brice (Owner, finance)</td></tr>
+      <tr><td class="muted">Day-to-day contact</td><td>Justin (Production Manager)</td></tr>
+      <tr><td class="muted">Status</td><td>Draft for discovery. Not a contract.</td></tr>
+    </tbody></table>
+
+    <h2 class="mt2">1. Purpose + goals</h2>
+    <ul class="small" style="line-height:1.7"><li>Replace JobTread (and, where it fits, GoHighLevel) with a platform the company owns.</li><li>One job record from first call to final payment, with no re-typing between sales, design, production and finance.</li><li>Accurate job costing and crew pay, synced to QuickBooks.</li><li>Give the owners a real-time view of the business.</li></ul>
+    <p class="small"><strong>Success measures:</strong> one real job runs start to finish in the new system · the team stops using JobTread · weekly payroll prep drops from hours to minutes · margin per job is known while the job is running.</p>
+
+    <h2 class="mt2">2. Users + roles</h2>
+    <div class="tablewrap"><table><thead><tr><th>Role</th><th>Who</th><th>Main tasks</th></tr></thead><tbody>
+      <tr><td>Owner / Sales</td><td>Austin</td><td>Leads, quotes, approvals, proposals, everything</td></tr>
+      <tr><td>Master Admin</td><td>Joel</td><td>Finance reports, payroll approval, QuickBooks, users</td></tr>
+      <tr><td>Designer</td><td>Designer</td><td>Specs, drawings, takeoffs, selections</td></tr>
+      <tr><td>Production manager</td><td>Justin</td><td>Jobs board, crew calendar, POs, time approval, costing</td></tr>
+      <tr><td>Field crew lead</td><td>Crew leads</td><td>Clock in, crew day, receipts, photos (phone)</td></tr>
+      <tr><td>Client</td><td>Homeowners</td><td>Sign, choose finishes, approve changes, pay</td></tr>
+    </tbody></table></div>
+
+    <h2 class="mt2">3. Assumptions + constraints</h2>
+    <ul class="small" style="line-height:1.7"><li>About 10–20 internal users plus clients. One company, one location to start, with more regional locations later.</li><li>Installers are 1099 subcontractors working only for Platinum. Electrical and other trades are outside vendors.</li><li>QuickBooks Online stays the accounting system of record.</li><li>All accounts are created in Platinum's name before the build starts.</li><li>JobTread runs in parallel until cutover.</li></ul>
+
+    <h2 class="mt2">4. Functional requirements</h2>
+    <p class="small muted">"Must" = required for launch. "Should" = wanted for launch, can slip to the first update. Each requirement is accepted when it's shown working on a real job in testing.</p>
+    ${RQ_MODULES.map(([name,code,reqs])=>`<h3 style="font-size:15px;margin:18px 0 6px">${name}</h3>
+      <div class="tablewrap"><table><thead><tr><th style="width:80px">ID</th><th>Requirement: the system shall…</th><th style="width:70px">Priority</th></tr></thead><tbody>
+      ${reqs.map(([t,p],i)=>`<tr><td class="small muted">${code}-${String(i+1).padStart(2,'0')}</td><td class="small">${t}</td><td><span class="pill ${p==='Must'?'p-green':'p-grey'}">${p}</span></td></tr>`).join('')}
+      </tbody></table></div>`).join('')}
+
+    <h2 class="mt2">5. Non-functional requirements</h2>
+    <div class="tablewrap"><table><tbody>${RQ_NFR.map(([k,v],i)=>`<tr><td class="small muted" style="width:80px">NFR-${String(i+1).padStart(2,'0')}</td><td style="width:140px"><strong>${k}</strong></td><td class="small">${v}</td></tr>`).join('')}</tbody></table></div>
+
+    <h2 class="mt2">6. Integrations</h2>
+    <div class="tablewrap"><table><tbody>${RQ_INT.map(([k,v])=>`<tr><td style="width:200px"><strong>${k}</strong></td><td class="small">${v}</td></tr>`).join('')}</tbody></table></div>
+
+    <h2 class="mt2">7. Data the system stores</h2>
+    <p class="small" style="line-height:1.8">${RQ_DATA.join(' · ')}</p>
+
+    <h2 class="mt2">8. Sample user stories</h2>
+    <ul class="small" style="line-height:1.7">
+      <li>As a <strong>designer</strong>, I attach my drawing so quantities fill the estimate, and I don't have to re-measure.</li>
+      <li>As <strong>Austin</strong>, I see whether a client's budget leaves us a healthy margin before I send the quote.</li>
+      <li>As <strong>Justin</strong>, I drag a job to a new day and every crew lead and client is told.</li>
+      <li>As a <strong>crew lead</strong>, I snap a receipt and it lands on the right job in QuickBooks.</li>
+      <li>As <strong>Joel</strong>, I approve the week's pay in one click and see margin by job without a spreadsheet.</li>
+      <li>As a <strong>homeowner</strong>, I approve a change order on my phone and see my new total.</li>
+    </ul>
+
+    <h2 class="mt2">9. Out of scope for the MVP</h2>
+    <ul class="small" style="line-height:1.7">${RQ_OUT.map(x=>`<li>${x}</li>`).join('')}</ul>
+
+    <h2 class="mt2">10. Milestones + deliverables</h2>
+    <div class="tablewrap"><table><thead><tr><th>Milestone</th><th>Delivers</th><th>Target</th></tr></thead><tbody>${RQ_MS.map(m=>`<tr><td><strong>${m[0]}</strong></td><td class="small">${m[1]}</td><td class="small" style="white-space:nowrap">${m[2]}</td></tr>`).join('')}</tbody></table></div>
+    <p class="small muted">A traditional team would typically plan 6–10 months for this scope (see Traditional Development). The targets above assume the AI-assisted build.</p>
+
+    <h2 class="mt2">11. Acceptance + sign-off</h2>
+    <ul class="small" style="line-height:1.7"><li>Every "Must" requirement is demonstrated on a test job and signed off by the owner of that area (Austin, Joel or Justin).</li><li>One live job is run in both JobTread and the new system with matching numbers.</li><li>QuickBooks entries for that job are checked by Joel or the bookkeeper.</li><li>Training is done for each role.</li></ul>
+
+    <h2 class="mt2">12. Open questions for discovery</h2>
+    <ol class="small" style="line-height:1.7">${RQ_Q.map(x=>`<li>${x}</li>`).join('')}</ol>
+  </div>`;
 };
 
 // ---------- client pages ----------
