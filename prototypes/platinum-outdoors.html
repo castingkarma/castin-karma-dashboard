@@ -134,6 +134,18 @@ input.txt{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius
 .bcard{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px;cursor:pointer;font-size:13.5px}
 .bcard:hover{border-color:#9fb0c2}
 .bthumb{height:34px;border-radius:6px;margin-bottom:8px}
+/* schedule builder */
+.sbcrews{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.screw{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;cursor:grab;touch-action:none;user-select:none;box-shadow:var(--shadow)}
+.screw i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.screw:hover{border-color:var(--c)}
+.sbar{cursor:grab;touch-action:none;user-select:none;padding-right:14px !important}
+.sbar.locked{cursor:default}.sbar.conf{box-shadow:0 0 0 2px var(--bad)}
+.sbhandle{position:absolute;right:0;top:0;bottom:0;width:10px;cursor:ew-resize;background:rgba(255,255,255,.4);border-radius:0 6px 6px 0}
+.sblane.open{background-color:#fbfcfd}
+.sblane.drop{background-color:var(--accent-soft) !important}
+.sbhint{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted)}
+.sbghost{position:fixed;z-index:80;pointer-events:none;padding:6px 12px;border-radius:999px;color:#fff;font-size:13px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 /* walkthrough */
 .tour .twho{display:inline-block;margin-left:8px;font-size:12px;font-weight:700;background:rgba(95,224,181,.16);color:#9ff0d2;border:1px solid rgba(95,224,181,.4);border-radius:999px;padding:2px 10px;vertical-align:2px;white-space:nowrap}
 .tour{position:sticky;top:var(--hdr,58px);z-index:18;background:#0b3b2e;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -1003,16 +1015,43 @@ PAGES.costing = () => {
   <p class="small muted" style="margin:12px 0 0">Mark a PO as billed on <a href="#" onclick="go('schedule');return false">Schedule &amp; POs</a> and watch it move from Committed to Actual here.</p></div>`;
 };
 
+// ---------- job schedule builder: drag a crew onto a phase, drag/stretch the bar, then Set schedule ----------
+const CREWS = [['Crew A','#64748b'],['Crew B','#0f8a6a'],['Crew C','#4d7c0f'],['Masonry sub','#b26a00'],['Electrical sub','#2856b6'],['Gas sub','#9333ea']];
+const crewColor = n => (CREWS.find(c=>c[0]===n)||[0,'#64748b'])[1];
+const dayDate = k => new Date(2026,9,5+Math.floor(k/5)*7+k%5).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+const isSet = () => DATA[curJob].schedSet ?? (curJob===1);
+function seedPhases(){ if(schedule.length) return; const secs=[...new Set(est.lines.map(l=>l.sec).filter(Boolean))];
+  (secs.length?secs:['Demo & haul-off','Grade & base','Hardscape','Turf + planting','Lighting + walkthrough']).forEach(n=>schedule.push({n,crew:null,s:null,d:3,c:null,st:'next'})); }
+function schedConf(){ const out=[]; schedule.forEach((a,i)=>schedule.slice(i+1).forEach(b=>{ if(a.crew&&a.crew===b.crew&&a.s!=null&&b.s!=null&&a.s<=b.s+b.d-1&&b.s<=a.s+a.d-1) out.push([a,b]); })); return out; }
 PAGES.schedule = () => {
-  const gantt = schedule.map(s=>`<div class="lbl"><strong>${s.n}</strong><div class="small muted">${s.crew}</div></div>
-    <div class="lane"><div class="t" style="left:${s.s/30*100}%;width:${s.d/30*100}%;background:${s.c};opacity:${s.st==='done'?.55:1}" title="${s.n}">${s.st==='done'?'✓ ':''}${s.n}</div></div>`).join('');
-  const weeks = ['Oct 6','Oct 13','Oct 20','Oct 27','Nov 3','Nov 10'];
+  seedPhases();
+  const set=isSet(), conf=schedConf(), confSet=new Set(conf.flat()), open=schedule.filter(x=>x.s==null).length;
+  const weeks = ['Oct 5','Oct 12','Oct 19','Oct 26','Nov 2','Nov 9'];
   const poSt = s => ({draft:'p-grey',sent:'p-blue',confirmed:'p-blue',delivered:'p-amber',billed:'p-green'}[s]);
+  const rows = schedule.map((p,i)=>`<div class="lbl"><strong>${p.n}</strong><div class="small muted">${p.crew||'No crew yet'}${p.s!=null?` · ${p.d} day${p.d>1?'s':''}`:''}</div></div>
+    <div class="lane sblane ${set?'':'open'}" data-row="${i}">${p.s!=null
+      ?`<div class="t sbar ${set?'locked':''} ${confSet.has(p)?'conf':''}" data-row="${i}" style="left:${p.s/30*100}%;width:${p.d/30*100}%;background:${p.c||crewColor(p.crew)};opacity:${p.st==='done'?.55:1}" title="${p.n} · ${p.crew}">${p.st==='done'?'✓ ':''}${p.n}${set?'':'<span class="sbhandle" title="Drag to change the days"></span>'}</div>`
+      :`<div class="sbhint">${set?'':'⇠ Drag a crew here'}</div>`}</div>`).join('');
+  const done = schedule.filter(x=>x.s!=null).sort((a,b)=>a.s-b.s);
+  const first = done.length?Math.min(...done.map(x=>x.s)):0, last = done.length?Math.max(...done.map(x=>x.s+x.d-1)):0;
   return `<h1>${J().name}: schedule &amp; POs</h1><p class="sub">Crews and subs on one calendar. Materials ordered against the job, so cost lands in the right bucket.</p>
-  <div class="card"><div class="tablewrap"><div class="gantt">
-    <div class="lbl" style="font-size:12px;color:var(--muted)">Phase · crew</div><div class="hdr">${weeks.map(w=>`<div>Wk of ${w}</div>`).join('')}</div>
-    ${gantt}
-  </div></div></div>
+  <div class="card">
+    ${set?`<div class="row between"><div><strong>✓ Schedule set</strong> <span class="small muted">· crew leads have their dates</span></div><button class="btn sm" onclick="editSched()">✏️ Edit schedule</button></div>`
+      :`<div class="row between"><div><strong>${DATA[curJob].schedSet===false&&done.length?'Edit the schedule':'Plan the schedule'}</strong><div class="small muted">Drag a crew onto a phase. Drag the bar to move it. Drag its right edge to change the days.</div></div>
+         <div class="row"><button class="btn sm" onclick="autoSched()">Auto-fill crews</button><button class="btn sm primary" ${open||conf.length?`disabled title="${open?'Give every phase a crew first':'Fix the crew conflict first'}"`:''} onclick="setSched(this)">Set schedule</button></div></div>
+        <div class="sbcrews">${CREWS.map(([n,c])=>`<span class="screw" data-crew="${n}" style="--c:${c}"><i></i>${n}</span>`).join('')}</div>`}
+    ${conf.length?`<div class="small neg" style="margin-top:10px">⚠ ${conf.map(([a,b])=>`${a.crew} is on "${a.n}" and "${b.n}" at the same time`).join(' · ')}</div>`:''}
+    <div class="tablewrap mt"><div class="gantt">
+      <div class="lbl" style="font-size:12px;color:var(--muted)">Phase · crew</div><div class="hdr">${weeks.map(w=>`<div>Wk of ${w}</div>`).join('')}</div>
+      ${rows}
+    </div></div>
+  </div>
+  ${set&&done.length?`<div class="card mt" id="schedSummary"><div class="row between"><h2 style="margin:0">Schedule · ${dayDate(first)} – ${dayDate(last)}</h2><span class="pill p-green">${last-first+1} workdays · ${new Set(done.map(x=>x.crew)).size} crews</span></div>
+    <div class="small mt"><strong>${done.filter(p=>(p.conf||'confirmed')==='confirmed').length} of ${done.length}</strong> crews confirmed${done.some(p=>p.conf==='declined')?' · <span class="neg">1 or more declined</span>':''}</div>
+    <div class="tablewrap mt"><table><thead><tr><th>Phase</th><th>Crew</th><th>Starts</th><th>Ends</th><th class="r">Days</th><th>Crew confirmed?</th></tr></thead><tbody>
+    ${done.map(p=>{ const i=schedule.indexOf(p), c=p.conf||'confirmed'; return `<tr><td><strong>${p.n}</strong></td><td><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${p.c||crewColor(p.crew)};margin-right:6px"></span>${p.crew}</td><td>${dayDate(p.s)}</td><td>${dayDate(p.s+p.d-1)}</td><td class="r">${p.d}</td>
+      <td>${c==='confirmed'?'<span class="pill p-green">✓ Confirmed</span>':c==='declined'?`<span class="pill p-red">Can't make it</span> <button class="btn sm" onclick="editSched()">Pick another crew</button>`:`<span class="pill p-blue">Sent · waiting</span> <span class="small muted">demo:</span> <button class="btn sm" onclick="crewReply(${curJob},${i},'confirmed')">✓</button> <button class="btn sm" onclick="crewReply(${curJob},${i},'declined')">✕</button>`}</td></tr>`; }).join('')}
+    </tbody></table></div><p class="small muted" style="margin:10px 0 0">Setting the schedule texts and emails each crew and sub their dates with Confirm / Can't make it buttons. Crew leads also see it in the field app. The client sees the phases in their portal.</p></div>`:''}
   <div class="row between mt2"><h2 style="margin:0">Purchase orders</h2><button class="btn primary" onclick="toast('In the real app this opens a PO form with your vendor list and cost codes.')">+ New PO</button></div>
   <div class="card mt"><div class="tablewrap"><table>
     <thead><tr><th>PO</th><th>Vendor</th><th>Items</th><th>Delivery</th><th>Status</th><th class="r">Amount</th><th></th></tr></thead>
@@ -1021,6 +1060,40 @@ PAGES.schedule = () => {
       <td class="r">${nx?`<button class="btn sm" onclick="advPO(${i})">Mark ${nx}</button>`:''}</td></tr>`}).join('')}</tbody>
   </table></div></div>`;
 };
+function editSched(){ DATA[curJob].schedSet=false; render(); }
+async function setSched(b){ b.disabled=true; b.textContent='Setting…'; await wait(500); DATA[curJob].schedSet=true; schedule.forEach(p=>{ if(p.s!=null) p.conf='sent'; }); render(); flash('#schedSummary');
+  toast(`Schedule set. ${new Set(schedule.map(x=>x.crew)).size} crews were sent their dates to confirm.`); }
+function crewReply(jid,i,ans){ const p=DATA[jid].schedule[i]; p.conf=ans; render();
+  toast(ans==='confirmed'?`${p.crew} confirmed "${p.n}".`:`${p.crew} can't make "${p.n}". Pick another crew or new dates.`); }
+function autoSched(){ const order=['Crew A','Crew A','Masonry sub','Crew B','Crew C','Electrical sub']; let next=0;
+  schedule.forEach((p,i)=>{ if(p.s==null){ p.crew=p.crew||order[i%order.length]; p.c=crewColor(p.crew); p.s=Math.min(next,30-p.d); } next=Math.max(next,p.s+p.d); });
+  render(); toast('Crews placed. Drag anything to adjust, then Set schedule.'); }
+let sbDrag=null;
+const laneDay = (lane,x) => { const r=lane.getBoundingClientRect(); return Math.max(0,Math.min(29,Math.floor((x-r.left)/r.width*30))); };
+document.addEventListener('pointerdown', e=>{
+  const chip=e.target.closest('.screw');
+  if(chip){ const g=document.createElement('div'); g.className='sbghost'; g.style.background=crewColor(chip.dataset.crew); g.textContent=chip.dataset.crew;
+    document.body.appendChild(g); g.style.left=e.clientX+8+'px'; g.style.top=e.clientY+8+'px'; sbDrag={mode:'new', crew:chip.dataset.crew, ghost:g}; e.preventDefault(); return; }
+  const bar=e.target.closest('.sbar:not(.locked)'); if(!bar) return;
+  const p=schedule[+bar.dataset.row], lane=bar.closest('.sblane');
+  sbDrag={mode:e.target.classList.contains('sbhandle')?'resize':'move', p, lane, grab:laneDay(lane,e.clientX)-p.s, moved:false}; e.preventDefault();
+});
+document.addEventListener('pointermove', e=>{
+  if(!sbDrag) return;
+  if(sbDrag.mode==='new'){ sbDrag.ghost.style.left=e.clientX+8+'px'; sbDrag.ghost.style.top=e.clientY+8+'px';
+    document.querySelectorAll('.sblane.drop').forEach(l=>l.classList.remove('drop')); const l=document.elementFromPoint(e.clientX,e.clientY)?.closest('.sblane'); if(l) l.classList.add('drop'); return; }
+  const {p,lane}=sbDrag, d=laneDay(lane,e.clientX);
+  if(sbDrag.mode==='move'){ const ns=Math.max(0,Math.min(30-p.d,d-sbDrag.grab)); if(ns!==p.s){ p.s=ns; sbDrag.moved=true; render(); sbDrag.lane=document.querySelector(`.sblane[data-row="${schedule.indexOf(p)}"]`); } }
+  else { const nl=Math.max(1,Math.min(30-p.s,d-p.s+1)); if(nl!==p.d){ p.d=nl; sbDrag.moved=true; render(); sbDrag.lane=document.querySelector(`.sblane[data-row="${schedule.indexOf(p)}"]`); } }
+});
+document.addEventListener('pointerup', e=>{
+  if(!sbDrag) return; const dr=sbDrag; sbDrag=null;
+  if(dr.mode==='new'){ dr.ghost.remove(); document.querySelectorAll('.sblane.drop').forEach(l=>l.classList.remove('drop'));
+    const lane=document.elementFromPoint(e.clientX,e.clientY)?.closest('.sblane'); if(!lane) return;
+    const p=schedule[+lane.dataset.row]; p.crew=dr.crew; p.c=crewColor(dr.crew); if(p.s==null) p.s=Math.min(laneDay(lane,e.clientX),30-p.d);
+    render(); toast(`${dr.crew} on "${p.n}" · starts ${dayDate(p.s)}, ${p.d} days.`); return; }
+  if(dr.moved) toast(`"${dr.p.n}" · ${dayDate(dr.p.s)} – ${dayDate(dr.p.s+dr.p.d-1)} (${dr.p.d} day${dr.p.d>1?'s':''}).`);
+});
 function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]; render(); toast(p.status==='billed'?`${p.n} billed. ${fmt(p.amt)} now counts as actual cost on the job.`:`${p.n} marked ${p.status}.`); }
 
 // ---------- user roles: each role sees only the screens it touches ----------
@@ -1293,6 +1366,9 @@ PAGES.field = () => `<div class="phone">
     :`<button class="bigbtn go" onclick="FIELD.clocked='7:02 AM';render();toast('Clocked in at 7:02 AM on Henderson Backyard.')">Clock in</button>`}
   ${FIELD.clocked?`<h2 style="font-size:15px;margin:16px 0 4px">Crew on site today</h2>${Object.entries(FIELD.crew).map(([n,on])=>`<label class="check" style="cursor:pointer"><input type="checkbox" ${on?'checked':''} ${FIELD.crewSent?'disabled':''} onchange="FIELD.crew['${n}']=this.checked;render()"> ${n} <span class="small muted" style="margin-left:auto">${on?'full day':'not here'}</span></label>`).join('')}
     <button class="bigbtn alt" ${FIELD.crewSent?'disabled':''} onclick="sendCrewDay()">${FIELD.crewSent?'✓ Crew day sent':'Send crew day to Time & pay'}</button>`:''}
+  ${(()=>{ const reqs=[]; Object.entries(DATA).forEach(([jid,d])=>(d.schedule||[]).forEach((p,i)=>{ if(p.crew==='Crew A'&&p.conf==='sent') reqs.push([+jid,i,p]); }));
+    return reqs.length?`<h2 style="font-size:15px;margin:18px 0 4px">Schedule to confirm</h2>${reqs.map(([jid,i,p])=>`<div class="card" style="padding:12px;margin-top:8px"><strong>${p.n}</strong><div class="small muted">${jobs.find(j=>j.id===jid)?.name} · ${dayDate(p.s)} – ${dayDate(p.s+p.d-1)} (${p.d} days)</div>
+      <div class="row" style="margin-top:8px"><button class="btn sm primary" onclick="crewReply(${jid},${i},'confirmed')">✓ Confirm</button><button class="btn sm" onclick="crewReply(${jid},${i},'declined')">Can't make it</button></div></div>`).join('')}`:''; })()}
   <h2 style="font-size:15px;margin:18px 0 4px">Receipts + photos</h2>
   ${FIELD.receipt?`<div class="card" style="padding:12px"><div class="row between"><strong>${FIELD.receipt.v}</strong><strong>${money2(FIELD.receipt.amt)}</strong></div>
       <div class="small muted">Job: ${FIELD.receipt.job} · ${FIELD.receipt.code}</div><div class="small muted">${FIELD.receipt.note}</div>
@@ -1904,7 +1980,7 @@ const STEPS = [
     selections[0].chosen=1; selections[0].status='picked'; selections[1].chosen=0; selections[1].status='picked'; render(); flash('main .grid.g3');
     toast('Taylor picked Toscana pavers (+$310 over allowance) and the pet-friendly turf.'); }},
   {t:'Schedule crews and subs', who:'Justin · production manager', d:'Phases go on one calendar with the crew assigned. The job moves to In progress.', run: async()=>{
-    useJob(TOUR_ID); J().status='In progress';
+    useJob(TOUR_ID); J().status='In progress'; schedule.length=0; DATA[TOUR_ID].schedSet=true;
     [['Demo & haul-off','Crew A',0,2,'#64748b'],['Grade & base','Crew A',2,2,'#64748b'],['BBQ island + fire pit','Masonry sub',4,5,'#b26a00'],
      ['Paver install','Crew B',5,5,'#0f8a6a'],['Turf + putting green','Crew C',10,3,'#4d7c0f'],['Lighting + walkthrough','Crew A',13,2,'#2856b6']]
       .forEach(([n,crew,st,d,c])=>schedule.push({n,crew,s:st,d,c,st:'next'}));
