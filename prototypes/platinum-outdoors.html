@@ -192,6 +192,16 @@ body.dragging{cursor:grabbing;user-select:none}
 .reqdoc h2{font-size:17px;border-bottom:1px solid var(--line);padding-bottom:6px}
 @media print{header.top,.tour,nav.side,.demo-bar,.noprint,.toast{display:none !important}.layout{display:block}main{padding:0}.card{box-shadow:none;border:0}.reqdoc .tablewrap{overflow:visible}body{background:#fff}}
 /* hidden offer hotspot + offer sheet */
+.ohgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:center}
+.ovalue{background:rgba(255,255,255,.06);border:1px solid rgba(214,178,94,.35);border-radius:14px;padding:18px}
+.ovh{font-size:19px;font-weight:800;line-height:1.25;margin:6px 0 12px}
+.ovrow{display:flex;gap:10px;align-items:baseline;font-size:13.5px;color:#c6d0db;padding:7px 0;border-top:1px solid rgba(255,255,255,.1)}
+.ovrow.now{color:#fff;font-weight:700}
+.ovlab{flex:none;width:52px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#8fa0b3}
+.ovrow.now .ovlab{color:#d6b25e}
+.ovsame{margin-top:8px;font-weight:800;color:#f3dc9b}
+.ovq{font-size:13px !important;color:#c6d0db !important;margin:10px 0 0 !important;font-style:italic}
+@media (max-width:900px){.ohgrid{grid-template-columns:1fr;gap:18px}}
 .olevel{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fafbfc}
 .olevel.urgent{border-color:#f3b4ad;background:#fff8f7}
 .o3{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fafbfc;min-width:0}
@@ -1607,8 +1617,17 @@ PAGES.offer = () => {
   <div class="offer">
     <div class="ohero">
       <div class="small" style="letter-spacing:1.2px;text-transform:uppercase;color:#d6b25e">Proposal for Platinum Outdoors · prepared by Jamin Austin</div>
+      <div class="ohgrid"><div>
       <h1>Your own technology team.<br>One monthly fee.</h1>
       <p>I build your platform, run it, and keep improving it, as your dedicated tech lead. The MVP goes live in 3–4 months, and the same fee continues for new features and upkeep for as long as you want me on.</p>
+      </div>
+      <div class="ovalue"><div class="small" style="letter-spacing:1px;text-transform:uppercase;color:#d6b25e">The point</div>
+        <div class="ovh">You're paying for the result, not the hours.</div>
+        <div class="ovrow"><span class="ovlab">Before</span><span>9 people · 2,470 hours · 6–10 months</span></div>
+        <div class="ovrow now"><span class="ovlab">Now</span><span>1 lead + AI · 3–4 months</span></div>
+        <div class="ovsame">Same app. Same result.</div>
+        <p class="ovq">You don't price a backyard by the hours your crew stands in it. You price the finished backyard. Software works the same way now.</p>
+      </div></div>
       <div class="ostats">
         <div><b>3–4 mo</b><span>to a live MVP, for the scope agreed in discovery</span></div><div><b>1 lead + AI</b><span>no team to hire</span></div><div><b>100%</b><span>yours: code, data, accounts</span></div>
       </div>
