@@ -192,6 +192,18 @@ body.dragging{cursor:grabbing;user-select:none}
 .reqdoc h2{font-size:17px;border-bottom:1px solid var(--line);padding-bottom:6px}
 @media print{header.top,.tour,nav.side,.demo-bar,.noprint,.toast{display:none !important}.layout{display:block}main{padding:0}.card{box-shadow:none;border:0}.reqdoc .tablewrap{overflow:visible}body{background:#fff}}
 /* hidden offer hotspot + offer sheet */
+.tl{margin-top:8px}
+.tlaxis{display:grid;grid-template-columns:150px 1fr;gap:10px;margin-bottom:6px}
+.tlaxis div{position:relative;height:16px}
+.tlaxis i{position:absolute;transform:translateX(-50%);font-style:normal;font-size:11px;color:var(--muted)}
+.tlrow{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;margin-top:16px}
+.tlrow>span{font-weight:700;font-size:14px}
+.tltrack{position:relative;height:26px;background:repeating-linear-gradient(90deg,#f3f4f6 0 calc(100%/12 - 1px),#e2e5ea calc(100%/12 - 1px) calc(100%/12));border-radius:6px}
+.tlseg{position:absolute;top:0;bottom:0;border-radius:6px;font-size:11px;color:#1f2a37;padding:0 6px;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+.tlseg.slip{background:repeating-linear-gradient(45deg,var(--c) 0 6px,transparent 6px 11px);opacity:.9}
+.tlflag{position:absolute;top:-15px;font-size:10.5px;font-weight:700;color:#1f2a37;white-space:nowrap}
+.orisk{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fafbfc}
+@media (max-width:760px){.tlaxis,.tlrow{grid-template-columns:90px 1fr}.tlrow>span{font-size:12px}.tlseg{font-size:0}}
 .hotspot{position:absolute;right:10px;bottom:10px;width:64px;height:40px;background:transparent;border:0;padding:0;cursor:default;opacity:0}
 .hotspot:focus-visible{opacity:1;outline:2px dashed var(--plat)}
 .offer{max-width:980px;margin:0 auto}
@@ -1611,6 +1623,37 @@ PAGES.offer = () => {
         <div style="height:14px;background:#eef0f3;border-radius:999px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${v/max*100}%;background:${c};border-radius:999px"></div></div></div>`).join('')}
       <div class="osave">You save about <strong>${fmt(usY1-yr1)}</strong> against a US agency in year one. You get a working MVP in 3–4 months instead of 6–10, and your tech lead stays on afterward.</div>
       <p class="small muted" style="margin:10px 0 0">Traditional figures come from the Traditional Development breakdown (2,470 hours at 2026 industry rates) plus 17.5% a year for upkeep. Offshore adds 30% for rework and handoffs. These are ballparks, not vendor quotes.</p>
+    </div>
+
+    <div class="ocard"><h2>Time to a working app</h2>
+      <p class="small muted" style="margin:0 0 6px">Solid bar = typical time to launch. Striped = where it commonly slips.</p>
+      <div class="tl">
+        <div class="tlaxis"><span></span><div>${Array.from({length:13},(_,i)=>`<i style="left:${i/12*100}%">${i}</i>`).join('')}</div></div>
+        ${[['Traditional US agency','#9aa6b3',[[0,1,'Discovery'],[1,6,'Design + build']],[6,8],null],
+           ['Offshore agency','#c2cbd5',[[0,1.5,'Requirements'],[1.5,7,'Build + rework']],[7,10],null],
+           ['Casting Karma','#d6b25e',[[0,0.5,''],[0.5,3,'Build · weekly demos']],[3,4],[4,12,'Live, running your business + improving']]]
+          .map(([name,c,segs,slip,live])=>`<div class="tlrow"><span>${name}</span><div class="tltrack">
+            ${segs.map(([a,b,l])=>`<div class="tlseg" style="left:${a/12*100}%;width:${(b-a)/12*100}%;background:${c}">${l}</div>`).join('')}
+            <div class="tlseg slip" style="left:${slip[0]/12*100}%;width:${(slip[1]-slip[0])/12*100}%;--c:${c}"></div>
+            <div class="tlflag" style="left:${slip[0]/12*100}%">▼ live ${slip[0]}–${slip[1]} mo</div>
+            ${live?`<div class="tlseg" style="left:${live[0]/12*100}%;width:${(live[1]-live[0])/12*100}%;background:#0f8a6a;color:#fff">${live[2]}</div>`:''}
+          </div></div>`).join('')}
+        <div class="small muted" style="margin-top:8px">Months from signing</div>
+      </div>
+      <div class="osave">In month 5 you're already running jobs on your own system. A traditional team is still building, and an offshore team may not deliver until month 10 or later.</div>
+    </div>
+
+    <div class="ocard"><h2>Why offshore projects often run late</h2>
+      <div class="grid g3" style="gap:12px">
+        ${[['🧭','You still need a strong US-side project manager','Someone has to write tight requirements, answer questions daily and check every delivery. That\'s a $40k–$60k hire for the build, or a lot of Austin\'s and Justin\'s hours.'],
+           ['🌐','Requirements get lost in translation','"Change order", "allowance", "selections" mean specific things in your trade. Misread specs come back as rework rounds.'],
+           ['🕓','Time-zone lag','A question asked at 4 PM in Arizona is answered overnight. Each fix is a one-day round trip, so small issues stretch into weeks.'],
+           ['📱','Web + mobile quoted separately','The phone app for crews is often a second project with its own price and timeline.'],
+           ['🔁','More rework + bug-fix rounds','Testing happens at the end, so problems surface late, when they’re most expensive to fix.'],
+           ['🔄','Team turnover','Developers rotate between clients mid-project, and knowledge leaves with them.']]
+          .map(([i,t,d])=>`<div class="orisk"><div style="font-size:20px">${i}</div><strong>${t}</strong><div class="small muted" style="margin-top:4px">${d}</div></div>`).join('')}
+      </div>
+      <p class="small muted" style="margin:12px 0 0">These are common risks of offshore development, not certainties. Good offshore teams exist. They still need the US-side management above. With Casting Karma, the person you talk to is the person building it.</p>
     </div>
 
     <div class="grid g2" style="gap:16px">
