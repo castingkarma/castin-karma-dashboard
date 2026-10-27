@@ -134,6 +134,14 @@ input.txt{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius
 .bcard{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px;cursor:pointer;font-size:13.5px}
 .bcard:hover{border-color:#9fb0c2}
 .bthumb{height:34px;border-radius:6px;margin-bottom:8px}
+/* current schedule (compact) */
+.smini{margin-top:10px}
+.smrow{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,2fr) 130px;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.smtrack{position:relative;height:14px;background:repeating-linear-gradient(90deg,#f3f4f6 0 calc(100%/6 - 1px),#e2e5ea calc(100%/6 - 1px) calc(100%/6));border-radius:4px}
+.smbar{position:absolute;top:2px;bottom:2px;border-radius:4px}.smbar.done{opacity:.45}.smbar.active{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--accent)}
+.smtoday{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--bad)}
+.smst{text-align:right}
+@media (max-width:760px){.smrow{grid-template-columns:1fr auto}.smtrack{grid-column:1 / -1;order:3}}
 /* schedule builder */
 .sbcrews{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .screw{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;cursor:grab;touch-action:none;user-select:none;box-shadow:var(--shadow)}
@@ -878,6 +886,7 @@ PAGES.estimate = () => {
   });
   const coSt = s => ({approved:'p-green',sent:'p-blue',draft:'p-grey',declined:'p-red'}[s]);
   return `
+  ${schedMini()}
   <div class="row between"><div><h1>${J().name}: estimate</h1><p class="sub">Built from your cost book. Change quantity or markup and every total updates.</p></div>
   <span class="pill ${est.status==='signed'?'p-green':est.status==='sent'?'p-blue':'p-grey'}">${est.status==='signed'?`Signed by ${est.signedBy} · ${est.signedAt}`:est.status==='sent'?'Proposal sent':'Draft'}</span></div>
   <div class="grid g4">
@@ -1060,6 +1069,21 @@ PAGES.schedule = () => {
       <td class="r">${nx?`<button class="btn sm" onclick="advPO(${i})">Mark ${nx}</button>`:''}</td></tr>`}).join('')}</tbody>
   </table></div></div>`;
 };
+// compact "current schedule" shown at the top of a job once it has one
+const TODAY_IDX = 16; // Tue Oct 27, 2026 on the Mon Oct 5 workday grid
+function schedMini(){
+  const ph = schedule.filter(p=>p.s!=null).sort((a,b)=>a.s-b.s); if(!ph.length) return '';
+  const stOf = p => J().status==='Complete' || p.s+p.d-1 < TODAY_IDX ? 'done' : p.s <= TODAY_IDX ? 'active' : 'next';
+  const first=ph[0].s, last=Math.max(...ph.map(p=>p.s+p.d-1));
+  return `<div class="card" style="margin-bottom:18px"><div class="row between"><div><h2 style="margin:0">Current schedule</h2><div class="small muted">${dayDate(first)} – ${dayDate(last)} · ${new Set(ph.map(p=>p.crew)).size} crews${isSet()?'':' · <span class="neg">draft, not set yet</span>'}</div></div>
+    <button class="btn sm" onclick="go('schedule')">Open schedule →</button></div>
+    <div class="smini">${ph.map(p=>{ const st=stOf(p), conf=p.conf||'confirmed'; return `<div class="smrow">
+      <div class="smname"><strong>${p.n}</strong><div class="small muted">${p.crew} · ${dayDate(p.s)} – ${dayDate(p.s+p.d-1)}</div></div>
+      <div class="smtrack"><div class="smbar ${st}" style="left:${p.s/30*100}%;width:${p.d/30*100}%;background:${p.c||crewColor(p.crew)}"></div><div class="smtoday" style="left:${(TODAY_IDX+.5)/30*100}%"></div></div>
+      <div class="smst">${st==='done'?'<span class="pill p-grey">✓ Done</span>':st==='active'?'<span class="pill p-green">● In progress</span>':conf==='sent'?'<span class="pill p-blue">Awaiting crew</span>':conf==='declined'?'<span class="pill p-red">Crew declined</span>':'<span class="pill p-grey">Upcoming</span>'}</div></div>`; }).join('')}
+    <div class="small muted" style="margin-top:6px;text-align:right"><span style="display:inline-block;width:2px;height:10px;background:var(--bad);vertical-align:-1px;margin-right:5px"></span>Today · ${dayDate(TODAY_IDX)}</div></div>
+  </div>`;
+}
 function editSched(){ DATA[curJob].schedSet=false; render(); }
 async function setSched(b){ b.disabled=true; b.textContent='Setting…'; await wait(500); DATA[curJob].schedSet=true; schedule.forEach(p=>{ if(p.s!=null) p.conf='sent'; }); render(); flash('#schedSummary');
   toast(`Schedule set. ${new Set(schedule.map(x=>x.crew)).size} crews were sent their dates to confirm.`); }
@@ -1907,8 +1931,8 @@ PAGES.portal = () => {
     `<div class="todo"><div class="ic" style="background:var(--accent-soft)">💳</div><div style="flex:1"><strong>Payment 3 of 4: ${fmt(t.contract*.3)}</strong><div class="small muted">Due when the kitchen &amp; hardscape are complete</div></div><button class="btn sm" onclick="toast('Online card/ACH payment is an option for v1. We would decide that with you in discovery.')">Pay</button></div>`
   ];
   return `<h1>Hi Dana, here's your backyard</h1><p class="sub">Henderson Backyard · Scottsdale · managed by Platinum Outdoors</p>
-  <div class="card"><div class="steps">${stages.map((s,i)=>`<div class="${i<2?'done':i===2?'now':''}">${s}</div>`).join('')}</div>
-    <p class="small muted" style="margin:14px 0 0">Pavers are going in this week. Next up: the seat wall and your outdoor kitchen.</p></div>
+  <div class="card"><div class="steps">${stages.map((s,i)=>`<div class="${i<3?'done':i===3?'now':''}">${s}</div>`).join('')}</div>
+    <p class="small muted" style="margin:14px 0 0">Your patio and seat wall are done. The outdoor kitchen and gas line are going in this week. Next up: turf and planting.</p></div>
   <div class="grid g2 mt">
     <div class="card"><h2>Needs your attention</h2>${todos.join('')}</div>
     <div class="card"><h2>Your contract</h2>
