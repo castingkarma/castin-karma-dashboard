@@ -191,6 +191,31 @@ body.dragging{cursor:grabbing;user-select:none}
 /* requirements doc + print */
 .reqdoc h2{font-size:17px;border-bottom:1px solid var(--line);padding-bottom:6px}
 @media print{header.top,.tour,nav.side,.demo-bar,.noprint,.toast{display:none !important}.layout{display:block}main{padding:0}.card{box-shadow:none;border:0}.reqdoc .tablewrap{overflow:visible}body{background:#fff}}
+/* hidden offer hotspot + offer sheet */
+.hotspot{position:absolute;right:10px;bottom:10px;width:64px;height:40px;background:transparent;border:0;padding:0;cursor:default;opacity:0}
+.hotspot:focus-visible{opacity:1;outline:2px dashed var(--plat)}
+.offer{max-width:980px;margin:0 auto}
+.ohero{background:radial-gradient(1200px 400px at 85% -10%,#3b4d63 0,transparent 60%),linear-gradient(135deg,#141c26,#22303f);color:#fff;border-radius:18px;padding:34px 34px 28px;box-shadow:0 10px 30px rgba(15,23,42,.25)}
+.ohero h1{font-size:34px;line-height:1.15;margin:10px 0 12px;letter-spacing:-.3px}
+.ohero p{color:#d3dbe4;max-width:640px;margin:0;font-size:15.5px}
+.ostats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
+.ostats div{border-top:1px solid rgba(255,255,255,.18);padding-top:12px}
+.ostats b{display:block;font-size:22px;color:#f3dc9b}.ostats span{font-size:13px;color:#aeb9c6}
+.oplans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.oplan{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;position:relative;box-shadow:var(--shadow)}
+.oplan.rec{border:2px solid #d6b25e;box-shadow:0 8px 24px rgba(214,178,94,.18)}
+.otag{position:absolute;top:-11px;left:20px;background:#d6b25e;color:#1f2a37;font-size:11.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.oname{font-weight:700;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.oprice{font-size:40px;font-weight:800;letter-spacing:-.5px;margin:6px 0 2px}.oprice small{font-size:15px;font-weight:600;color:var(--muted);margin-left:6px}
+.oplan ul,.ochecks{margin:14px 0 0;padding:0;list-style:none}
+.oplan li,.ochecks li{padding:6px 0 6px 24px;position:relative;font-size:14.5px}
+.oplan li:before,.ochecks li:before{content:"✓";position:absolute;left:0;color:#0f8a6a;font-weight:800}
+.ocard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:var(--shadow)}
+.osave{margin-top:18px;background:#fbf6e8;border:1px solid #efdfb4;border-radius:12px;padding:12px 14px;font-size:15px}
+.osteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.osteps span{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#1f2a37;color:#f3dc9b;font-weight:800;margin-bottom:6px}
+.osteps b{display:block}
+@media (max-width:760px){.ohero{padding:24px 20px}.ohero h1{font-size:26px}.ostats,.oplans,.osteps{grid-template-columns:1fr}.oprice{font-size:34px}}
 /* leads */
 .funnel{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 .funnel .st{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;position:relative}
@@ -428,7 +453,7 @@ function setRole(r){
   document.getElementById('roleSel').value=r; render(); window.scrollTo({top:0});
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'||page==='offer'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -640,14 +665,15 @@ PAGES.trad = () => {
       <p class="small muted" style="margin:0">Offshore rates are lower, but time-zone gaps, handoffs and rework usually add 20–40% to the hours. Either way you also spend your own time in meetings, testing and approvals across 6–10 months.</p>
     </div>
   </div>
-  <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)">
+  <div class="card mt" style="position:relative;border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)">
     <div class="row between"><h2 style="margin:0">Built with Casting Karma's AI build system</h2><span class="pill p-green">The same app</span></div>
     <div class="grid g3 mt">
       <div class="stat"><div class="k">Team</div><div class="v">1 builder + AI</div><div class="d muted">no team to hire or manage</div></div>
-      <div class="stat"><div class="k">Time to launch</div><div class="v">Weeks</div><div class="d muted">not months</div></div>
+      <div class="stat"><div class="k">Time to launch</div><div class="v">3–4 months</div><div class="d muted">MVP live, vs. 6–10 with a traditional team</div></div>
       <div class="stat"><div class="k">Price</div><div class="v">Quoted to you</div><div class="d muted">a fraction of the traditional cost</div></div>
     </div>
     <p class="small muted" style="margin:12px 0 0">And you own it: the code, the data and the accounts are in your name.</p>
+    <button class="hotspot" aria-label="Open offer" onclick="go('offer')"></button>
   </div>`;
 };
 
@@ -1424,7 +1450,7 @@ const RQ_NFR = [
 const RQ_INT = [['QuickBooks Online','Invoices, payments, bills, expenses, payroll/1099 bills, customers, projects'],['Email delivery','Proposals, approvals, sign-in codes, notifications'],['AutoCAD (DWG/DXF)','Read quantities from agreed layers and blocks'],['Receipt reading','Read vendor, amount and date from receipt photos'],['Online payments (optional)','Card / ACH deposits and progress payments from the client portal'],['Maps / location','Job addresses and clock-in location']];
 const RQ_DATA = ['Users + roles','Customers','Jobs','Quotes + quote requests','Design files + takeoffs','Cost book items + cost groups','Estimates + lines (versioned)','Change orders','Selections + options','Proposals + signatures','Schedule phases + crews','Purchase orders + vendor bills','Receipts','Time cards + pay rules','Invoices + payments','QuickBooks sync records','Audit log'];
 const RQ_OUT = ['Vehicle GPS tracking (clock-in location only)','A full accounting system (QuickBooks remains the books)','Native App Store / Play Store apps (mobile web + home-screen install instead)','HR, onboarding + applicant tracking','Leads engine from public records (separate add-on)','Subcontractor report cards + AI cost analysis','Licensing the platform to other companies'];
-const RQ_MS = [['M1 · Discovery + design sign-off','Requirements confirmed, screens approved, QuickBooks mapping and report definitions agreed','Weeks 1–2'],['M2 · Core','Accounts + roles, cost book, quotes + design, estimates, proposal + e-sign, client portal','Weeks 3–5'],['M3 · Production','Jobs board, crew calendar, selections, POs, job costing, field app, time + pay','Weeks 5–7'],['M4 · Money + admin','QuickBooks integration, Master Admin, finance reports, audit log','Weeks 7–8'],['M5 · Launch','Data migration from JobTread, training, run side by side with JobTread, cutover','Weeks 8–9']];
+const RQ_MS = [['M1 · Discovery + design sign-off','Requirements confirmed, screens approved, QuickBooks mapping and report definitions agreed','Weeks 1–2'],['M2 · Core','Accounts + roles, cost book, quotes + design, estimates, proposal + e-sign, client portal','Month 1–2'],['M3 · Production','Jobs board, crew calendar, selections, POs, job costing, field app, time + pay','Month 2–3'],['M4 · Money + admin','QuickBooks integration, Master Admin, finance reports, audit log','Month 3'],['M5 · Launch','Data migration from JobTread, training, run side by side with JobTread, cutover','Month 3–4']];
 const RQ_Q = ['Which drawing layers and blocks does the designer use, and in what file version?','What is the target margin, and does it differ by job type?','Exact pay rules per worker type, and the pay period','QuickBooks: which accounts, items and classes; who reconciles','Which reports does Joel need each week and month?','Online payments in v1: yes or no; which processor?','What has to move from JobTread: open jobs only, or history too?','Which work-eligibility checks happen in hiring and pay (for their accountant/attorney, not the software)?'];
 PAGES.reqdoc = () => {
   const total = RQ_MODULES.reduce((a,m)=>a+m[2].length,0);
@@ -1488,7 +1514,7 @@ PAGES.reqdoc = () => {
 
     <h2 class="mt2">10. Milestones + deliverables</h2>
     <div class="tablewrap"><table><thead><tr><th>Milestone</th><th>Delivers</th><th>Target</th></tr></thead><tbody>${RQ_MS.map(m=>`<tr><td><strong>${m[0]}</strong></td><td class="small">${m[1]}</td><td class="small" style="white-space:nowrap">${m[2]}</td></tr>`).join('')}</tbody></table></div>
-    <p class="small muted">A traditional team would typically plan 6–10 months for this scope (see Traditional Development). The targets above assume the AI-assisted build.</p>
+    <p class="small muted">A traditional team would typically plan 6–10 months for this scope (see Traditional Development). The targets above (about 3–4 months) assume the AI-assisted build.</p>
 
     <h2 class="mt2">11. Acceptance + sign-off</h2>
     <ul class="small" style="line-height:1.7"><li>Every "Must" requirement is demonstrated on a test job and signed off by the owner of that area (Austin, Joel or Justin).</li><li>One live job is run in both JobTread and the new system with matching numbers.</li><li>QuickBooks entries for that job are checked by Joel or the bookkeeper.</li><li>Training is done for each role.</li></ul>
@@ -1549,6 +1575,59 @@ PAGES.infra = () => {
   <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)"><h2>The comparison that matters</h2>
     <p style="margin:0">Running your own platform costs about <strong>${fmt(lo*12)}–${fmt(hi*12)} a year</strong> in accounts, compared with roughly <strong>$5.6k–$10.5k a year</strong> for JobTread + GoHighLevel at list price. And you own it: no per-seat fees as you hire, and no price increases you didn't choose.</p>
     <p class="small muted" style="margin:8px 0 0">Support and maintenance are separate from these account costs.</p></div>`;
+};
+
+// ---------- the offer (reached only from the hidden hotspot on Traditional Development) ----------
+const OFFER = {flat:8500, growth:7000, pct:0.03, base:2000000, tradUS:383800, tradOff:103210};
+PAGES.offer = () => {
+  const o = OFFER, yr1 = o.flat*12;
+  const usY1 = o.tradUS + o.tradUS*0.175, offY1 = o.tradOff*1.3 + o.tradOff*0.175; // build + a year of upkeep (offshore +30% rework)
+  const bars = [['Traditional US agency','build + first year of upkeep',usY1,'#9aa6b3'],['Offshore agency','build + rework + first year of upkeep',offY1,'#c2cbd5'],['Casting Karma','build + upkeep + new features, all 12 months',yr1,'#d6b25e']];
+  const max = Math.max(...bars.map(b=>b[2]));
+  const grow = [2e6,3e6,4e6,5e6].map(r=>({r, g:o.growth*12 + Math.max(0,r-o.base)*o.pct}));
+  return `<div class="row noprint" style="margin-bottom:14px"><button class="btn" onclick="go('trad')">← Back</button></div>
+  <div class="offer">
+    <div class="ohero">
+      <div class="small" style="letter-spacing:1.2px;text-transform:uppercase;color:#d6b25e">Proposal for Platinum Outdoors · prepared by Jamin Austin</div>
+      <h1>Your own technology team.<br>One monthly fee.</h1>
+      <p>I build your platform, run it, and keep improving it, as your dedicated tech lead. The MVP goes live in 3–4 months, and the same fee continues for new features and upkeep for as long as you want me on.</p>
+      <div class="ostats">
+        <div><b>3–4 mo</b><span>to a live MVP</span></div><div><b>1 lead + AI</b><span>no team to hire</span></div><div><b>100%</b><span>yours: code, data, accounts</span></div>
+      </div>
+    </div>
+
+    <div class="oplans">
+      <div class="oplan rec"><span class="otag">Recommended</span><div class="oname">Dedicated tech lead</div>
+        <div class="oprice">${fmt(o.flat)}<small>/ month</small></div><div class="small muted">One flat fee. Simple to budget.</div>
+        <ul><li>MVP built + live in 3–4 months</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} for the first full year</li></ul></div>
+      <div class="oplan"><div class="oname">Growth partner</div>
+        <div class="oprice">${fmt(o.growth)}<small>/ month</small></div><div class="small muted">+ ${o.pct*100}% of revenue above $${o.base/1e6}M a year</div>
+        <ul><li>Lower monthly fee today</li><li>You only pay the share when you grow past today</li><li>Everything in Dedicated tech lead</li></ul>
+        <table class="small" style="margin-top:6px"><tbody>${grow.map(g=>`<tr><td class="muted">At $${g.r/1e6}M revenue</td><td class="r"><strong>${fmt(g.g)}</strong> / yr</td></tr>`).join('')}</tbody></table></div>
+    </div>
+
+    <div class="ocard"><h2>What the same result costs the traditional way (first 12 months)</h2>
+      ${bars.map(([l,d,v,c])=>`<div style="margin-top:14px"><div class="row between"><span><strong>${l}</strong> <span class="small muted">· ${d}</span></span><strong>${fmt(v)}</strong></div>
+        <div style="height:14px;background:#eef0f3;border-radius:999px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${v/max*100}%;background:${c};border-radius:999px"></div></div></div>`).join('')}
+      <div class="osave">You save about <strong>${fmt(usY1-yr1)}</strong> against a US agency in year one. You get a working MVP in 3–4 months instead of 6–10, and your tech lead stays on afterward.</div>
+      <p class="small muted" style="margin:10px 0 0">Traditional figures come from the Traditional Development breakdown (2,470 hours at 2026 industry rates) plus 17.5% a year for upkeep. Offshore adds 30% for rework and handoffs. These are ballparks, not vendor quotes.</p>
+    </div>
+
+    <div class="grid g2" style="gap:16px">
+      <div class="ocard"><h2>What's included</h2><ul class="ochecks">
+        <li>Discovery + design sessions with Austin, Joel + Justin</li><li>The full MVP: quotes + design, estimates, proposals, portal, selections, calendar, job costing, time + pay, field app, QuickBooks, Master Admin</li>
+        <li>Running side by side with JobTread until you're ready to switch</li><li>Hosting setup, security, backups + monitoring</li><li>New features after launch, from one shared priority list</li><li>Fixes and urgent help: same business day</li><li>Up to about 25 hours a week, focused on Platinum</li></ul></div>
+      <div class="ocard"><h2>Terms, in plain words</h2><ul class="ochecks">
+        <li><strong>12-month minimum.</strong> It covers the build, which is priced well below a one-time build fee.</li><li><strong>After 12 months:</strong> month to month, with 60 days' notice to end it</li>
+        <li><strong>You own everything</strong>: code, data and accounts, all in Platinum's name</li><li>Account costs (about $67–95 a month) are billed to your card directly. Travel + paid data only with your OK.</li>
+        <li>Rate reviewed once a year</li><li>Independent contractor (1099) agreement</li></ul></div>
+    </div>
+
+    <div class="ocard"><h2>How we start</h2><div class="osteps">
+      ${[['1','Agree','Pick a plan and sign a short agreement'],['2','Set up','You create the accounts and I’m added (I’ll guide you)'],['3','Discover','1–2 weeks of working sessions to lock the MVP'],['4','Build','Weekly demos until it’s live, then it keeps improving']].map(([n,t,d])=>`<div><span>${n}</span><b>${t}</b><div class="small muted">${d}</div></div>`).join('')}
+    </div></div>
+    <p class="small muted" style="text-align:center;margin:18px 0 0">Jamin Austin · Casting Karma · proposal draft, not a contract · valid 30 days</p>
+  </div>`;
 };
 
 // ---------- client pages ----------
