@@ -135,6 +135,7 @@ input.txt{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius
 .bcard:hover{border-color:#9fb0c2}
 .bthumb{height:34px;border-radius:6px;margin-bottom:8px}
 /* walkthrough */
+.tour .twho{display:inline-block;margin-left:8px;font-size:12px;font-weight:700;background:rgba(95,224,181,.16);color:#9ff0d2;border:1px solid rgba(95,224,181,.4);border-radius:999px;padding:2px 10px;vertical-align:2px;white-space:nowrap}
 .tour{position:sticky;top:var(--hdr,58px);z-index:18;background:#0b3b2e;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tour .tstep{flex:1;min-width:220px;font-size:14px}
 .tour .tstep b{display:block;font-size:15px}
@@ -1874,13 +1875,13 @@ function flash(sel){ const el=typeof sel==='string'?document.querySelector(sel):
 function teamOn(){ if(role!=='owner'){ role='owner'; view='team'; document.getElementById('roleSel').value='owner'; } closeModal(); }
 const TL = (sec,code,d,q,u,c,m) => ({sec,code,d,q,u,c,m});
 const STEPS = [
-  {t:'A new customer calls', d:'Create the customer and the job in one form. It lands on the Jobs board under Lead.', run: async()=>{
+  {t:'A new customer calls', who:'Austin · owner / sales', d:'Create the customer and the job in one form. It lands on the Jobs board under Lead.', run: async()=>{
     teamOn(); go('jobs'); await wait(300); newJobModal(); await wait(250);
     await typeIn('nj_name','Taylor Reyes'); await typeIn('nj_email','taylor.reyes@example.com'); await typeIn('nj_phone','(480) 555-0131');
     await typeIn('nj_addr','Sample address, Queen Creek'); await typeIn('nj_city','Queen Creek'); document.getElementById('nj_src').value='Postcard (Leads)';
     await typeIn('nj_scope','Pavers, turf + putting green, fire pit, BBQ island, lighting');
     const b=document.getElementById('nj_btn'); b.disabled=true; b.textContent='Creating…'; await wait(500); createJob(TOUR_ID); }},
-  {t:'Build the estimate from your cost book', d:'Pick items from the cost book. Your costs and markups fill in, and price and margin update live.', run: async()=>{
+  {t:'Build the estimate from your cost book', who:'Austin · owner / sales', d:'Pick items from the cost book. Your costs and markups fill in, and price and margin update live.', run: async()=>{
     useJob(TOUR_ID); J().status='Estimating'; go('estimate');
     const lines=[TL('Site prep','DEMO','Remove grass & rock, haul off',1,'ls',1900,30), TL('Site prep','DEMO','Grade & compact base, 4" ABC',700,'sf',1.6,35),
       TL('Patio','PAV','Concrete pavers, Belgard Catalina',480,'sf',9.75,38), TL('Turf','TURF','Artificial turf + putting green',650,'sf',5.2,40),
@@ -1888,12 +1889,12 @@ const STEPS = [
       TL('Lighting','LITE','Low-voltage lighting (10 fixtures)',10,'ea',165,45)];
     for(const l of lines){ est.lines.push(l); render(); await wait(300); }
     flash('main .grid.g4'); const t=totals(); toast(`Estimate built: ${fmt(t.estPrice)} at ${pct((t.contract-t.budget)/t.contract*100)} margin.`); }},
-  {t:'Send the proposal', d:'The same estimate becomes a branded proposal. The client never sees your costs or markup.', run: async()=>{
+  {t:'Send the proposal', who:'Austin · owner / sales', d:'The same estimate becomes a branded proposal. The client never sees your costs or markup.', run: async()=>{
     useJob(TOUR_ID); go('proposal'); await wait(500); est.status='sent'; J().status='Proposal sent'; render(); flash('.proposal'); toast('Proposal emailed to Taylor with a link to review and sign.'); }},
-  {t:'Taylor signs online', d:'The client types their name to accept. The job moves to Sold and the deposit invoice goes out on its own.', run: async()=>{
+  {t:'Taylor (client) signs online', who:'Taylor · client (homeowner)', d:'The client types their name to accept. The job moves to Sold and the deposit invoice goes out on its own.', run: async()=>{
     useJob(TOUR_ID); if(page!=='proposal') go('proposal'); await wait(200); flash('.sigbox'); await typeIn('sigName','Taylor Reyes'); await wait(300);
     document.getElementById('sigBtn').click(); await wait(900); flash('.sigbox'); }},
-  {t:'Taylor picks finishes in the portal', d:'Pavers and turf are chosen in the client portal. Anything over the allowance shows up right away.', run: async()=>{
+  {t:'Taylor (client) picks finishes in the portal', who:'Taylor · client (homeowner)', d:'Pavers and turf are chosen in the client portal. Anything over the allowance shows up right away.', run: async()=>{
     useJob(TOUR_ID); selections.push(
       {id:'r1', cat:'Pavers', title:'Patio paver color', allowance:4680, due:'Oct 30', status:'open', chosen:null, opts:[
         {n:'Catalina Grana, Sand', v:'Belgard', p:4680, sw:'linear-gradient(135deg,#e6d5b5,#c7ad80)'}, {n:'Catalina Grana, Toscana', v:'Belgard', p:4990, sw:'linear-gradient(135deg,#c9a27a,#8f6a45)'}, {n:'Catalina Grana, Charcoal', v:'Belgard', p:4680, sw:'linear-gradient(135deg,#6b6b6b,#383838)'}]},
@@ -1902,26 +1903,26 @@ const STEPS = [
     go('selections'); await wait(700);
     selections[0].chosen=1; selections[0].status='picked'; selections[1].chosen=0; selections[1].status='picked'; render(); flash('main .grid.g3');
     toast('Taylor picked Toscana pavers (+$310 over allowance) and the pet-friendly turf.'); }},
-  {t:'Schedule crews and subs', d:'Phases go on one calendar with the crew assigned. The job moves to In progress.', run: async()=>{
+  {t:'Schedule crews and subs', who:'Justin · production manager', d:'Phases go on one calendar with the crew assigned. The job moves to In progress.', run: async()=>{
     useJob(TOUR_ID); J().status='In progress';
     [['Demo & haul-off','Crew A',0,2,'#64748b'],['Grade & base','Crew A',2,2,'#64748b'],['BBQ island + fire pit','Masonry sub',4,5,'#b26a00'],
      ['Paver install','Crew B',5,5,'#0f8a6a'],['Turf + putting green','Crew C',10,3,'#4d7c0f'],['Lighting + walkthrough','Crew A',13,2,'#2856b6']]
       .forEach(([n,crew,st,d,c])=>schedule.push({n,crew,s:st,d,c,st:'next'}));
     go('schedule'); await wait(200); flash('.gantt'); toast('Crews scheduled. Everyone sees the same calendar.'); }},
-  {t:'Order materials', d:'Purchase orders go to vendors against the job, so every dollar lands in the right cost group.', run: async()=>{
+  {t:'Order materials', who:'Justin · production manager', d:'Purchase orders go to vendors against the job, so every dollar lands in the right cost group.', run: async()=>{
     useJob(TOUR_ID);
     [['PO-1051','Belgard / SiteOne','Catalina pavers 500 sf + sand','PAV',4520],['PO-1052','SYNLawn Arizona','Turf 650 sf + putting green kit','TURF',3280],
      ['PO-1053','BBQ Island Supply','Island block, grill cutout, stucco','KIT',3900],['PO-1054','Ferguson','Fire pit burner + gas parts','FIRE',2350],['PO-1055','FX Luminaire / Ewing','10 fixtures + transformer','LITE',1240]]
       .forEach(([n,v,d,code,amt])=>pos.push({n,v,d,code,amt,date:'Nov 3',status:'sent'}));
     go('schedule'); await wait(200); flash('main .card.mt:last-child'); toast('5 purchase orders sent to vendors.'); }},
-  {t:'A change order mid-job', d:'Taylor asks for a seat wall and 2 palm uplights. They approve it on their phone and the contract updates.', run: async()=>{
+  {t:'A change order mid-job', who:'Austin · sales + Taylor · client', d:'Taylor (client) asks for a seat wall and 2 palm uplights. They approve it on their phone and the contract updates.', run: async()=>{
     useJob(TOUR_ID); cos.push({n:1, title:'Add seat wall + 2 palm uplights', status:'sent', date:'Nov 6', lines:[TL('','PAV','Seat wall, 12 lf',12,'lf',140,35), TL('','LITE','2 palm uplights',2,'ea',165,45)]});
     go('estimate'); await wait(200); flash('main .card.mt:last-child'); await wait(1400);
     cos[0].status='approved'; render(); flash('main .grid.g4'); toast(`Taylor approved CO-1 (+${fmt(coPriceOf(cos[0]))}). Contract and budget updated.`); }},
-  {t:'Costs roll in', d:'Vendor bills and crew labor post against the budget. You see the margin while the job is still running.', run: async()=>{
+  {t:'Costs roll in', who:'Crew lead · field app + Joel · finance', d:'Vendor bills and crew labor post against the budget. You see the margin while the job is still running.', run: async()=>{
     useJob(TOUR_ID); const t0=totals(), estM=(t0.contract-t0.budget)/t0.contract*100; pos.forEach(p=>p.status='billed'); Object.assign(otherActual,{DEMO:1600, PAV:1500, TURF:700, KIT:1100, FIRE:900, LITE:450});
     go('costing'); await wait(200); flash('main .card.mt'); const t=totals(); toast(`All costs in. Turf ran ${fmt(t.byCode.TURF.actual-t.byCode.TURF.budget)} over, but the job landed at ${pct((t.contract-t.actual)/t.contract*100)} margin vs. ${pct(estM)} estimated.`); }},
-  {t:'Final walkthrough and close', d:'The job moves to Complete, the final invoice goes out, and a review request is sent automatically.', run: async()=>{
+  {t:'Final walkthrough and close', who:'Justin · production + Joel · final invoice', d:'The job moves to Complete, the final invoice goes out, and a review request is sent automatically.', run: async()=>{
     useJob(TOUR_ID); J().status='Complete'; go('jobs'); await wait(200); flash('#jc-'+TOUR_ID); toast('Job complete. Final invoice and review request sent.'); }},
 ];
 let tourStep = 0, tourBusy = false;
@@ -1932,7 +1933,7 @@ function renderTour(){
   else if(tourStep>n) el.innerHTML = `<div class="tstep"><b>✓ Done: first call to final invoice</b><span>Every screen you saw shared the same job record. Nothing was typed twice.</span><div class="tbar"><i style="width:100%"></i></div></div>
     <button class="btn treset" onclick="startOver()">↺ Start over</button>`;
   else { const st=STEPS[tourStep-1];
-    el.innerHTML = `<div class="tstep"><b>Step ${tourStep} of ${n}: ${st.t}</b><span>${st.d}</span><div class="tbar"><i style="width:${tourStep/n*100}%"></i></div></div>
+    el.innerHTML = `<div class="tstep"><b>Step ${tourStep} of ${n}: ${st.t} <span class="twho">👤 ${st.who}</span></b><span>${st.d}</span><div class="tbar"><i style="width:${tourStep/n*100}%"></i></div></div>
     <button class="btn tnext" id="tourNext" onclick="nextStep()" ${tourBusy?'disabled':''}>${tourBusy?'Working…':tourStep===n?'Finish':'Next step →'}</button>
     <button class="btn treset" onclick="startOver()">↺ Start over</button>`; }
 }
