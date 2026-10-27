@@ -957,6 +957,9 @@ function proposalDoc(client){
     <div class="body">
       <p>Thanks for having us out, ${src.first}. Here's the full scope we walked through, with one price and no surprises. Finishes you still need to choose will show up in your client portal once you approve.</p>
       <div class="tablewrap"><table><tbody>${rows}<tr class="tot"><td>Total</td><td class="r">${fmt(total)}</td></tr></tbody></table></div>
+      <h2 class="mt2">Your design</h2>
+      <p class="small muted" style="margin:0 0 6px">The plan this price is based on. Tap a file to view it.</p>
+      ${[['PDF',`${src.client.split(' ').pop()}_backyard_v1.pdf`,'Plan sheet · what we will build'],['DWG',`${src.client.split(' ').pop()}_backyard_v1.dwg`,'CAD drawing · every layer + dimension']].map(([t,n,d])=>`<div class="file clickable" role="button" tabindex="0" onclick="openPropDrawing('${t}')"><span class="ext">${t}</span>${n}<span class="small muted" style="margin-left:auto">${d}</span></div>`).join('')}
       <h2 class="mt2">Payment schedule</h2>
       <div class="tablewrap"><table><tbody>${payments.map(p=>`<tr><td>${p.l}</td><td class="r">${Math.round(p.p*100)}%</td><td class="r">${fmt(total*p.p)}</td></tr>`).join('')}</tbody></table></div>
       <h2 class="mt2">Timeline</h2><p class="muted" style="margin-top:0">About 3 weeks on site. We'll confirm a start date within 2 business days of your approval.</p>
@@ -1790,12 +1793,16 @@ function planSVG(print){
     <g transform="translate(64,40)"><circle r="2.2" fill="none" stroke="${ink}" stroke-width=".15"/><path d="M0,2 L.9,-1 L0,-.3 L-.9,-1 Z" fill="${ink}"/><text y="-2.8" text-anchor="middle" fill="${ink}" font-size="1.1">N</text></g>
   </svg>`;
 }
-function openDrawing(qid, kind){
-  const q = QUOTES.find(x=>x.id===qid) || QUOTES[0], last = q.client.split(' ').pop();
-  const lines = q.lines.length ? q.lines : [];
+let lastDraw = null;
+function openDrawing(qid, kind){ const q = QUOTES.find(x=>x.id===qid) || QUOTES[0]; drawFor(q.client, q.city, q.lines, kind); }
+function openPropDrawing(kind){ const src=propSrc(); drawFor(src.client, src.city, curJob===1?[]:est.lines, kind); }
+function drawFor(client, city, qlines, kind){
+  lastDraw=[client, city, qlines];
+  const q = {client, city}, last = client.split(' ').pop();
+  const lines = (qlines||[]).filter(l=>l.q!=null);
   const body = kind==='DWG'
     ? `<div class="row between" style="margin-bottom:8px"><div><div class="small muted">AutoCAD drawing · sample</div><h2 style="margin:2px 0 0">${last}_backyard_v1.dwg</h2></div><button class="btn" onclick="closeModal()" aria-label="Close">✕</button></div>
-       <div class="cadwrap"><div class="cadbar"><span>Layers</span>${CAD_LAYERS.map(([k,l,c])=>`<button class="cadchip ${cadOff.has(k)?'off':''}" onclick="toggleLayer('${k}','${qid}')"><i style="background:${c}"></i>${k}</button>`).join('')}</div>
+       <div class="cadwrap"><div class="cadbar"><span>Layers</span>${CAD_LAYERS.map(([k,l,c])=>`<button class="cadchip ${cadOff.has(k)?'off':''}" onclick="toggleLayer('${k}')"><i style="background:${c}"></i>${k}</button>`).join('')}</div>
        ${planSVG(false)}<div class="cadfoot"><span>MODEL</span><span>Scale 1/8" = 1'-0"</span><span>Units: feet</span><span>Snap ON · Grid 5'</span></div></div>
        <p class="small muted" style="margin:10px 0 0">Each layer is what the app reads for the takeoff: PAVERS 524 sf · WALLS 18 lf · TURF 710 sf · PERGOLA, FIREPIT and 12 LIGHT blocks. Click a layer to hide or show it.</p>`
     : `<div class="row between" style="margin-bottom:8px"><div><div class="small muted">Plan set · PDF · sample</div><h2 style="margin:2px 0 0">${last}_backyard_v1.pdf</h2></div><button class="btn" onclick="closeModal()" aria-label="Close">✕</button></div>
@@ -1809,7 +1816,7 @@ function openDrawing(qid, kind){
            <div class="tb small muted">Sample drawing for demo. Not for construction.</div></div></div>`;
   openModal(body, true);
 }
-function toggleLayer(k,qid){ cadOff.has(k)?cadOff.delete(k):cadOff.add(k); openDrawing(qid,'DWG'); }
+function toggleLayer(k){ cadOff.has(k)?cadOff.delete(k):cadOff.add(k); drawFor(...lastDraw,'DWG'); }
 
 // ---------- client pages ----------
 PAGES.portal = () => {
