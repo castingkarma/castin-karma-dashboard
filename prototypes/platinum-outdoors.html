@@ -192,6 +192,8 @@ body.dragging{cursor:grabbing;user-select:none}
 .reqdoc h2{font-size:17px;border-bottom:1px solid var(--line);padding-bottom:6px}
 @media print{header.top,.tour,nav.side,.demo-bar,.noprint,.toast{display:none !important}.layout{display:block}main{padding:0}.card{box-shadow:none;border:0}.reqdoc .tablewrap{overflow:visible}body{background:#fff}}
 /* hidden offer hotspot + offer sheet */
+.olevel{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fafbfc}
+.olevel.urgent{border-color:#f3b4ad;background:#fff8f7}
 .o3{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fafbfc;min-width:0}
 .o3 table td,.o3 table th{padding:7px 6px}
 .tl{margin-top:8px}
@@ -1678,12 +1680,24 @@ PAGES.offer = () => {
     <div class="grid g2" style="gap:16px">
       <div class="ocard"><h2>What's included</h2><ul class="ochecks">
         <li>Discovery + design sessions with Austin, Joel + Justin</li><li>The full MVP: quotes + design, estimates, proposals, portal, selections, calendar, job costing, time + pay, field app, QuickBooks, Master Admin</li>
-        <li>Running side by side with JobTread until you're ready to switch</li><li>Hosting setup, security, backups + monitoring</li><li>New features after launch, from one shared priority list</li><li>Urgent system issues: reachable 24/7, remote. Everything else: same business day</li><li>Up to about 25 hours a week, focused on Platinum</li></ul></div>
+        <li>Running side by side with JobTread until you're ready to switch</li><li>Hosting setup, security, backups + monitoring</li><li>New features after launch, from one shared priority list</li><li>Urgent system issues: reachable 24/7, remote. Everything else: same business day (see "What counts as urgent")</li><li>Up to about 25 hours a week, focused on Platinum</li></ul></div>
       <div class="ocard"><h2>Terms, in plain words</h2><ul class="ochecks">
         <li><strong>12-month minimum.</strong> It covers the build, which is priced well below a one-time build fee.</li><li><strong>After 12 months:</strong> month to month, with 60 days' notice to end it</li>
         <li><strong>Timeline:</strong> the 3–4 months covers the MVP scope we lock together in discovery. Adding to it either moves the date or goes into the first update after launch. We decide that together.</li>
         <li><strong>You own everything</strong>: code, data and accounts, all in Platinum's name</li><li>Account costs (about $67–95 a month) are billed to your card directly. Travel + paid data only with your OK.</li>
         <li><strong>Yearly review:</strong> +5% standard, up to +10% when the agreed goals are met</li><li>Independent contractor (1099) agreement</li></ul></div>
+    </div>
+
+    <div class="ocard"><h2>What counts as urgent</h2>
+      <div class="grid g2" style="gap:16px">
+        <div class="olevel urgent"><div class="row between"><strong>🔴 Urgent · 24/7</strong><span class="pill p-red">Reply within 1 hour</span></div>
+          <ul class="ochecks"><li>The app is down, or your team can't sign in</li><li>Payments, invoices or e-signatures are failing</li><li>The QuickBooks sync has stopped, or crew pay is blocked</li><li>Crews can't clock in on a work day</li><li>Any data loss or security problem</li></ul>
+          <div class="small" style="margin-top:8px"><strong>How:</strong> call or text. I work on it until it's fixed or there's a workaround, then send a short note on what happened.</div></div>
+        <div class="olevel"><div class="row between"><strong>🟢 Everything else · same business day</strong><span class="pill p-green">Reply same day</span></div>
+          <ul class="ochecks"><li>A bug that has a workaround</li><li>How-to questions and training</li><li>Report or wording tweaks, small changes</li><li>New feature ideas (they go on the shared priority list)</li></ul>
+          <div class="small" style="margin-top:8px"><strong>How:</strong> message or email. Business days are Mon–Fri. Messages after hours are answered the next business day.</div></div>
+      </div>
+      <p class="small muted" style="margin:12px 0 0">If something feels urgent and isn't on the list, call anyway. We'll sort it out and add it to the list if it should be there.</p>
     </div>
 
     <div class="ocard"><h2>How we start</h2><div class="osteps">
