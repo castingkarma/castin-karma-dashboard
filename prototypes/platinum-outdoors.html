@@ -1592,7 +1592,7 @@ PAGES.infra = () => {
 };
 
 // ---------- the offer (reached only from the hidden hotspot on Traditional Development) ----------
-const OFFER = {flat:8500, growth:7000, pct:0.03, base:2000000, tradUS:383800, tradOff:103210, raise:0.05, perf:0.10, rev:[2.4e6,2.9e6,3.5e6]};
+const OFFER = {flat:9000, growth:7000, pct:0.03, base:2000000, tradUS:383800, tradOff:103210, raise:0.05, perf:0.10, rev:[2.4e6,2.9e6,3.5e6]};
 // 3-year view: fee raises from the year-2 review; revenue share (Plan B only) on an ASSUMED ~20%/yr growth path
 function offer3(monthly, withShare, r){ return OFFER.rev.map((rev,i)=>{ const fee=monthly*12*Math.pow(1+r,i), share=withShare?Math.max(0,rev-OFFER.base)*OFFER.pct:0; return {y:i+1, rev, fee, share, total:fee+share}; }); }
 PAGES.offer = () => {
