@@ -265,6 +265,7 @@ body.dragging{cursor:grabbing;user-select:none}
 .oplans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
 .oplan.mvp{border:2px solid #9fb0c2}
 .otag.mvpt{background:#1f2a37;color:#f3dc9b}
+.onext{margin-top:12px;border:1px dashed #9fb0c2;border-radius:10px;padding:10px 12px;background:#f8fafc}
 .oplan ul.ono li:before{content:"✕";color:#9aa6b3}
 .oplan ul.ono li{color:var(--muted)}
 @media (max-width:1100px) and (min-width:761px){.oplans{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -1769,7 +1770,7 @@ PAGES.offer = () => {
         <div class="oprice">${fmt(o.mvp)}<small>one time</small></div><div class="small muted">${fmt(o.mvp/2)} to start · ${fmt(o.mvp/2)} when it's live</div>
         <ul><li>Quotes + design workflow</li><li>Estimates + change orders</li><li>Proposals, e-sign + client portal</li><li>Selections</li><li>Jobs board + drag-and-drop schedule, crew confirmations</li><li>Purchase orders + job costing</li><li>QuickBooks: invoices + payments</li><li>30 days of fixes after launch</li></ul>
         <ul class="ono"><li>Leads engine</li><li>Master Admin portal</li><li>Time + pay (crew payroll)</li><li>Field receipts to QuickBooks</li><li>New features after launch</li></ul>
-        <div class="small muted" style="margin-top:10px">After launch: ${fmt(o.support)}/mo support plan, or switch to Dedicated tech lead.</div></div>
+        <div class="onext"><strong>After it's delivered</strong><div class="small" style="margin-top:4px">We sit down and plan what's next together: ongoing maintenance, Phase 2 features (leads engine, Master Admin, time + pay, field receipts) and enhancements from your wish list. Options then: a support plan from ${fmt(o.support)}/mo, a Phase 2 price, or moving to Dedicated tech lead.</div></div></div>
       <div class="oplan rec"><span class="otag">Recommended</span><div class="oname">Dedicated tech lead</div>
         <div class="oprice">${fmt(o.flat)}<small>/ month</small></div><div class="small muted">One flat fee. Simple to budget.</div>
         <ul><li>MVP built + live in 3–4 months</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} for the first full year</li><li>Remote, and reachable 24/7 for urgent issues</li><li>Yearly review: +5% standard, up to +10% when goals are hit</li></ul></div>
