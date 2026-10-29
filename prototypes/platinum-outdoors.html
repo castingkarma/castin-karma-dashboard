@@ -262,7 +262,12 @@ body.dragging{cursor:grabbing;user-select:none}
 .ostats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
 .ostats div{border-top:1px solid rgba(255,255,255,.18);padding-top:12px}
 .ostats b{display:block;font-size:22px;color:#f3dc9b}.ostats span{font-size:13px;color:#aeb9c6}
-.oplans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.oplans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
+.oplan.mvp{border:2px solid #9fb0c2}
+.otag.mvpt{background:#1f2a37;color:#f3dc9b}
+.oplan ul.ono li:before{content:"✕";color:#9aa6b3}
+.oplan ul.ono li{color:var(--muted)}
+@media (max-width:1100px) and (min-width:761px){.oplans{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .oplan{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;position:relative;box-shadow:var(--shadow)}
 .oplan.rec{border:2px solid #d6b25e;box-shadow:0 8px 24px rgba(214,178,94,.18)}
 .otag{position:absolute;top:-11px;left:20px;background:#d6b25e;color:#1f2a37;font-size:11.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 10px;border-radius:999px}
@@ -1730,7 +1735,7 @@ PAGES.infra = () => {
 };
 
 // ---------- the offer (reached only from the hidden hotspot on Traditional Development) ----------
-const OFFER = {flat:9000, growth:7000, pct:0.03, base:2000000, tradUS:383800, tradOff:103210, raise:0.05, perf:0.10, rev:[2.4e6,2.9e6,3.5e6]};
+const OFFER = {mvp:48000, support:1500, flat:9000, growth:7000, pct:0.03, base:2000000, tradUS:383800, tradOff:103210, raise:0.05, perf:0.10, rev:[2.4e6,2.9e6,3.5e6]};
 // 3-year view: fee raises from the year-2 review; revenue share (Plan B only) on an ASSUMED ~20%/yr growth path
 function offer3(monthly, withShare, r){ return OFFER.rev.map((rev,i)=>{ const fee=monthly*12*Math.pow(1+r,i), share=withShare?Math.max(0,rev-OFFER.base)*OFFER.pct:0; return {y:i+1, rev, fee, share, total:fee+share}; }); }
 PAGES.offer = () => {
@@ -1760,6 +1765,11 @@ PAGES.offer = () => {
     </div>
 
     <div class="oplans">
+      <div class="oplan mvp"><span class="otag mvpt">MVP</span><div class="oname">Price for MVP</div>
+        <div class="oprice">${fmt(o.mvp)}<small>one time</small></div><div class="small muted">${fmt(o.mvp/2)} to start · ${fmt(o.mvp/2)} when it's live</div>
+        <ul><li>Quotes + design workflow</li><li>Estimates + change orders</li><li>Proposals, e-sign + client portal</li><li>Selections</li><li>Jobs board + drag-and-drop schedule, crew confirmations</li><li>Purchase orders + job costing</li><li>QuickBooks: invoices + payments</li><li>30 days of fixes after launch</li></ul>
+        <ul class="ono"><li>Leads engine</li><li>Master Admin portal</li><li>Time + pay (crew payroll)</li><li>Field receipts to QuickBooks</li><li>New features after launch</li></ul>
+        <div class="small muted" style="margin-top:10px">After launch: ${fmt(o.support)}/mo support plan, or switch to Dedicated tech lead.</div></div>
       <div class="oplan rec"><span class="otag">Recommended</span><div class="oname">Dedicated tech lead</div>
         <div class="oprice">${fmt(o.flat)}<small>/ month</small></div><div class="small muted">One flat fee. Simple to budget.</div>
         <ul><li>MVP built + live in 3–4 months</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} for the first full year</li><li>Remote, and reachable 24/7 for urgent issues</li><li>Yearly review: +5% standard, up to +10% when goals are hit</li></ul></div>
@@ -1828,6 +1838,7 @@ PAGES.offer = () => {
         <li>Running side by side with JobTread until you're ready to switch</li><li>Hosting setup, security, backups + monitoring</li><li>New features after launch, from one shared priority list</li><li>Urgent system issues: reachable 24/7, remote. Everything else: same business day (see "What counts as urgent")</li><li>Up to about 25 hours a week, focused on Platinum</li></ul></div>
       <div class="ocard"><h2>Terms, in plain words</h2><ul class="ochecks">
         <li><strong>12-month minimum.</strong> It covers the build, which is priced well below a one-time build fee.</li><li><strong>After 12 months:</strong> month to month, with 60 days' notice to end it</li>
+        <li><strong>Price for MVP:</strong> 50% at signing, 50% when the MVP is live. It covers the MVP list only; anything added is quoted first.</li>
         <li><strong>Timeline:</strong> the 3–4 months covers the MVP scope we lock together in discovery. Adding to it either moves the date or goes into the first update after launch. We decide that together.</li>
         <li><strong>You own everything</strong>: code, data and accounts, all in Platinum's name</li><li>Account costs (about $67–95 a month) are billed to your card directly. Travel + paid data only with your OK.</li>
         <li><strong>Yearly review:</strong> +5% standard, up to +10% when the agreed goals are met</li><li>Independent contractor (1099) agreement</li></ul></div>
