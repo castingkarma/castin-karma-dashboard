@@ -265,6 +265,8 @@ body.dragging{cursor:grabbing;user-select:none}
 .oplans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
 .oplan.mvp{border:2px solid #9fb0c2}
 .otag.mvpt{background:#1f2a37;color:#f3dc9b}
+.mvpb{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;padding:1px 7px;border-radius:999px;background:#1f2a37;color:#f3dc9b;vertical-align:middle;margin-left:6px}
+tr.mvprow td{background:#fbf7ea}
 .onext{margin-top:12px;border:1px dashed #9fb0c2;border-radius:10px;padding:10px 12px;background:#f8fafc}
 .oplan ul.ono li:before{content:"✕";color:#9aa6b3}
 .oplan ul.ono li{color:var(--muted)}
@@ -688,10 +690,10 @@ PAGES.overview = () => `
     <div class="grid g2">${NEXT.filter(n=>n[2]===g).map(([t,d])=>`<div class="card" style="padding:14px 16px"><strong>${t}</strong><div class="small muted" style="margin-top:4px">${d}</div></div>`).join('')}</div>`).join('')}
   <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)"><h2>Yours, from day one</h2>
     <p class="small" style="margin:0">Hosting, database, domain and code all sit in Platinum Outdoors' name. We're added as a collaborator. No vendor can raise your price, remove a feature or hold your data.</p>
-    ${(()=>{const req=INFRA.slice(0,2).flatMap(g=>g[1]), opt=INFRA[2][1], lo=req.reduce((a,r)=>a+r[3],0), hi=req.reduce((a,r)=>a+r[4],0);
+    ${(()=>{const req=INFRA.slice(0,2).flatMap(g=>g[1]), opt=INFRA[2][1], lo=req.reduce((a,r)=>a+r[3],0), hi=req.reduce((a,r)=>a+r[4],0), mv=req.filter(r=>r[6]), mlo=mv.reduce((a,r)=>a+r[3],0), mhi=mv.reduce((a,r)=>a+r[4],0);
       const cost=r=>r[3]===r[4]?(r[3]?fmt(r[3]):'$0'):`${fmt(r[3])}–${fmt(r[4])}`;
-      const row=(r,o)=>`<tr><td><strong>${r[0]}</strong>${o?' <span class="pill">Optional</span>':''}</td><td class="small muted">${r[1]}</td><td class="r small" style="white-space:nowrap">${cost(r)}</td></tr>`;
-      return `<div class="row between" style="margin-top:16px;gap:8px;flex-wrap:wrap"><h3 style="margin:0;font-size:15px">Accounts + services it runs on</h3><span class="pill p-green">Required: ${fmt(lo)}–${fmt(hi)} / month</span></div>
+      const row=(r,o)=>`<tr class="${r[6]?'mvprow':''}"><td><strong>${r[0]}</strong>${r[6]?'<span class="mvpb">MVP</span>':''}${o?' <span class="pill">Optional</span>':''}</td><td class="small muted">${r[1]}</td><td class="r small" style="white-space:nowrap">${cost(r)}</td></tr>`;
+      return `<div class="row between" style="margin-top:16px;gap:8px;flex-wrap:wrap"><h3 style="margin:0;font-size:15px">Accounts + services it runs on</h3><span><span class="pill" style="background:#1f2a37;color:#f3dc9b">MVP: ${fmt(mlo)}–${fmt(mhi)} / month</span> <span class="pill p-green">All required: ${fmt(lo)}–${fmt(hi)} / month</span></span></div>
       <p class="small muted" style="margin:4px 0 8px">Every account is opened in your name and paid on your card. We set them up together in one session. Some lines (e-signature, drawing reading) are built into the app and need no account.</p>
       <div class="tablewrap"><table><thead><tr><th>Account</th><th>What it's for</th><th class="r">Per month</th></tr></thead><tbody>${req.map(r=>row(r)).join('')}${opt.map(r=>row(r,1)).join('')}</tbody></table></div>
       <h3 style="margin:16px 0 6px;font-size:15px">Built to grow</h3>
@@ -1700,19 +1702,19 @@ PAGES.reqdoc = () => {
 // ---------- infrastructure accounts + monthly cost (list prices checked Oct 2026; confirm at signup) ----------
 const INFRA = [
   ['Core platform (required)', [
-    ['Supabase','Database, logins + 2-step codes, file storage (photos, receipts, drawings), nightly backups','Pro',25,25,'Includes 8 GB database, 100 GB files, daily backups. Point-in-time restore is an optional add-on.'],
-    ['Vercel','Runs the web app + phone app, automatic deploys','Pro · 1–2 seats',20,40,'$20 per seat that can deploy. Viewers are free.'],
-    ['GitHub','Holds the code, version history','Free (private repo)',0,0,'Paid only if they add a team plan later.'],
-    ['Resend','Sends proposals, approvals, sign-in codes, notifications','Pro',20,20,'50,000 emails/mo. The free tier caps at 100/day, too tight for a business.'],
-    ['Domain + DNS','e.g. app.platinumoutdoorsaz.com','Already owned',0,0,'Uses the domain they have. Just a new subdomain.'],
-    ['Error alerts (Sentry)','Tells us the moment something breaks','Free tier',0,0,'Enough for one company.'],
+    ['Supabase','Database, logins + 2-step codes, file storage (photos, receipts, drawings), nightly backups','Pro',25,25,'Includes 8 GB database, 100 GB files, daily backups. Point-in-time restore is an optional add-on.',1],
+    ['Vercel','Runs the web app + phone app, automatic deploys','Pro · 1–2 seats',20,40,'$20 per seat that can deploy. Viewers are free.',1],
+    ['GitHub','Holds the code, version history','Free (private repo)',0,0,'Paid only if they add a team plan later.',1],
+    ['Resend','Sends proposals, approvals, sign-in codes, notifications','Pro',20,20,'50,000 emails/mo. The free tier caps at 100/day, too tight for a business.',1],
+    ['Domain + DNS','e.g. app.platinumoutdoorsaz.com','Already owned',0,0,'Uses the domain they have. Just a new subdomain.',1],
+    ['Error alerts (Sentry)','Tells us the moment something breaks','Free tier',0,0,'Enough for one company.',1],
   ]],
   ['Third parties (required)', [
-    ['QuickBooks Online','Their books. The app syncs invoices, bills, receipts and pay into it','They already pay',0,0,'No new subscription. Connecting the app through Intuit\'s developer program is free at their volume.'],
+    ['QuickBooks Online','Their books. The app syncs invoices, bills, receipts and pay into it','They already pay',0,0,'No new subscription. Connecting the app through Intuit\'s developer program is free at their volume.',1],
     ['Receipt + document reading (Claude AI)','Reads vendor, amount and date from receipt photos','Pay per use 💲',2,10,'About a penny or less per receipt. Turned on only with an approved budget.'],
-    ['E-signature','Client accepts proposals + change orders','Built in',0,0,'Typed-name e-sign with time, IP and device recorded. DocuSign (~$25+/mo per sender) only if they want it.'],
+    ['E-signature','Client accepts proposals + change orders','Built in',0,0,'Typed-name e-sign with time, IP and device recorded. DocuSign (~$25+/mo per sender) only if they want it.',1],
     ['Maps','Job addresses, clock-in location','Free tier',0,0,'Well within the free monthly allowance.'],
-    ['AutoCAD file reading','Pulls quantities from drawings','Free with DXF export',0,0,'Free if the designer exports DXF. Reading raw DWG directly may need a paid converter. Confirm in discovery.'],
+    ['AutoCAD file reading','Pulls quantities from drawings','Free with DXF export',0,0,'Free if the designer exports DXF. Reading raw DWG directly may need a paid converter. Confirm in discovery.',1],
   ]],
   ['Optional', [
     ['Stripe (online payments)','Card + bank (ACH) payments from the client portal','No monthly fee',0,0,'Cards about 2.9% + 30¢. Bank transfer about 0.8% (capped at $5). Fees can be passed to the client. QuickBooks Payments is the alternative.'],
@@ -1723,9 +1725,11 @@ const INFRA = [
 PAGES.infra = () => {
   const sum = (groups,i) => groups.reduce((a,[,rows])=>a+rows.reduce((b,r)=>b+r[i],0),0);
   const req = INFRA.slice(0,2), lo=sum(req,3), hi=sum(req,4);
+  const mvp = INFRA.flatMap(g=>g[1]).filter(r=>r[6]), mlo=mvp.reduce((a,r)=>a+r[3],0), mhi=mvp.reduce((a,r)=>a+r[4],0);
   return `<div class="row noprint"><button class="btn" onclick="go('overview')">← Back to Project overview</button></div>
   <h1 class="mt">Infrastructure + monthly costs</h1>
   <p class="sub">Every account the real build needs. <strong>All of them are opened in Platinum Outdoors' name and paid on your card.</strong> We're added as a collaborator. List prices checked October 2026, confirmed again at signup.</p>
+  <p class="small" style="margin:6px 0 0"><span class="mvpb" style="margin:0 4px 0 0">MVP</span> = needed to launch the MVP: <strong>${fmt(mlo)}–${fmt(mhi)} / month</strong>. Everything else is added when the feature it serves is built.</p>
   <div class="grid g4">
     <div class="card stat"><div class="k">Required, per month</div><div class="v">${fmt(lo)}–${fmt(hi)}</div><div class="d muted">core platform + third parties</div></div>
     <div class="card stat"><div class="k">Required, per year</div><div class="v">${fmt(lo*12)}–${fmt(hi*12)}</div></div>
@@ -1734,7 +1738,7 @@ PAGES.infra = () => {
   </div>
   ${INFRA.map(([g,rows])=>`<div class="card mt"><h2>${g}</h2><div class="tablewrap"><table>
     <thead><tr><th>Account</th><th>What it does</th><th>Plan</th><th class="r">Est. / month</th><th>Notes</th></tr></thead>
-    <tbody>${rows.map(r=>`<tr><td><strong>${r[0]}</strong></td><td class="small">${r[1]}</td><td class="small">${r[2]}</td><td class="r" style="white-space:nowrap">${r[3]===r[4]?fmt(r[3]):`${fmt(r[3])}–${fmt(r[4])}`}</td><td class="small muted">${r[5]}</td></tr>`).join('')}</tbody>
+    <tbody>${rows.map(r=>`<tr class="${r[6]?'mvprow':''}"><td><strong>${r[0]}</strong>${r[6]?'<span class="mvpb">MVP</span>':''}</td><td class="small">${r[1]}</td><td class="small">${r[2]}</td><td class="r" style="white-space:nowrap">${r[3]===r[4]?fmt(r[3]):`${fmt(r[3])}–${fmt(r[4])}`}</td><td class="small muted">${r[5]}</td></tr>`).join('')}</tbody>
   </table></div></div>`).join('')}
   <div class="card mt"><h2>Which platform to build on</h2><div class="tablewrap"><table>
     <thead><tr><th></th><th>Option A · Supabase + Vercel <span class="pill p-green">Recommended</span></th><th>Option B · Cloudflare (Pages, Workers, D1, R2)</th></tr></thead><tbody>
