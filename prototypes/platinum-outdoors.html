@@ -1777,7 +1777,8 @@ PAGES.offer = () => {
       <div class="oplan"><div class="oname">Growth partner</div>
         <div class="oprice">${fmt(o.growth)}<small>/ month</small></div><div class="small muted">+ ${o.pct*100}% of revenue above $${o.base/1e6}M a year</div>
         <ul><li>Lower monthly fee today</li><li>You only pay the share when you grow past today</li><li>Everything in Dedicated tech lead</li><li>Same yearly review: +5% standard, up to +10%</li></ul>
-        <table class="small" style="margin-top:6px"><tbody>${grow.map(g=>`<tr><td class="muted">At $${g.r/1e6}M revenue</td><td class="r"><strong>${fmt(g.g)}</strong> / yr</td></tr>`).join('')}</tbody></table></div>
+        <div class="small" style="margin-top:10px"><strong>Your total for the year</strong> <span class="muted">(monthly fees + share)</span></div>
+        <table class="small" style="margin-top:4px"><tbody>${grow.map(g=>{const share=g.g-o.growth*12;return `<tr><td class="muted">At $${g.r/1e6}M revenue</td><td class="r"><strong>${fmt(g.g)}</strong> / yr<div class="muted" style="font-size:11px">${fmt(o.growth*12)} fees${share?` + ${fmt(share)} share`:', no share'}</div></td></tr>`}).join('')}</tbody></table></div>
     </div>
 
     <div class="ocard"><h2>Your first 3 years together</h2>
