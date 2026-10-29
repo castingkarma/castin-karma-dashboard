@@ -687,7 +687,22 @@ PAGES.overview = () => `
   ${['Grow','Run','Scale'].map(g=>`<h3 style="margin:20px 0 4px;font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">${g==='Grow'?'Grow revenue':g==='Run'?'Run smoother':'Scale up'}</h3>
     <div class="grid g2">${NEXT.filter(n=>n[2]===g).map(([t,d])=>`<div class="card" style="padding:14px 16px"><strong>${t}</strong><div class="small muted" style="margin-top:4px">${d}</div></div>`).join('')}</div>`).join('')}
   <div class="card mt" style="border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)"><h2>Yours, from day one</h2>
-    <p class="small" style="margin:0">Hosting, database, domain and code all sit in Platinum Outdoors' name. We're added as a collaborator. No vendor can raise your price, remove a feature or hold your data.</p></div>`;
+    <p class="small" style="margin:0">Hosting, database, domain and code all sit in Platinum Outdoors' name. We're added as a collaborator. No vendor can raise your price, remove a feature or hold your data.</p>
+    ${(()=>{const req=INFRA.slice(0,2).flatMap(g=>g[1]), opt=INFRA[2][1], lo=req.reduce((a,r)=>a+r[3],0), hi=req.reduce((a,r)=>a+r[4],0);
+      const cost=r=>r[3]===r[4]?(r[3]?fmt(r[3]):'$0'):`${fmt(r[3])}–${fmt(r[4])}`;
+      const row=(r,o)=>`<tr><td><strong>${r[0]}</strong>${o?' <span class="pill">Optional</span>':''}</td><td class="small muted">${r[1]}</td><td class="r small" style="white-space:nowrap">${cost(r)}</td></tr>`;
+      return `<div class="row between" style="margin-top:16px;gap:8px;flex-wrap:wrap"><h3 style="margin:0;font-size:15px">Accounts + services it runs on</h3><span class="pill p-green">Required: ${fmt(lo)}–${fmt(hi)} / month</span></div>
+      <p class="small muted" style="margin:4px 0 8px">Every account is opened in your name and paid on your card. We set them up together in one session. Some lines (e-signature, drawing reading) are built into the app and need no account.</p>
+      <div class="tablewrap"><table><thead><tr><th>Account</th><th>What it's for</th><th class="r">Per month</th></tr></thead><tbody>${req.map(r=>row(r)).join('')}${opt.map(r=>row(r,1)).join('')}</tbody></table></div>
+      <h3 style="margin:16px 0 6px;font-size:15px">Built to grow</h3>
+      <ul class="small" style="margin:0;padding-left:18px;line-height:1.6">
+        <li><strong>More users cost nothing extra.</strong> Logins are included up to 100,000 users. Only the people who ship code need a paid seat.</li>
+        <li><strong>Room for years of data.</strong> The plan includes 8 GB of database and 100 GB of files (photos, drawings, receipts). Past that, storage costs cents per GB.</li>
+        <li><strong>More traffic, one click.</strong> If use grows a lot, the database moves to a bigger server in a few clicks (about $15–60 a month more). No rebuild.</li>
+        <li><strong>Integrations only cost when used.</strong> QuickBooks, payments, texting and AI receipt reading are free or pay-per-use, and new ones plug into the same setup.</li>
+        <li><strong>No re-platforming.</strong> The same accounts carry you from 10 users to 100+.</li>
+      </ul>
+      <div class="row" style="margin-top:12px"><button class="btn" onclick="go('infra')">Full breakdown + notes →</button></div>`;})()}</div>`;
 
 // ---------- traditional development comparison (industry ballpark rates, not vendor quotes) ----------
 const TEAM_ROLES = [
