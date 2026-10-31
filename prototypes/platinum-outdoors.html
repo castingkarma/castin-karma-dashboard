@@ -1812,6 +1812,7 @@ PAGES.offer = () => {
         <div class="small" style="margin-top:10px"><strong>Your total for the year</strong> <span class="muted">(monthly fees + share)</span></div>
         <table class="small" style="margin-top:4px"><tbody>${grow.map(g=>{const share=g.g-o.growth*12;return `<tr><td class="muted">At $${g.r/1e6}M revenue</td><td class="r"><strong>${fmt(g.g)}</strong> / yr<div class="muted" style="font-size:11px">${fmt(o.growth*12)} fees${share?` + ${fmt(share)} share`:', no share'}</div></td></tr>`}).join('')}</tbody></table></div>
     </div>
+    <p class="small muted" style="text-align:center;margin:-4px 0 18px">Prefer to share in the company’s growth another way? I’m open to discussing an equity share in place of the revenue share.</p>
 
     <div class="ocard"><h2>Your first 3 years together</h2>
       <p class="small muted" style="margin:0 0 12px">The fee is reviewed every year: <strong>+5% standard</strong>, or <strong>up to +10%</strong> in a year when the agreed goals below are met. Plan B adds its revenue share on top.</p>
