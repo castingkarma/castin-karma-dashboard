@@ -697,6 +697,12 @@ PAGES.overview = () => `
       <p class="small muted" style="margin:4px 0 8px">Every account is opened in your name and paid on your card. We set them up together in one session. Some lines (e-signature, drawing reading) are built into the app and need no account.</p>
       <div class="small" style="margin:0 0 10px;padding:10px 12px;border:1px dashed #9fb0c2;border-radius:10px;background:#f8fafc"><strong>How setup works.</strong> You make one company mailbox you own (e.g. tech@ your domain). Jamin opens every account with it, with 2-step codes going to an owner's phone. You enter the card, and an owner connects QuickBooks and any payments account, since those need the business owner. Jamin works under his own login as a team member wherever the service offers one (nearly all do). <strong>When the work ends:</strong> remove Jamin and reset the mailbox password and app keys (about 15 minutes). Keep the mailbox itself: it's how you get back into every account.</div>
       <div class="tablewrap"><table><thead><tr><th>Account</th><th>What it's for</th><th class="r">Per month</th></tr></thead><tbody>${req.map(r=>row(r)).join('')}${opt.map(r=>row(r,1)).join('')}</tbody></table></div>
+      <h3 style="margin:16px 0 6px;font-size:15px">How it gets built</h3>
+      <ul class="small" style="margin:0;padding-left:18px;line-height:1.6">
+        <li><strong>On Jamin’s own AI setup, ready now.</strong> Jamin builds with his own Claude account, already set up with build agents, connectors and his build standards. It’s included in the fee: no AI tools or subscriptions for you to buy during the build.</li>
+        <li><strong>Everything it makes lands in your accounts.</strong> The code goes into your GitHub and runs on your hosting. Your customer data stays in your accounts.</li>
+        <li><strong>Your own AI, when you want it.</strong> Once it’s delivered, the project can be connected to your company’s AI (for example your own Claude account), so your team can ask it questions or keep improving it. Optional, and a connection rather than a rebuild.</li>
+      </ul>
       <h3 style="margin:16px 0 6px;font-size:15px">Built to grow</h3>
       <ul class="small" style="margin:0;padding-left:18px;line-height:1.6">
         <li><strong>More users cost nothing extra.</strong> Logins are included up to 100,000 users. Only the people who ship code need a paid seat.</li>
