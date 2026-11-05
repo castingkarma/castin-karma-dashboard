@@ -504,6 +504,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='cards'&&CARDS.req&&CARDS.req.st==='pending') return `<span class="n">1</span>`;
   if(key==='leads'){const n=leads.filter(l=>l.st==='new').length;return n?`<span class="n" style="background:var(--accent-soft);color:#075e48">${n} new</span>`:''}
   if(key==='selections'||key==='c-selections'){const n=selections.filter(s=>s.status==='open').length;return n?`<span class="n">${n}</span>`:''}
   if(key==='estimate'||key==='c-changes'){const n=cos.filter(c=>c.status==='sent').length;return n?`<span class="n">${n}</span>`:''}
@@ -660,6 +661,7 @@ const NEXT = [
   ['QuickBooks sync','Invoices, bills and payments flow into your books without double entry.','Run'],
   ['Crew mobile app','Daily job sheets, photos, punch lists and time on the phone.','Run'],
   ['Automatic client updates','Texts and emails when a phase starts, finishes or needs a decision.','Run'],
+  ['Company cards with approval','Crew leads pay with a company card in Apple Pay or Google Pay, unlocked for one approved purchase at a time and tied to the job. (See Company cards.)','Run'],
   ['HOA approval packets','The plan, materials and specs your clients need for HOA approval, generated from the estimate.','Run'],
   ['AI-assisted estimating','Draft an estimate from site photos, measurements and notes, then review and send.','Scale'],
   ['Owner dashboard','Win rate, margin by job type, crew utilization and cash flow on one screen.','Scale'],
@@ -1165,10 +1167,10 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 const ROLES = {
-  owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['qbo','QuickBooks'],FLOW]},
-  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['qbo','QuickBooks'],['users','Users & permissions'],FLOW]},
+  owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
+  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
-  production:{l:'Production manager (Justin)', who:'Justin', sub:'Production manager', home:'calendar', nav:[['jobs','Jobs'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['time','Time & pay'],['costing','Job costing'],FLOW]},
+  production:{l:'Production manager (Justin)', who:'Justin', sub:'Production manager', home:'calendar', nav:[['jobs','Jobs'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['time','Time & pay'],['cards','Company cards'],['costing','Job costing'],FLOW]},
   field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
 };
@@ -1435,6 +1437,7 @@ PAGES.field = () => `<div class="phone">
   ${(()=>{ const reqs=[]; Object.entries(DATA).forEach(([jid,d])=>(d.schedule||[]).forEach((p,i)=>{ if(p.crew==='Crew A'&&p.conf==='sent') reqs.push([+jid,i,p]); }));
     return reqs.length?`<h2 style="font-size:15px;margin:18px 0 4px">Schedule to confirm</h2>${reqs.map(([jid,i,p])=>`<div class="card" style="padding:12px;margin-top:8px"><strong>${p.n}</strong><div class="small muted">${jobs.find(j=>j.id===jid)?.name} · ${dayDate(p.s)} – ${dayDate(p.s+p.d-1)} (${p.d} days)</div>
       <div class="row" style="margin-top:8px"><button class="btn sm primary" onclick="crewReply(${jid},${i},'confirmed')">✓ Confirm</button><button class="btn sm" onclick="crewReply(${jid},${i},'declined')">Can't make it</button></div></div>`).join('')}`:''; })()}
+  ${fieldCard()}
   <h2 style="font-size:15px;margin:18px 0 4px">Receipts + photos</h2>
   ${FIELD.receipt?`<div class="card" style="padding:12px"><div class="row between"><strong>${FIELD.receipt.v}</strong><strong>${money2(FIELD.receipt.amt)}</strong></div>
       <div class="small muted">Job: ${FIELD.receipt.job} · ${FIELD.receipt.code}</div><div class="small muted">${FIELD.receipt.note}</div>
@@ -1448,6 +1451,61 @@ function sendReceipt(){ FIELD.receipt.sent=true; DATA[1].otherActual.PAV=(DATA[1
   QBO_LOG.unshift({t:'Oct 26 · 10:14 AM', type:'Expense (receipt)', ref:'SiteOne #48213 · photo attached', job:'Henderson Backyard', amt:86.42, st:'Synced'});
   render(); toast('Receipt sent. It\'s in QuickBooks and in Henderson\'s job costing.'); }
 function sendCrewDay(){ FIELD.crewSent=true; const n=Object.values(FIELD.crew).filter(Boolean).length; render(); toast(`Crew day sent: Marco + ${n} installer${n===1?'':'s'}, full day on Henderson. Pay is figured from each day rate.`); }
+
+// ---------- company cards: locked by default, unlocked for one approved purchase (demo: no real card program) ----------
+const CARDS = {req:null, cards:[
+    {n:'Marco T. (sample)', r:'Crew lead · Crew A', last:'4821'},
+    {n:'Luis P. (sample)', r:'Crew lead · Crew B', last:'7730'},
+    {n:'Justin', r:'Production manager', last:'1196'}],
+  tx:[
+    {t:'Oct 23 · 2:10 PM', who:'Luis P.', v:'Home Depot #2231', job:'Nguyen Front Yard', code:'Turf & Planting', amt:64.18, st:'ok'},
+    {t:'Oct 22 · 6:48 PM', who:'Luis P.', v:'Circle K (fuel)', job:'None', code:'', amt:41.00, st:'declined'},
+    {t:'Oct 21 · 9:35 AM', who:'Marco T.', v:'SiteOne Landscape Supply', job:'Henderson Backyard', code:'Pavers & Hardscape', amt:118.60, st:'ok'}]};
+const cardPill = c => { const q=CARDS.req; return q&&q.who===c.n.split(' (')[0]&&q.st==='approved' ? `<span class="pill p-green">Open for 1 purchase</span>` : `<span class="pill p-grey">🔒 Locked</span>`; };
+PAGES.cards = () => { const q=CARDS.req, ok=CARDS.tx.filter(t=>t.st==='ok'), dec=CARDS.tx.filter(t=>t.st==='declined').length;
+  return `<div class="row between"><div><h1>Company cards</h1><p class="sub">Each crew lead has a company card in Apple Pay or Google Pay on their phone. It stays locked. When they need to buy something, they ask in the crew app, you approve that one purchase, and the card opens for just that: one job, one vendor type, up to the amount you set, for a few hours. After the tap it locks again.</p></div></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Cards on phones</div><div class="v">${CARDS.cards.length}</div><div class="d muted">all locked by default</div></div>
+    <div class="card stat"><div class="k">Waiting for approval</div><div class="v ${q&&q.st==='pending'?'':'pos'}">${q&&q.st==='pending'?1:0}</div></div>
+    <div class="card stat"><div class="k">Spent this month</div><div class="v">${money2(ok.reduce((a,t)=>a+t.amt,0))}</div><div class="d muted">every dollar on a job</div></div>
+    <div class="card stat"><div class="k">Blocked attempts</div><div class="v">${dec}</div><div class="d muted">no approval open</div></div>
+  </div>
+  <div class="card mt"><h2>Purchase requests</h2>
+    ${q?`<div class="todo"><div class="ic" style="background:${q.st==='pending'?'var(--warn-soft)':'var(--accent-soft)'}">💳</div><div style="flex:1"><strong>${q.who}: ${q.what}</strong>
+      <div class="small muted">${q.job} · ${q.code} · ${q.vendor} · up to ${fmt(q.max)}</div>
+      ${q.st==='pending'?'':`<div class="small ${q.st==='denied'?'neg':'pos'}" style="margin-top:4px">${q.st==='approved'?`✓ Approved. Card open for one purchase at building-supply stores, up to ${fmt(q.max)}, until 2:00 PM.`:q.st==='used'?`✓ Paid ${money2(q.paid)} at ${q.vendor}. Card locked again. Posted to ${q.job} · ${q.code}.`:'Denied. The card stays locked.'}</div>`}</div>
+      ${q.st==='pending'?`<div class="row"><button class="btn sm primary" onclick="cardDecide('approved')">Approve</button><button class="btn sm" onclick="cardDecide('denied')">Deny</button></div>`:''}</div>`
+     :`<p class="small muted" style="margin:0">No requests right now. Try it: ${roleLink('field','field','ask for a purchase as the crew lead')}</p>`}
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>Cards</h2><div class="tablewrap"><table><thead><tr><th>Who</th><th>Card</th><th>Status</th></tr></thead>
+      <tbody>${CARDS.cards.map(c=>`<tr><td><strong>${c.n}</strong><div class="small muted">${c.r}</div></td><td class="small">•••• ${c.last}<div class="muted">Apple Pay / Google Pay</div></td><td>${cardPill(c)}</td></tr>`).join('')}</tbody></table></div></div>
+    <div class="card"><h2>Card activity</h2><div class="tablewrap"><table><thead><tr><th>When</th><th>Where</th><th class="r">Amount</th></tr></thead>
+      <tbody>${CARDS.tx.map(t=>`<tr><td class="small">${t.t}<div class="muted">${t.who}</div></td><td class="small"><strong>${t.v}</strong><div class="${t.st==='ok'?'muted':'neg'}">${t.st==='ok'?`${t.job} · ${t.code}`:'Declined: no approved purchase open'}</div></td><td class="r small">${money2(t.amt)}</td></tr>`).join('')}</tbody></table></div></div>
+  </div>
+  <div class="card mt" style="border-left:4px solid var(--accent)"><h2>How it works</h2>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">1</div><div><strong>Cards in the company's name.</strong> Platinum Outdoors opens a business card program (for example Stripe Issuing) and gives each crew lead a virtual card that lives in Apple Pay or Google Pay. No plastic to lose.</div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">2</div><div><strong>Locked until you say yes.</strong> At the moment of every tap, the card network asks the app "approve this?". With no open approval the answer is no, so a card can't be used for fuel, lunch or anything else.</div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">3</div><div><strong>One approval, one purchase.</strong> You set the job, the amount and the type of store. The card works once, inside those limits, then locks again.</div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">4</div><div><strong>Lands on the job automatically.</strong> The purchase posts to job costing and QuickBooks with the receipt attached, so nobody chases receipts at month end.</div></div>
+    <p class="small muted" style="margin:10px 0 0">An add-on after the MVP. Spend cards like Ramp or BILL Spend offer similar limits for free, and the app can connect to one of those instead if you prefer.</p>
+  </div>`; };
+function cardDecide(st){ CARDS.req.st=st; render(); toast(st==='approved'?'Approved. The card is open for this one purchase.':'Denied. The card stays locked.'); }
+function fieldCard(){ const q=CARDS.req;
+  const head=`<h2 style="font-size:15px;margin:18px 0 4px">Company card</h2>`;
+  if(!q||q.st==='denied') return head+(q?`<div class="small neg" style="margin-bottom:4px">Justin denied the last request.</div>`:'')+`<button class="bigbtn alt" onclick="cardRequest()">💳 Ask to make a purchase</button>`;
+  if(q.st==='pending') return head+`<div class="card" style="padding:12px;background:var(--warn-soft);border-color:#f1d49a"><strong>Waiting for Justin</strong><div class="small muted">${q.what} · up to ${fmt(q.max)} · ${q.job}</div><div class="small" style="margin-top:6px">${roleLink('production','cards','Approve it as Justin')}</div></div>`;
+  if(q.st==='approved') return head+`<div class="card" style="padding:14px;background:linear-gradient(135deg,#1f2a37,#3a4a5e);color:#fff;border:0"><div class="row between"><strong>Platinum Outdoors</strong><span class="small" style="color:#f3dc9b">•••• 4821</span></div>
+      <div class="small" style="margin-top:10px;color:#dfe5ec">Open for 1 purchase · up to ${fmt(q.max)}<br>Building-supply stores · until 2:00 PM<br>${q.job} · ${q.code}</div></div>
+      <button class="bigbtn go" onclick="cardTap(this)">Hold near the reader (Apple Pay)</button>`;
+  return head+`<div class="card" style="padding:12px;background:var(--accent-soft);border-color:#9fd8c6"><strong>✓ Paid ${money2(q.paid)} at ${q.vendor}</strong><div class="small muted">Card locked again · on ${q.job} · ${q.code}</div></div>
+    <button class="bigbtn alt" onclick="CARDS.req=null;render()">💳 Ask for another purchase</button>`; }
+function cardRequest(){ CARDS.req={who:'Marco T.', what:'Polymeric sand + edge restraint', job:'Henderson Backyard', code:'Pavers & Hardscape', vendor:'SiteOne Landscape Supply', max:250, st:'pending'}; render(); toast('Request sent to Justin. You\'ll get a ping when it\'s approved.'); }
+async function cardTap(b){ b.disabled=true; b.textContent='Checking the approval…'; await wait(900); const q=CARDS.req; q.st='used'; q.paid=212.40;
+  DATA[1].otherActual.PAV=(DATA[1].otherActual.PAV||0)+q.paid;
+  CARDS.tx.unshift({t:'Oct 26 · 11:20 AM', who:'Marco T.', v:q.vendor, job:q.job, code:q.code, amt:q.paid, st:'ok'});
+  QBO_LOG.unshift({t:'Oct 26 · 11:20 AM', type:'Expense (company card)', ref:'SiteOne · card •••• 4821', job:q.job, amt:q.paid, st:'Synced'});
+  render(); toast('Approved at the reader: $212.40. The card locked again and the cost is on Henderson.'); }
 
 // ---------- Master Admin (Joel): sign-in with a 6-digit code, then the whole business ----------
 let finOpen = false;
@@ -1738,6 +1796,7 @@ const INFRA = [
   ['Optional', [
     ['Stripe (online payments)','Card + bank (ACH) payments from the client portal','No monthly fee',0,0,'Cards about 2.9% + 30¢. Bank transfer about 0.8% (capped at $5). Fees can be passed to the client. QuickBooks Payments is the alternative.'],
     ['Text messages (Twilio)','Schedule reminders, "crew on the way"','Pay per use',5,20,'About a penny per text plus carrier registration. Email-only is fine for v1.'],
+    ['Company cards (Stripe Issuing)','Crew cards in Apple / Google Wallet, unlocked one approved purchase at a time','Per card 💲',0,10,'Only if the company-cards feature is added. The card program is opened in Platinum Outdoors\' name; virtual cards cost cents each. Ramp or BILL Spend are free alternatives the app can connect to.'],
     ['Point-in-time restore','Roll the database back to any minute','Supabase add-on',0,100,'Only if Joel wants more than daily backups.'],
   ]],
 ];
