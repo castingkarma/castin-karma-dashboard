@@ -538,6 +538,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='fmday'){const n=fmShort().length;return n?`<span class="n">${n}</span>`:''}
   if(key==='crewsched'){const n=crewNew().length;return n?`<span class="n">${n}</span>`:''}
   if(key==='costbook'){const n=vbOpen().length;return n?`<span class="n">${n}</span>`:''}
   if(key==='handoff'){const n=jobs.filter(j=>j.status==='Sold'&&!j.handed).length;return n?`<span class="n">${n}</span>`:''}
@@ -1229,12 +1230,13 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
-const MVP_PAGES = new Set(['pm','changes','sales','handoff','costbook','c-schedule','c-walk','c-sign','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
+const MVP_PAGES = new Set(['pm','fmday','changes','sales','handoff','costbook','c-schedule','c-walk','c-sign','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'sales', nav:[['sales','Sales home'],['leads','Leads'],['campaigns','Campaigns'],['quotes','Quotes & design'],['proposal','Proposals'],['handoff','Sold → handoff'],['jobs','Jobs board'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costbook','Cost book'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
+  foreman:{l:'Foreman (Diego)', who:'Diego (sample)', sub:'Foreman · people on every job', home:'fmday', nav:[['fmday','Assignments'],['calendar','Crew calendar'],['subs','Crews & subs'],FLOW]},
   field:{l:'Field crew lead (Leo)', who:'Leo', sub:'Crew lead · Crew A · phone app', home:'field', nav:[['field','Today'],['crewsched','My schedule'],['crewjob','Job details'],['crewtime','My hours'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-schedule','Schedule'],['c-selections','Selections'],['c-changes','Change orders'],['c-pay','Payments'],['c-photos','Photos + updates'],['c-walk','Final walkthrough'],['c-proposal','Proposal (new job)'],['c-start','Request a design visit']]},
 };
@@ -1773,6 +1775,71 @@ function fxTick(){ FX.parts=FX.parts.filter(p=>{ p.life++; p.vy+=.22; p.vx*=.99;
     const o=Math.max(0,1-p.life/p.max); p.d.style.transform=`translate(${p.x}px,${p.y}px) rotate(${p.rot}deg)`; p.d.style.opacity=o;
     if(o<=0||p.y>innerHeight+40){ p.d.remove(); return false; } return true; });
   FX.raf = (FX.on||FX.parts.length) ? requestAnimationFrame(fxTick) : 0; }
+
+// ---------- foreman (Diego): Justin books crews on jobs; the foreman puts the right people on each one ----------
+// sample roster (installers are 1099 subs working only for Platinum); off = days of November they can't work
+const PEOPLE = [
+  {n:'Leo', r:'Crew lead · Crew A', sk:['Pavers','Demo','Walkthrough'], off:[]},
+  {n:'Luis P.', r:'Crew lead · Crew B', sk:['Pavers','Walls'], off:[]},
+  {n:'Sam D.', r:'Crew lead · Crew C', sk:['Turf','Planting'], off:[]},
+  {n:'Andre K.', r:'Installer', sk:['Pavers','Demo'], off:[]},
+  {n:'Victor S.', r:'Installer', sk:['Walls','Pavers'], off:[18,19,20]},
+  {n:'Chris B.', r:'Material handler', sk:['Demo','Haul-off'], off:[]},
+  {n:'Jorge M.', r:'Installer', sk:['Turf','Irrigation'], off:[]},
+  {n:'Eli R.', r:'Installer', sk:['Lighting','Turf'], off:[25]},
+  {n:'Nate W.', r:'Equipment operator', sk:['Demo','Grading'], off:[]},
+];
+const LEAD_OF = {'Crew A':'Leo','Crew B':'Luis P.','Crew C':'Sam D.'};
+const FM = {asg:{}, sent:false};
+const fmNeed = e => /walk/i.test(e.label)?1 : /light/i.test(e.label)?2 : /demo|base/i.test(e.label)?3 : /paver|wall|deck|hardscape/i.test(e.label)?3 : /turf|plant/i.test(e.label)?2 : 2;
+const fmSkill = e => /demo|base/i.test(e.label)?'Demo' : /paver|deck|hardscape/i.test(e.label)?'Pavers' : /wall/i.test(e.label)?'Walls' : /turf|plant/i.test(e.label)?'Turf' : /light/i.test(e.label)?'Lighting' : /walk/i.test(e.label)?'Walkthrough' : '';
+const fmEvents = () => CAL.filter(e=>LEAD_OF[e.crew]).sort((a,b)=>a.start-b.start);
+function fmPeople(e){ if(!FM.asg[e.id]) FM.asg[e.id]=[LEAD_OF[e.crew]]; return FM.asg[e.id]; }
+const fmDays = e => Array.from({length:e.len},(_,i)=>e.start+i);
+function fmIssue(e,n){ const p=PEOPLE.find(x=>x.n===n); if(!p) return null; const days=fmDays(e), off=days.filter(d=>p.off.includes(d));
+  if(off.length) return `${n} is off Nov ${off.join(', ')}`;
+  const clash=fmEvents().find(o=>o.id!==e.id && o.crew!==e.crew && fmPeople(o).includes(n) && fmDays(o).some(d=>days.includes(d))); return clash?`${n} is also on ${clash.job} (${clash.label}) those days`:null; }
+const fmShort = () => fmEvents().filter(e=>fmPeople(e).length<fmNeed(e) || fmPeople(e).some(n=>fmIssue(e,n)));
+function fmFree(e){ const sk=fmSkill(e), leads=Object.values(LEAD_OF); return PEOPLE.filter(p=>!fmPeople(e).includes(p.n) && !leads.includes(p.n) && !fmIssueFor(e,p.n)).sort((a,b)=>(b.sk.includes(sk))-(a.sk.includes(sk))); }
+function fmIssueFor(e,n){ const keep=FM.asg[e.id]; FM.asg[e.id]=[...fmPeople(e),n]; const r=fmIssue(e,n); FM.asg[e.id]=keep; return r; }
+PAGES.fmday = () => { const ev=fmEvents(), short=fmShort(), people=ev.reduce((a,e)=>a+fmPeople(e).length,0), need=ev.reduce((a,e)=>a+fmNeed(e),0), issues=ev.reduce((a,e)=>a+fmPeople(e).filter(n=>fmIssue(e,n)).length,0);
+  const card = e => { const ppl=fmPeople(e), need=fmNeed(e), bad=ppl.map(n=>[n,fmIssue(e,n)]).filter(x=>x[1]), st=bad.length?['Conflict','p-red']:ppl.length<need?[`Needs ${need-ppl.length} more`,'p-amber']:['✓ Staffed','p-green'];
+    return `<div class="card" style="padding:14px 16px;margin-top:10px"><div class="row between" style="gap:8px;flex-wrap:wrap"><div><div class="small muted">Nov ${e.start}${e.len>1?'–'+(e.start+e.len-1):''} · ${e.crew}${fmSkill(e)?' · needs '+fmSkill(e).toLowerCase()+' skills':''}</div><strong>${e.job}: ${e.label}</strong></div><span class="pill ${st[1]}">${st[0]}</span></div>
+      <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:10px">${ppl.map(n=>{ const iss=fmIssue(e,n); return `<span class="pill ${iss?'p-red':'p-grey'}" title="${iss||''}" style="padding:4px 10px">${n===LEAD_OF[e.crew]?'⭐ ':''}${n}${n===LEAD_OF[e.crew]?'':` <a href="#" style="margin-left:4px;color:inherit;text-decoration:none" aria-label="Remove ${n}" onclick="fmDel(${e.id},'${n}');return false">×</a>`}</span>`; }).join('')}
+        <select class="txt" style="padding:5px 8px;border:1px dashed #9fb0c2;border-radius:999px;font-size:13px;background:#f8fafc;width:auto;max-width:100%" aria-label="Add a person to ${e.job} ${e.label}" onchange="fmAdd(${e.id},this.value)"><option value="">+ Add a person</option>${PEOPLE.filter(p=>!ppl.includes(p.n)).map(p=>{ const iss=fmIssueFor(e,p.n); return `<option value="${p.n}">${p.n} · ${p.r}${p.sk.includes(fmSkill(e))?' · ✓ '+fmSkill(e):''}${iss?' · ⚠ '+iss.replace(p.n+' is ',''):''}</option>`; }).join('')}</select></div>
+      ${bad.map(([n,i])=>`<div class="small neg" style="margin-top:6px">⚠ ${i}. Swap someone in.</div>`).join('')}
+      ${(()=>{ const o=fmEvents().find(x=>x.id!==e.id&&x.crew===e.crew&&fmDays(x).some(d=>fmDays(e).includes(d))); return o?`<div class="small" style="margin-top:6px;color:var(--warn)">${e.crew} is double-booked with ${o.job} on the calendar. That's Justin's to move; the people here are fine.</div>`:''; })()}</div>`; };
+  return `<div class="row between" style="gap:10px;flex-wrap:wrap"><div><h1>Assignments</h1><p class="sub">Justin books the crews on each job. You put the right people on every crew, by skill and who's free. Everyone gets their days on their phone.</p></div>
+    <div class="row" style="gap:6px"><button class="btn" onclick="fmAuto()">Fill open spots</button><button class="btn primary" ${short.length?'disabled':''} onclick="fmSend()">${FM.sent?'✓ Sent':'Send assignments'}</button></div></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Phases this month</div><div class="v">${ev.length}</div><div class="d muted">your crews, not subs</div></div>
+    <div class="card stat"><div class="k">Spots filled</div><div class="v ${people>=need?'pos':''}">${people} / ${need}</div><div class="d muted">people across every phase</div></div>
+    <div class="card stat"><div class="k">Need attention</div><div class="v ${short.length?'neg':'pos'}">${short.length}</div><div class="d muted">short or a conflict</div></div>
+    <div class="card stat"><div class="k">Conflicts</div><div class="v ${issues?'neg':'pos'}">${issues}</div><div class="d muted">time off or double-booked</div></div>
+  </div>
+  <div class="grid g2 mt" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
+    <div>${ev.map(card).join('')}</div>
+    <div class="card" style="align-self:start"><h2>Your people</h2><div class="tablewrap"><table><thead><tr><th>Who</th><th>Skills</th><th class="r">Days</th></tr></thead><tbody>
+      ${PEOPLE.map(p=>{ const d=fmEvents().filter(e=>fmPeople(e).includes(p.n)).reduce((a,e)=>a+e.len,0); return `<tr><td><strong>${p.n}</strong><div class="small muted">${p.r}${p.off.length?` · off Nov ${p.off[0]}${p.off.length>1?'–'+p.off[p.off.length-1]:''}`:''}</div></td><td class="small">${p.sk.join(', ')}</td><td class="r">${d}</td></tr>`; }).join('')}
+    </tbody></table></div><p class="small muted" style="margin:8px 0 0">Subcontractor crews (masonry, electrical, gas) bring their own people, so they don't show here.</p></div>
+  </div>`; };
+function fmAdd(id,n){ if(!n) return; const e=CAL.find(x=>x.id===id); fmPeople(e).push(n); FM.sent=false; render(); const iss=fmIssue(e,n); toast(iss?`⚠ ${iss}.`:`${n} added to ${e.job}: ${e.label}.`); }
+function fmDel(id,n){ const e=CAL.find(x=>x.id===id); FM.asg[id]=fmPeople(e).filter(x=>x!==n); FM.sent=false; render(); }
+function fmAuto(){ let added=0; fmEvents().forEach(e=>{ FM.asg[e.id]=fmPeople(e).filter(n=>n===LEAD_OF[e.crew]||!fmIssue(e,n)); while(fmPeople(e).length<fmNeed(e)){ const f=fmFree(e)[0]; if(!f) break; fmPeople(e).push(f.n); added++; } }); FM.sent=false; render(); toast(added?`${added} spots filled by skill and who's free. Check them, then send.`:'Every spot is already filled.'); }
+function fmSend(){ FM.sent=true; render(); toast('Assignments sent. Each person sees their days, the job address and the gate code on their phone.'); }
+
+const FOREMAN_STEPS = [
+  {t:'Diego signs in', who:'5:45 AM · Diego · foreman', d:'One screen: every phase Justin booked this month, and who’s on it.', run: async()=>{ await loginStep('foreman'); }},
+  {t:'A new job needs people', who:'5:50 AM · Assignments', d:'Justin just booked Ellis Backyard. Its phases show up here with the crew lead on each and the spots still open.', run: async()=>{
+    const j=jobs.find(x=>x.id===77); const keep=TOUR_FAST; TOUR_FAST=true; try{ if(j&&!j.kicked){ schedKickoff(77); await kickAuto(); kickConfirm(); } } finally { TOUR_FAST=keep; }
+    asRole('foreman','fmday'); await wait(300); flash('main .grid.g2 > div'); toast(`Ellis Backyard is on the board: ${fmEvents().filter(e=>e.jid===77).length} phases for your crews, crew leads in place, spots open.`); }},
+  {t:'Put people on the demo', who:'5:55 AM · Assignments', d:'Demo + base needs 3. Diego adds the two people with demo skills, and the list shows who’s free and who fits.', run: async()=>{
+    asRole('foreman','fmday'); const e=CAL.find(x=>x.jid===77&&/demo/i.test(x.label)); if(e){ for(const n of ['Nate W.','Chris B.']){ if(!fmPeople(e).includes(n)) fmAdd(e.id,n); await wait(400); } } }},
+  {t:'Catch a time-off conflict', who:'6:00 AM · Assignments', d:'Victor is the best wall installer, but Victor is off Nov 18–20. The app flags it before anyone shows up short-handed.', run: async()=>{
+    asRole('foreman','fmday'); const e=CAL.find(x=>x.jid===77&&/paver/i.test(x.label)); if(e&&!fmPeople(e).includes('Victor S.')) fmAdd(e.id,'Victor S.'); await wait(300); flash('main .grid.g2 > div'); }},
+  {t:'Fill the rest', who:'6:05 AM · Assignments', d:'One click takes Victor off the conflict and fills every open spot by skill and who’s free.', run: async()=>{ asRole('foreman','fmday'); fmAuto(); }},
+  {t:'Send the assignments', who:'6:10 AM · Assignments', d:'Everyone gets their days, the address and the gate code on their phone. No group texts.', run: async()=>{ asRole('foreman','fmday'); if(!fmShort().length) fmSend(); flash('main .grid.g4'); }},
+];
 
 // ---------- Justin's day: what a project manager sees first (MVP) ----------
 PAGES.pm = () => {
@@ -3076,7 +3143,7 @@ async function tourReplay(k,n){ tourKind=k; tourStep=0; if(n<=0){ const r=Object
   closeModal(); renderTour(); toast(`Back on step ${tourStep}: ${S[tourStep-1].t}.`); }
 // ---------- sign-in for any role (demo: fields fill themselves; the real app = password + a 6-digit code) ----------
 const ROLE_LOGIN = {
-  production:['justin@yourcompany.com','Justin Butler · project manager'], owner:['austin@yourcompany.com','Austin · sales'],
+  production:['justin@yourcompany.com','Justin Butler · project manager'], foreman:['diego@yourcompany.com','Diego · foreman'], owner:['austin@yourcompany.com','Austin · sales'],
   admin:['joel@yourcompany.com','Joel · Master Admin'], designer:['mia@yourcompany.com','Mia R. · designer'],
   field:['leo@yourcompany.com','Leo · crew lead'], client:['dana.h@example.com','Dana Henderson · client portal'],
 };
@@ -3252,13 +3319,14 @@ const TOURS = {
   sales:{title:'A day in the life of Austin (sales)', name:'Austin', blurb:'Austin signs in, mails new leads, quotes and prices a job, and hands the sale to Justin.', done:'✓ Austin\'s day, done', doneSub:'From a postcard to a signed job on Justin\'s desk, without leaving the sales portal.', steps:SALES_STEPS},
   admin:{title:'A day in the life of Joel (Master Admin)', name:'Joel', blurb:'Joel signs in with 2-step, approves pay and a card purchase, fixes QuickBooks and checks the reports.', done:'✓ Joel\'s day, done', doneSub:'Payroll, QuickBooks, spending and reports handled from one portal.', steps:ADMIN_STEPS},
   designer:{title:'A day in the life of Mia (designer)', name:'Mia', blurb:'Mia picks up a design, attaches the AutoCAD drawing and helps with selections.', done:'✓ Mia\'s day, done', doneSub:'Designs in, quantities ready for Austin to price.', steps:DESIGNER_STEPS},
+  foreman:{title:'A morning with Diego (foreman)', name:'Diego', blurb:'Diego puts people on the crews Justin booked: by skill, around time off, then sends everyone their days.', done:'✓ Diego\'s morning, done', doneSub:'Every phase staffed, no double-booking, everyone told.', steps:FOREMAN_STEPS},
   field:{title:'A day in the life of Leo (crew lead)', name:'Leo', blurb:'Leo confirms a new job, checks the job details, clocks in, works the checklist, finishes the phase and closes out a job.', done:'✓ Leo\'s day, done', doneSub:'No paper, no texts to the office, no receipts in the truck.', steps:FIELD_STEPS},
   client:{title:'A client from first ask to final walkthrough', name:'Taylor', blurb:'Taylor asks for a design visit, signs the proposal, pays, picks finishes, follows the build, approves a change and signs off the walkthrough.', done:'✓ Taylor\'s project, done', doneSub:'From one short form to a finished backyard, every step in the portal.', steps:CLIENT_STEPS},
   justin:{title:'A day in the life of Justin (project manager)', name:'Justin', blurb:'Justin Butler, project manager, signs in and runs the day from one screen.', done:'✓ Justin\'s day, done', doneSub:'Crews, subs, change orders and POs handled without a single call or spreadsheet.', steps:JUSTIN_STEPS},
   job:{title:'One job, start to finish', name:'the job', blurb:'Each click fills in the forms and shows where the work lands.', done:'✓ Done: first call to final invoice', doneSub:'Every screen you saw shared the same job record. Nothing was typed twice.', steps:STEPS},
 };
 let tourKind = 'justin';
-const ROLE_TOUR = {production:'justin', owner:'sales', admin:'admin', designer:'designer', field:'field', client:'client'};
+const ROLE_TOUR = {production:'justin', foreman:'foreman', owner:'sales', admin:'admin', designer:'designer', field:'field', client:'client'};
 const roleTour = () => ROLE_TOUR[role]||'justin';
 const tourSteps = () => TOURS[tourKind].steps;
 function roleChanged(r){ if(tourBusy){ document.getElementById('roleSel').value=role; return; } if(tourStep>0){ tourStep=0; } setRole(r); renderTour(); }
