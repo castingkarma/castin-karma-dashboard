@@ -275,6 +275,11 @@ body.dragging{cursor:grabbing;user-select:none}
 .kph.ksel,.kcrew.ksel{border-color:#be185d;box-shadow:0 0 0 2px #fbcfe8}
 .cal .dc.kpick{cursor:copy}
 .cal .dc.kday:hover{background:#fdf2f8}
+.newjob{display:flex;align-items:center;gap:10px;background:#0b3b2e;color:#fff;border:0;border-radius:12px;padding:10px 16px;cursor:pointer;text-align:left;box-shadow:0 0 0 3px #5fe0b5}
+.newjob b{display:block;font-size:15px}.newjob small{color:#9ff0d2;font-size:12.5px}
+.newjob .dot{width:12px;height:12px;border-radius:50%;background:#5fe0b5;box-shadow:0 0 0 0 rgba(95,224,181,.7);animation:njpulse 1.6s infinite}
+@keyframes njpulse{0%{box-shadow:0 0 0 0 rgba(95,224,181,.7)}70%{box-shadow:0 0 0 10px rgba(95,224,181,0)}100%{box-shadow:0 0 0 0 rgba(95,224,181,0)}}
+@media (prefers-reduced-motion:reduce){.newjob .dot{animation:none}}
 .navsec{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:14px 10px 4px;border-top:1px solid var(--line);margin-top:8px}
 .navkey{padding:12px 10px 0;margin-top:8px;border-top:1px solid var(--line);line-height:1.5}
 .segtog{display:inline-flex;background:#eef0f3;border-radius:999px;padding:3px;gap:2px}
@@ -520,6 +525,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='costbook'){const n=vbOpen().length;return n?`<span class="n">${n}</span>`:''}
   if(key==='handoff'){const n=jobs.filter(j=>j.status==='Sold'&&!j.handed).length;return n?`<span class="n">${n}</span>`:''}
   if(key==='changes'){const n=coCount();return n?`<span class="n">${n}</span>`:''}
   if(key==='subs'){const n=SUBS.filter(x=>coiDays(x)<=30).length;return n?`<span class="n">${n}</span>`:''}
@@ -1357,6 +1363,20 @@ const COSTBOOK = [
   {id:'lite', code:'LITE', d:'Low-voltage lighting', u:'ea', lab:60, mat:105, labSrc:'Bright Line Electric (sub), per fixture', matSrc:'FX Luminaire via Ewing', upd:'Oct 5'},
 ];
 const CB_TODAY = new Date(2026,9,27);
+// vendor bills that came in through POs / QuickBooks at a different unit price than the cost book (demo samples)
+const VBILL = [
+  {cb:'pav',  k:'mat', vendor:'Belgard via SiteOne', ref:'Bill on PO-1041 · Henderson', date:'Oct 24', billed:5.90},
+  {cb:'turf', k:'mat', vendor:'SYNLawn Arizona', ref:'Bill on PO-1043 · Henderson', date:'Oct 22', billed:3.35},
+];
+const vbOpen = () => VBILL.filter(v=>!v.done && COSTBOOK.find(c=>c.id===v.cb)[v.k]!==v.billed);
+function vbAccept(i){ const v=VBILL[i], c=COSTBOOK.find(x=>x.id===v.cb); c[v.k]=v.billed; c.upd='Oct 27'; v.done=true; render(); toast(`${c.d}: materials now ${money2(v.billed)} per ${c.u}, from the ${v.vendor} bill. New quotes use it.`); }
+function vbKeep(i){ VBILL[i].done=true; render(); toast('Kept the cost book price. This bill is treated as a one-off.'); }
+function vbPanel(){ const o=vbOpen(); if(!o.length) return '';
+  return `<div class="card" id="vbAlert" style="border-color:#f1d49a;background:var(--warn-soft);margin-bottom:12px"><strong style="color:var(--warn)">🔔 ${o.length} vendor price${o.length>1?'s':''} changed</strong><div class="small" style="margin-top:2px">Found by comparing the bills that came in on your POs (and QuickBooks) with this cost book.</div>
+    ${o.map(v=>{ const i=VBILL.indexOf(v), c=COSTBOOK.find(x=>x.id===v.cb), was=c[v.k], d=v.billed-was;
+      return `<div class="row between" style="gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #f1d49a"><div><strong>${c.d}</strong> · ${v.k==='mat'?'materials':'labor'}
+        <div class="small">${v.vendor} billed <strong>${money2(v.billed)}</strong> per ${c.u}; the book says ${money2(was)} (${d>0?'+':''}${money2(d)}, ${d>0?'+':''}${Math.round(d/was*100)}%). ${v.ref} · ${v.date}</div></div>
+        <div class="row" style="gap:6px"><button class="btn sm primary" onclick="vbAccept(${i})">Update the cost book</button><button class="btn sm" onclick="vbKeep(${i})">Keep the book price</button></div></div>`; }).join('')}</div>`; }
 const cbOld = c => (CB_TODAY - new Date(c.upd+', 2026'))/864e5 > 90;
 const cbUnit = c => c.lab + c.mat;
 function cbLine(id,q,m){ const c=COSTBOOK.find(x=>x.id===id); return {sec:CODES[c.code], code:c.code, d:c.d, q, u:c.u, c:cbUnit(c), lab:c.lab, mat:c.mat, cb:id, m}; }
@@ -1371,6 +1391,7 @@ PAGES.costbook = () => {
     <div class="card stat"><div class="k">Target margin</div><div class="v">${Math.round(TARGET_M*100)}%</div><div class="d muted">quotes go amber below it</div></div>
     <div class="card stat"><div class="k">Who can edit</div><div class="v" style="font-size:20px">Austin + Joel</div><div class="d muted">every change is logged</div></div>
   </div>
+  <div class="mt">${vbPanel()}</div>
   <div class="card mt"><div class="tablewrap"><table><thead><tr><th>Item</th><th>Unit</th><th class="r">Labor / sub</th><th class="r">Materials</th><th class="r">Your cost</th><th class="r">Price at target</th><th>Where the number comes from</th></tr></thead><tbody>
     ${COSTBOOK.map((c,i)=>`<tr><td><strong>${c.d}</strong><div class="small muted">${CODES[c.code]}</div></td><td>${c.u}</td>
       <td class="r"><input class="num" style="width:84px" type="number" min="0" step="0.05" value="${c.lab}" aria-label="Labor per ${c.u} for ${c.d}" onchange="cbSet(${i},'lab',this.value)"></td>
@@ -1381,7 +1402,7 @@ PAGES.costbook = () => {
   </tbody></table></div>
   <p class="small muted" style="margin:10px 0 0">Changes apply to new quotes. A quote already priced keeps the cost it was priced at, so a client's number never moves under them.</p></div>
   <div class="card mt" style="border-left:4px solid var(--accent)"><h2>How the numbers get here</h2>
-    <div class="todo"><div class="ic" style="background:var(--accent-soft)">📦</div><div><strong>Materials</strong><div class="small muted">From supplier price sheets (Belgard, SYNLawn, SiteOne, Ewing). In the MVP someone types the new price when it changes; uploading a supplier's price sheet is a later add-on.</div></div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">📦</div><div><strong>Materials</strong><div class="small muted">From supplier price sheets (Belgard, SYNLawn, SiteOne, Ewing). Type a new price when it changes, or let the bills catch it: when a vendor bills a different price than the book, it's flagged at the top of this screen. Uploading a supplier's price sheet is a later add-on.</div></div></div>
     <div class="todo"><div class="ic" style="background:var(--accent-soft)">👷</div><div><strong>Your crews</strong><div class="small muted">A crew's day rate divided by how much they install in a day. Pay rates already live in Time & pay, so only the "per day" part needs setting.</div></div></div>
     <div class="todo"><div class="ic" style="background:var(--accent-soft)">🤝</div><div><strong>Subcontractors</strong><div class="small muted">Each sub's rate sheet (per foot, per fixture or flat per build), kept with their record in Crews & subs.</div></div></div>
     <div class="todo"><div class="ic" style="background:var(--accent-soft)">🔁</div><div><strong>Kept honest by real jobs</strong><div class="small muted">Job costing compares what each item really cost against this book, so a number that keeps running over shows up and gets fixed.</div></div></div>
@@ -1591,7 +1612,8 @@ PAGES.pm = () => {
   const alert = fresh.length?`<div class="card" id="soldAlert" style="background:#0b3b2e;color:#fff;border:0;margin-bottom:14px"><div class="row between" style="gap:10px;flex-wrap:wrap"><div><div class="small" style="color:#9ff0d2;font-weight:700;letter-spacing:.5px">🔔 NEW JOB LANDED · SOLD BY AUSTIN</div>
     <strong style="font-size:17px">${fresh[0].name} · ${fmt(jobValue(fresh[0]))}</strong><div class="small" style="color:#cfe9df">${fresh[0].client} · ${fresh[0].city} · contract signed, deposit invoiced${fresh[0].hoNote?' · '+fresh[0].hoNote:''}${fresh.length>1?` · +${fresh.length-1} more waiting`:''}</div></div>
     <button class="btn" style="background:#5fe0b5;border-color:#5fe0b5;color:#06281f" onclick="schedKickoff(${fresh[0].id})">Start this job →</button></div></div>`:'';
-  return `${alert}<div class="row between"><div><h1>Good morning, Justin</h1><p class="sub">Project manager · everything on your jobs that needs you, on one screen. No calls, texts or spreadsheets to piece it together.</p></div></div>
+  return `${alert}<div class="row between" style="gap:12px;flex-wrap:wrap"><div><h1>Good morning, Justin</h1><p class="sub">Project manager · everything on your jobs that needs you, on one screen. No calls, texts or spreadsheets to piece it together.</p></div>
+    ${fresh.length?`<button class="newjob" onclick="schedKickoff(${fresh[0].id})" title="Open the new-job kickoff"><span class="dot"></span><span><b>${fresh.length>1?fresh.length+' new jobs ready':'New job ready'}</b><small>${fresh[0].name} · start it →</small></span></button>`:'<span class="pill p-grey" title="New sold jobs from sales show here">No new jobs waiting</span>'}</div>
   <div class="grid g4">
     <div class="card stat"><div class="k">Jobs you're running</div><div class="v">${run.length}</div><div class="d muted">sold + in progress</div></div>
     <div class="card stat"><div class="k">Needs you today</div><div class="v ${todo.length?'':'pos'}">${todo.length}</div><div class="d muted">listed below</div></div>
@@ -2731,8 +2753,8 @@ const ADMIN_STEPS = [
     asRole('admin','qbo'); await wait(300); const i=QBO_LOG.findIndex(x=>x.st!=='Synced'); if(i>=0) fixQbo(i); flash('main .card.mt'); }},
   {t:'Approve a company-card purchase', who:'10:30 AM · Company cards', d:'A crew lead needs polymeric sand. Joel approves that one purchase; the card opens for it and locks again after.', run: async()=>{
     if(!CARDS.req) cardRequest(); asRole('admin','cards'); await wait(400); if(CARDS.req.st==='pending') cardDecide('approved'); flash('main .card.mt'); }},
-  {t:'Update a supplier price', who:'1:00 PM · Cost book', d:'Belgard sent a new price sheet: pavers up 40¢ a foot. Joel updates the cost book once, and every new quote prices from it.', run: async()=>{
-    asRole('admin','costbook'); await wait(300); const el=document.querySelector('input[aria-label^="Materials per sf for Concrete pavers"]'); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); await wait(400); el.value=''; await typeIn(el.id||'',''); el.value='5.90'; cbSet(1,'mat','5.90'); } flash('main .card.mt'); }},
+  {t:'A vendor price changed', who:'1:00 PM · Cost book', d:'Belgard’s bill came in at $5.90 a foot for pavers; the cost book says $5.50. The app flagged it. Joel updates the book in one click, and every new quote prices from it.', run: async()=>{
+    asRole('admin','costbook'); await wait(300); flash('#vbAlert'); await wait(900); const i=VBILL.findIndex(v=>v.cb==='pav'); if(i>=0&&!VBILL[i].done) vbAccept(i); flash('main .card.mt'); }},
   {t:'Check the reports', who:'3:00 PM · Finance reports', d:'Job profitability, money owed and payroll, each one exports to PDF or CSV for the accountant.', run: async()=>{ asRole('admin','finance'); await wait(200); flash('main .card'); toast('Every number ties back to QuickBooks.'); }},
 ];
 const DESIGNER_STEPS = [
