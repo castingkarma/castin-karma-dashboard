@@ -1237,7 +1237,7 @@ const ROLES = {
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
   foreman:{l:'Foreman (Diego)', who:'Diego (sample)', sub:'Foreman · people on every job', home:'fmday', nav:[['fmday','Assignments'],['calendar','Crew calendar'],['subs','Crews & subs'],FLOW]},
-  field:{l:'Field crew lead (Leo)', who:'Leo', sub:'Crew lead · Crew A · phone app', home:'field', nav:[['field','Today'],['crewsched','My schedule'],['crewjob','Job details'],['crewtime','My hours'],FLOW]},
+  field:{l:'Field crew lead (Leo)', who:'Leo', sub:'Crew lead · Crew A · phone app', home:'field', nav:[['field','Today'],['crewsched','My schedule'],['crewjob','Job details'],['crewplan','Plan the crew'],['crewtime','My hours'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-schedule','Schedule'],['c-selections','Selections'],['c-changes','Change orders'],['c-pay','Payments'],['c-photos','Photos + updates'],['c-walk','Final walkthrough'],['c-proposal','Proposal (new job)'],['c-start','Request a design visit']]},
 };
 function populateRoles(){ document.getElementById('roleSel').innerHTML = Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${r.l}</option>`).join(''); document.getElementById('roleSel').value=role; }
@@ -2138,7 +2138,7 @@ async function approveTime(b){ b.disabled=true; b.textContent='Approving…'; aw
 
 // ---------- field crew app (phone) ----------
 // ---------- crew app (Leo, Crew A lead): today, my schedule, job details, my hours; a job from assigned to complete ----------
-const FIELD = {clocked:null, out:null, crew:{'Luis P.':true,'Andre K.':true,'Sam D.':false}, crewSent:false, receipt:null, photos:0, cur:'a1', view:'a1'};
+const FIELD = {clocked:null, out:null, crew:{'Andre K.':true,'Chris B.':true,'Jorge M.':true}, crewSent:false, receipt:null, photos:0, cur:'a1', view:'a1'};
 const ASSIGN = [
   {id:'a1', jid:1, job:'Henderson Backyard', phase:'Seat wall cap + paver cuts', when:'Mon Oct 26 – Tue Oct 27', days:2, day:1, st:'started', city:'Scottsdale', client:'Dana Henderson',
    gate:'Side gate code 4417 · dog in the yard · Dana works from home', scope:'Cap the seat wall, cut pavers along the house, clean up for the kitchen crew.',
@@ -2213,6 +2213,38 @@ PAGES.crewtime = () => { const w=CREW_TIME.find(x=>x.n==='Leo'), days=WEEK.map((
   <div class="row between" style="margin-top:10px"><strong>This week</strong><strong>${fmt(tot)}</strong></div>
   <div class="small ${w.st==='Approved'?'pos':'muted'}" style="margin-top:4px">${w.st==='Approved'?'✓ Approved by Joel · paid Friday':'Waiting for Joel to approve'}</div>
   ${FIELD.clocked?`<div class="card" style="margin-top:12px;padding:10px 12px"><div class="small"><strong>Today:</strong> Henderson Backyard · in ${FIELD.clocked}${FIELD.out?` · out ${FIELD.out}`:' · still on the clock'}</div></div>`:''}</div>`; };
+// ---------- crew lead plans the day: split the crew into teams, give each task to a team, the app builds each team's timeline ----------
+const PLAN_HRS = {'Finish seat wall cap':3,'Paver cuts along the house':3,'Blow off + clean the patio':1,'Photos before you leave':0.5,'Set 14 fixtures + transformer':4,'Test every zone at dusk':1,'Final photos':0.5,'Remove grass + rock':4,'Grade + compact 4" base':4,'Photos':0.5};
+let planFor = 'a1';
+function planOf(a){ if(!a.plan){ const ppl=Object.keys(FIELD.crew); a.plan={teams:['Team 1','Team 2'], who:Object.fromEntries(ppl.map((n,i)=>[n,i<Math.ceil(ppl.length/2)?0:1])), task:Object.fromEntries(a.tasks.map((t,i)=>[i,i%2])), hrs:Object.fromEntries(a.tasks.map((t,i)=>[i,PLAN_HRS[t]||2])), sent:false}; } return a.plan; }
+const planTime = h => { const m=Math.round(h*60), hh=7+Math.floor(m/60), mm=m%60; return `${hh>12?hh-12:hh}:${String(mm).padStart(2,'0')}${hh>=12?' PM':' AM'}`; };
+PAGES.crewplan = () => { const live=ASSIGN.filter(x=>x.st!=='done'); if(!live.some(x=>x.id===planFor)) planFor=(live[0]||ASSIGN[0]).id; const a=asg(planFor), P=planOf(a), ppl=Object.keys(P.who);
+  const line = (k,v) => `<div style="padding:8px 0;border-bottom:1px solid var(--line)">${k}${v}</div>`;
+  const pick = (cur,on) => `<div class="row" style="gap:4px;flex-wrap:wrap">${P.teams.map((t,i)=>`<button class="btn sm ${cur===i?'primary':''}" style="padding:3px 10px" onclick="${on}(${i})">${t}</button>`).join('')}</div>`;
+  return `<div class="phone">${phoneHead('Plan the crew')}
+  <p class="small muted" style="margin:4px 0 10px">Split today's crew into teams and give each task to a team. The app builds each team's schedule.</p>
+  <label class="small" for="planJob"><strong>Job</strong></label>
+  <select id="planJob" class="txt" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;margin-top:4px" onchange="planFor=this.value;render()">${live.map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>${x.job} · ${x.phase} · ${x.when.split(' – ')[0]}</option>`).join('')}</select>
+  <div class="row between" style="margin:16px 0 4px"><h2 style="font-size:15px;margin:0">Who's on which team</h2><button class="btn sm" onclick="planTeam()">+ Team</button></div>
+  <div class="small muted">⭐ Leo leads and floats between teams.</div>
+  ${ppl.map(n=>line(`<div class="row between" style="gap:8px;flex-wrap:wrap"><strong class="small">${n}</strong>`, pick(P.who[n], `(i=>planWho('${a.id}','${n}',i))`)+'</div>')).join('')}
+  <h2 style="font-size:15px;margin:16px 0 4px">Tasks</h2>
+  ${a.tasks.map((t,i)=>line(`<div class="small" style="margin-bottom:6px"><strong>${t}</strong></div><div class="row between" style="gap:8px;flex-wrap:wrap">`, pick(P.task[i], `(k=>planTask('${a.id}',${i},k))`)+`<select class="txt" style="width:auto;padding:4px 6px;border:1px solid var(--line);border-radius:8px;font-size:13px" aria-label="Hours for ${t}" onchange="planHrs('${a.id}',${i},this.value)">${[0.5,1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${+P.hrs[i]===h?'selected':''}>${h<1?'30 min':h+' h'}</option>`).join('')}</select></div>`)).join('')}
+  <h2 style="font-size:15px;margin:18px 0 4px">Today's plan</h2>
+  ${P.teams.map((tm,ti)=>{ const crew=ppl.filter(n=>P.who[n]===ti), tasks=a.tasks.map((t,i)=>[t,i]).filter(([t,i])=>P.task[i]===ti); let clock=0;
+    return `<div class="card" style="padding:12px;margin-top:8px;${!crew.length&&tasks.length?'border-color:#f3b4ad;background:var(--bad-soft)':''}"><div class="row between"><strong>${tm}</strong><span class="small muted">${crew.join(', ')||'nobody yet'}</span></div>
+      ${tasks.length?tasks.map(([t,i])=>{ const a0=clock; clock+=+P.hrs[i]; return `<div class="row between small" style="padding:5px 0;border-top:1px solid var(--line);gap:8px"><span>${planTime(a0)}–${planTime(clock)}</span><span style="text-align:right">${t}</span></div>`; }).join('')+`<div class="small ${clock>9?'neg':'muted'}" style="margin-top:4px">${clock>9?`⚠ ${clock} hours: move a task to another team`:`Done about ${planTime(clock)}`}</div>`
+        :'<div class="small muted" style="margin-top:4px">No tasks yet.</div>'}
+      ${!crew.length&&tasks.length?'<div class="small neg" style="margin-top:4px">⚠ This team has tasks but nobody on it.</div>':''}</div>`; }).join('')}
+  <button class="bigbtn go" onclick="planSend('${a.id}')">${P.sent?'✓ Plan sent to the crew':'Send the plan to the crew'}</button>
+  <div class="small muted" style="text-align:center;margin-top:4px">Each person sees their team, tasks and times on their phone.</div>
+</div>`; };
+function planWho(id,n,i){ const P=planOf(asg(id)); P.who[n]=i; P.sent=false; render(); }
+function planTask(id,t,k){ const P=planOf(asg(id)); P.task[t]=k; P.sent=false; render(); }
+function planHrs(id,t,h){ const P=planOf(asg(id)); P.hrs[t]=+h; P.sent=false; render(); }
+function planTeam(){ const a=asg(planFor), P=planOf(a); P.teams.push('Team '+(P.teams.length+1)); render(); toast(`${P.teams.at(-1)} added. Move people and tasks onto it.`); }
+function planSend(id){ const a=asg(id), P=planOf(a); P.sent=true; render(); toast(`Plan sent for ${a.job}: ${P.teams.filter((t,i)=>Object.values(P.who).includes(i)).length} teams. Everyone sees their tasks and times.`); }
+
 function crewClockIn(){ FIELD.clocked='7:02 AM'; FIELD.out=null; const a=asg(FIELD.cur); if(a.st==='confirmed') a.st='started'; render(); toast(`Clocked in at 7:02 AM on ${a.job}. Location saved.`); }
 function crewTask(id,i,on){ const a=asg(id); a.done=on?[...new Set([...a.done,i])]:a.done.filter(x=>x!==i); render(); }
 function crewPunch(id,i,on){ const a=asg(id); a.punchDone=on?[...new Set([...a.punchDone,i])]:a.punchDone.filter(x=>x!==i); render(); }
@@ -3237,6 +3269,10 @@ const FIELD_STEPS = [
     asRole('field','crewsched'); await wait(500); flash('main .phone .card'); await wait(500); if(asg('a3').st==='new') crewConfirm('a3',true); }},
   {t:'Check the job before heading out', who:'7:00 AM · Job details', d:'Address and directions, the gate code, what we’re doing, what materials are there, and the plans. No calling the office.', run: async()=>{
     FIELD.view='a1'; asRole('field','crewjob'); await wait(300); flash('main .phone .card'); }},
+  {t:'Split the crew into teams', who:'6:58 AM · Plan the crew', d:'Leo puts Andre and Chris on the seat wall and paver cuts, and Jorge on cleanup. The app lays out each team’s day with times.', run: async()=>{
+    planFor='a1'; asRole('field','crewplan'); await wait(300); const P=planOf(asg('a1'));
+    planWho('a1','Andre K.',0); planWho('a1','Chris B.',0); planWho('a1','Jorge M.',1); await wait(300);
+    planTask('a1',0,0); planTask('a1',1,0); planTask('a1',2,1); planTask('a1',3,1); await wait(400); flash('main .phone'); await wait(500); planSend('a1'); }},
   {t:'Clock in at the job', who:'7:02 AM · Today', d:'One tap. The location is saved at the job site, so pay and job costing fill themselves.', run: async()=>{ asRole('field','field'); if(!FIELD.clocked) crewClockIn(); }},
   {t:'Work the checklist', who:'9:30 AM · Today', d:'Leo ticks off the work as it’s done and adds photos. Justin and the client see progress without a phone call.', run: async()=>{
     asRole('field','field'); const a=asg('a1'); for(const i of [0,1]){ if(!a.done.includes(i)) crewTask('a1',i,true); await wait(350); } FIELD.photos+=3; render(); toast('2 of 4 done and 3 photos added. Justin and Dana see them.'); }},
