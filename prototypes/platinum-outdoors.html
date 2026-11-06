@@ -341,7 +341,7 @@ td input[type=checkbox]{width:17px;height:17px}
   <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
   <button class="hdr-btn" id="tradBtn" onclick="go('trad')">Traditional Development</button>
   <button class="hdr-btn gold" id="adBtn" onclick="setRole('admin')">Master Admin</button>
-  <label class="rolewrap"><span>View as</span><select id="roleSel" class="rolesel" onchange="setRole(this.value)"></select></label>
+  <label class="rolewrap"><span>View as</span><select id="roleSel" class="rolesel" onchange="roleChanged(this.value)"></select></label>
 </header>
 <div class="tour" id="tour"></div>
 <div class="layout">
@@ -1191,10 +1191,10 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
-const MVP_PAGES = new Set(['pm','changes','sales','handoff','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
+const MVP_PAGES = new Set(['pm','changes','sales','handoff','costbook','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'sales', nav:[['sales','Sales home'],['leads','Leads'],['quotes','Quotes & design'],['estimate','Estimates'],['proposal','Proposals'],['handoff','Sold → handoff'],['jobs','Jobs board'],FLOW]},
-  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
+  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costbook','Cost book'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
   field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
@@ -1247,7 +1247,7 @@ const QUOTES = [
 let selQ = 'Q-2041';
 const qVal = q => q.lines.length ? q.lines.reduce((a,l)=>a+linePrice(l),0) : (q.val||0);
 // budget check: the client's anticipated budget vs. our price + cost, against the target margin
-const TARGET_M = 0.30;
+let TARGET_M = 0.30;
 const MARKS = [['Cost','C','#b42318'],['Min. price at target','minP','#b26a00'],['Our price','P','#1f2a37'],['Client budget','B','#0f8a6a']];
 const qCost = q => q.lines.length ? q.lines.reduce((a,l)=>a+lineCost(l),0) : (q.val? q.val*0.70 : 0);
 function budgetFit(q){
@@ -1316,17 +1316,61 @@ PAGES.quotes = () => {
     </div>
   </div>`;
 };
+// ---------- cost book: what each item costs Platinum per unit, split into labor/sub and materials. Quotes price from it. ----------
+// sample numbers sized to East Valley residential work; the real book is built with Austin + Joel in discovery
+const COSTBOOK = [
+  {id:'demo', code:'DEMO', d:'Demo + base prep', u:'sf', lab:1.10, mat:0.50, labSrc:'Crew A day rate ÷ ~900 sf a day', matSrc:'ABC base, Arizona Materials price sheet', upd:'Oct 1'},
+  {id:'pav',  code:'PAV',  d:'Concrete pavers, Belgard Catalina', u:'sf', lab:4.25, mat:5.50, labSrc:'Crew B day rate ÷ ~250 sf a day', matSrc:'Belgard via SiteOne, contractor price', upd:'Sep 15'},
+  {id:'wall', code:'PAV',  d:'Seat wall, stacked stone', u:'lf', lab:75, mat:65, labSrc:'Desert Stoneworks (sub) rate sheet', matSrc:'Coronado Stone veneer + block', upd:'Aug 20'},
+  {id:'turf', code:'TURF', d:'Artificial turf + dog run', u:'sf', lab:2.00, mat:3.20, labSrc:'Crew C day rate ÷ ~600 sf a day', matSrc:'SYNLawn Arizona, pet turf + infill', upd:'Oct 10'},
+  {id:'perg', code:'PERG', d:'Attached pergola 14×16', u:'ea', lab:3200, mat:4600, labSrc:'Pergola sub, flat per build', matSrc:'Alumawood kit + footings', upd:'Jun 30'},
+  {id:'fire', code:'FIRE', d:'Gas fire pit, 42" round', u:'ea', lab:1400, mat:2200, labSrc:'Masonry sub + gas sub', matSrc:'Burner + parts, Ferguson', upd:'Sep 2'},
+  {id:'lite', code:'LITE', d:'Low-voltage lighting', u:'ea', lab:60, mat:105, labSrc:'Bright Line Electric (sub), per fixture', matSrc:'FX Luminaire via Ewing', upd:'Oct 5'},
+];
+const CB_TODAY = new Date(2026,9,27);
+const cbOld = c => (CB_TODAY - new Date(c.upd+', 2026'))/864e5 > 90;
+const cbUnit = c => c.lab + c.mat;
+function cbLine(id,q,m){ const c=COSTBOOK.find(x=>x.id===id); return {sec:CODES[c.code], code:c.code, d:c.d, q, u:c.u, c:cbUnit(c), lab:c.lab, mat:c.mat, cb:id, m}; }
+PAGES.costbook = () => {
+  if(!finOpen) return finGate();
+  const old = COSTBOOK.filter(cbOld).length;
+  return `<div class="row between"><div><h1>Cost book</h1><p class="sub">What each item costs Platinum per unit, split into labor (your crews or a sub) and materials. Set it once here, and every quote and estimate fills in from it.</p></div>
+    <div class="row" style="gap:8px;align-items:center"><label class="small" for="cb_tm"><strong>Target margin</strong></label><input class="num" id="cb_tm" type="number" min="0" max="80" value="${Math.round(TARGET_M*100)}" onchange="TARGET_M=Math.min(.8,Math.max(0,(+this.value||0)/100));render();toast('Target margin set to '+Math.round(TARGET_M*100)+'%. Quotes color against it.')">%</div></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Items</div><div class="v">${COSTBOOK.length}</div><div class="d muted">sample; yours set in discovery</div></div>
+    <div class="card stat"><div class="k">Prices over 90 days old</div><div class="v ${old?'neg':'pos'}">${old}</div><div class="d muted">worth a fresh quote from the vendor</div></div>
+    <div class="card stat"><div class="k">Target margin</div><div class="v">${Math.round(TARGET_M*100)}%</div><div class="d muted">quotes go amber below it</div></div>
+    <div class="card stat"><div class="k">Who can edit</div><div class="v" style="font-size:20px">Austin + Joel</div><div class="d muted">every change is logged</div></div>
+  </div>
+  <div class="card mt"><div class="tablewrap"><table><thead><tr><th>Item</th><th>Unit</th><th class="r">Labor / sub</th><th class="r">Materials</th><th class="r">Your cost</th><th class="r">Price at target</th><th>Where the number comes from</th></tr></thead><tbody>
+    ${COSTBOOK.map((c,i)=>`<tr><td><strong>${c.d}</strong><div class="small muted">${CODES[c.code]}</div></td><td>${c.u}</td>
+      <td class="r"><input class="num" style="width:84px" type="number" min="0" step="0.05" value="${c.lab}" aria-label="Labor per ${c.u} for ${c.d}" onchange="cbSet(${i},'lab',this.value)"></td>
+      <td class="r"><input class="num" style="width:84px" type="number" min="0" step="0.05" value="${c.mat}" aria-label="Materials per ${c.u} for ${c.d}" onchange="cbSet(${i},'mat',this.value)"></td>
+      <td class="r"><strong>${money2(cbUnit(c))}</strong><div class="small muted">per ${c.u}</div></td>
+      <td class="r">${money2(cbUnit(c)/(1-TARGET_M))}</td>
+      <td class="small"><div>👷 ${c.labSrc}</div><div>📦 ${c.matSrc}</div><div class="${cbOld(c)?'neg':'muted'}">Updated ${c.upd}${cbOld(c)?' · over 90 days old':''}</div></td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="small muted" style="margin:10px 0 0">Changes apply to new quotes. A quote already priced keeps the cost it was priced at, so a client's number never moves under them.</p></div>
+  <div class="card mt" style="border-left:4px solid var(--accent)"><h2>How the numbers get here</h2>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">📦</div><div><strong>Materials</strong><div class="small muted">From supplier price sheets (Belgard, SYNLawn, SiteOne, Ewing). In the MVP someone types the new price when it changes; uploading a supplier's price sheet is a later add-on.</div></div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">👷</div><div><strong>Your crews</strong><div class="small muted">A crew's day rate divided by how much they install in a day. Pay rates already live in Time & pay, so only the "per day" part needs setting.</div></div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">🤝</div><div><strong>Subcontractors</strong><div class="small muted">Each sub's rate sheet (per foot, per fixture or flat per build), kept with their record in Crews & subs.</div></div></div>
+    <div class="todo"><div class="ic" style="background:var(--accent-soft)">🔁</div><div><strong>Kept honest by real jobs</strong><div class="small muted">Job costing compares what each item really cost against this book, so a number that keeps running over shows up and gets fixed.</div></div></div>
+  </div>`;
+};
+function cbSet(i,k,v){ const c=COSTBOOK[i]; c[k]=Math.max(0,parseFloat(v)||0); c.upd='Oct 27'; render(); toast(`${c.d}: cost now ${money2(cbUnit(c))} per ${c.u}. New quotes use it.`); }
+
 // priced quote: one cost per line from the cost book (labor + materials), you type your price, margin updates as you type
 const qMargin = (p,c) => p>0 ? (p-c)/p : 0;
 function qPriceTable(q){ const edit = q.stage==='Review', C=q.lines.reduce((a,l)=>a+lineCost(l),0), P=qVal(q), m=qMargin(P,C);
   const mcell = (p,c) => { const v=qMargin(p,c); return `<span class="${v<0?'neg':v<TARGET_M?'':'pos'}" style="${v>=0&&v<TARGET_M?'color:var(--warn)':''}">${pct(v*100)}</span>`; };
   return `<div class="row between" style="margin:16px 0 4px;gap:8px;flex-wrap:wrap"><h3 style="font-size:14px;margin:0">Priced quote</h3><span class="small muted">${edit?'Type your price on any line. Margin updates as you type.':'Locked once it\'s sent to the client.'}</span></div>
-  <div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Your cost</th><th class="r">Your price</th><th class="r">Margin</th></tr></thead><tbody>
-    ${q.lines.map((l,i)=>{ const c=lineCost(l), p=linePrice(l); return `<tr><td>${l.d}<div class="small muted">${CODES[l.code]}</div></td><td class="r">${l.q.toLocaleString()} ${l.u}</td><td class="r">${fmt(c)}</td>
+  <div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Labor / sub</th><th class="r">Materials</th><th class="r">Your cost</th><th class="r">Your price</th><th class="r">Margin</th></tr></thead><tbody>
+    ${q.lines.map((l,i)=>{ const c=lineCost(l), p=linePrice(l); return `<tr><td>${l.d}<div class="small muted">${CODES[l.code]}</div></td><td class="r">${l.q.toLocaleString()} ${l.u}</td><td class="r small">${l.lab!=null?fmt(l.q*l.lab):'—'}</td><td class="r small">${l.mat!=null?fmt(l.q*l.mat):'—'}</td><td class="r"><strong>${fmt(c)}</strong></td>
       <td class="r">${edit?`<input class="num" style="width:96px;text-align:right" type="number" min="0" step="50" value="${Math.round(p)}" aria-label="Price for ${l.d}" oninput="qPriceLive('${q.id}',${i},this.value)" onchange="qPriceSet('${q.id}',${i},this.value)">`:fmt(p)}</td>
       <td class="r" id="qm_${i}">${mcell(p,c)}</td></tr>`; }).join('')}
-    <tr class="tot"><td colspan="2">Total</td><td class="r">${fmt(C)}</td><td class="r" id="qP">${fmt(P)}</td><td class="r" id="qM">${mcell(P,C)}</td></tr></tbody></table></div>
-  <div class="small muted" style="margin-top:6px">Your cost is one number per item from the cost book (labor + materials together). Target margin ${Math.round(TARGET_M*100)}%: green at or above, amber below, red is a loss.</div>`; }
+    <tr class="tot"><td colspan="2">Total</td><td class="r small">${fmt(q.lines.reduce((a,l)=>a+(l.lab!=null?l.q*l.lab:0),0))}</td><td class="r small">${fmt(q.lines.reduce((a,l)=>a+(l.mat!=null?l.q*l.mat:0),0))}</td><td class="r">${fmt(C)}</td><td class="r" id="qP">${fmt(P)}</td><td class="r" id="qM">${mcell(P,C)}</td></tr></tbody></table></div>
+  <div class="small muted" style="margin-top:6px">Labor / sub and materials come from the ${role==='admin'||role==='owner'?'<a href="#" onclick="setRole(\'admin\');go(\'costbook\');return false">cost book</a>':'cost book'}, set by Austin + Joel. Target margin ${Math.round(TARGET_M*100)}%: green at or above, amber below, red is a loss.</div>`; }
 function qPriceSet(id,i,v){ const q=QUOTES.find(x=>x.id===id), l=q.lines[i], base=l.q*l.c, p=Math.max(0,parseFloat(v)||0); l.m = base? (p/base-1)*100 : 0; }
 function qPriceLive(id,i,v){ qPriceSet(id,i,v); const q=QUOTES.find(x=>x.id===id), l=q.lines[i], C=q.lines.reduce((a,x)=>a+lineCost(x),0), P=qVal(q);
   const m=(p,c)=>{ const x=qMargin(p,c); return `<span class="${x<0?'neg':x<TARGET_M?'':'pos'}" style="${x>=0&&x<TARGET_M?'color:var(--warn)':''}">${pct(x*100)}</span>`; };
@@ -1345,14 +1389,13 @@ function stepBackQ(id){
 async function busy(b,label){ if(b){ b.disabled=true; b.textContent=label; } await wait(600); }
 async function specsOut(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…');
   q.specs=['Backyard ~42×60 ft, north-facing, gentle slope to the east','Attached pergola 14×16 ft off the patio door','Pavers about 520 sf, seat wall along the back','Turf about 700 sf including a dog run','Gas fire pit; budget around $45k','Site photos + measurements attached'];
-  q.designer='Mia R.'; q.stage='Design'; render(); toast('Specs and site photos sent to Mia. It\'s in her design queue.'); }
+  q.designer='Mia R.'; q.stage='Design'; render(); toast('Specs and site photos sent to Mia. It\'s in Mia\'s design queue.'); }
 async function attachDwg(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Reading drawing…'); const last=q.client.split(' ').pop();
   q.files=[{n:`${last}_backyard_v1.dwg`,t:'DWG'},{n:`${last}_backyard_v1.pdf`,t:'PDF'}];
   q.takeoff=[{item:'PAVERS (area)',q:524,u:'sf'},{item:'WALLS (length)',q:18,u:'lf'},{item:'TURF (area)',q:710,u:'sf'},{item:'DEMO (area)',q:1240,u:'sf'},{item:'PERGOLA (block)',q:1,u:'ea'},{item:'FIREPIT (block)',q:1,u:'ea'},{item:'LIGHT (blocks)',q:12,u:'ea'}];
   q.stage='Pricing'; render(); toast('Design attached. 7 quantities pulled from the drawing layers.'); }
 async function priceIt(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Pricing…');
-  q.lines=[TL('Site prep','DEMO','Demo + base prep',1240,'sf',1.6,45),TL('Patio','PAV','Concrete pavers, Belgard Catalina',524,'sf',9.75,50),TL('Patio','PAV','Seat wall, stacked stone',18,'lf',140,40),
-    TL('Turf','TURF','Artificial turf + dog run',710,'sf',5.2,45),TL('Shade','PERG','Attached pergola 14×16',1,'ea',7800,35),TL('Fire feature','FIRE','Gas fire pit, 42" round',1,'ea',3600,45),TL('Lighting','LITE','Low-voltage lighting',12,'ea',165,60)];
+  q.lines=[cbLine('demo',1240,45),cbLine('pav',524,50),cbLine('wall',18,40),cbLine('turf',710,45),cbLine('perg',1,35),cbLine('fire',1,45),cbLine('lite',12,60)];
   q.stage='Review'; render(); toast(`Priced at ${fmt(qVal(q))} from your cost book.`); }
 async function approveQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…'); q.stage='Sent'; render(); toast(`Approved by Austin and emailed to ${q.client.split(' ')[0]}.`); }
 async function signQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Signing…'); q.stage='Signed'; render(); toast(`${q.client} signed. Ready to push to production.`); }
@@ -2484,9 +2527,10 @@ const STEPS = [
 ];
 let tourStep = 0, tourBusy = false;
 function renderTour(){
-  const el=document.getElementById('tour'), T=TOURS[tourKind], n=T.steps.length, other=tourKind==='justin'?'job':'justin';
-  if(tourStep===0) el.innerHTML = `<div class="tstep"><b>▶ Guided demo: ${TOURS.justin.title}</b><span>${TOURS.justin.steps.length} clicks. ${TOURS.justin.blurb}</span></div>
-    <button class="btn tnext" onclick="startTour('justin')">Start Justin's day</button>
+  if(tourStep===0) tourKind=roleTour();
+  const el=document.getElementById('tour'), T=TOURS[tourKind], n=T.steps.length, other=tourKind==='job'?roleTour():'job';
+  if(tourStep===0) el.innerHTML = `<div class="tstep"><b>▶ Guided demo: ${T.title}</b><span>${n} clicks, starting at sign-in. ${T.blurb}</span></div>
+    <button class="btn tnext" onclick="startTour('${tourKind}')">Start ${T.name==='Dana'?'Dana\'s evening':T.name+'\'s day'}</button>
     <button class="btn treset" onclick="startTour('job')">Or: one job, start to finish</button>`;
   else if(tourStep>n) el.innerHTML = `<div class="tstep"><b>${T.done}</b><span>${T.doneSub}</span><div class="tbar"><i style="width:100%"></i></div></div>
     <button class="btn tnext" onclick="startTour('${other}')">Now: ${TOURS[other].title.toLowerCase()}</button>
@@ -2521,28 +2565,106 @@ document.addEventListener('click', e=>{
   if(el.id.startsWith('nj_')) fillNewJob();
   else if(el.id==='sigName'){ el.value = propSrc().client; el.dispatchEvent(new Event('input',{bubbles:true})); }
   else if(el.id==='q_budget'){ const q=QUOTES.find(x=>x.id===selQ); setBudget(selQ, q.hint || Math.round((qVal(q)||40000)*1.1/500)*500); }
-  else if(el.id==='pm_email'||el.id==='pm_pw'||el.id==='pm_code'){ [['pm_email','justin@yourcompany.com'],['pm_pw','demo-password'],['pm_code','275104']].forEach(([k,v])=>{ const f=document.getElementById(k); if(f&&!f.value) f.value=v; }); }
+  else if(el.id==='pm_email'||el.id==='pm_pw'||el.id==='pm_code'){ fillLogin(); }
   else if(el.id==='fin_pw'){ el.value='demo-password'; document.getElementById('fin_code').value='482913'; }
   else if(el.id==='fin_code'){ el.value='482913'; const pw=document.getElementById('fin_pw'); if(!pw.value) pw.value='demo-password'; }
 });
 function startOver(){ location.href = location.pathname + '?start=' + Date.now(); }
-// ---------- Justin's sign-in (demo: any password works; real app = password + 2-step code) ----------
-PAGES.login = () => `<div class="gate card"><div class="small muted">Platinum Outdoors · Job Hub</div><h1 style="margin-top:4px">Sign in</h1>
-  <p class="small muted">Your team signs in with a password and a 6-digit code to their phone.</p>
+// ---------- sign-in for any role (demo: fields fill themselves; the real app = password + a 6-digit code) ----------
+const ROLE_LOGIN = {
+  production:['justin@yourcompany.com','Justin Butler · project manager'], owner:['austin@yourcompany.com','Austin · sales'],
+  admin:['joel@yourcompany.com','Joel · Master Admin'], designer:['mia@yourcompany.com','Mia R. · designer'],
+  field:['marco@yourcompany.com','Marco T. · crew lead'], client:['dana.h@example.com','Dana Henderson · client portal'],
+};
+let loginAs = 'production';
+PAGES.login = () => { const c=loginAs==='client', f=loginAs==='field';
+  return `<div class="gate card"><div class="small muted">Platinum Outdoors · ${c?'Client portal':'Job Hub'}</div><h1 style="margin-top:4px">Sign in</h1>
+  <p class="small muted">${c?'No password to remember: we email you a 6-digit code each time.':f?'Crews sign in once on their phone and stay signed in.':'Your team signs in with a password and a 6-digit code to their phone.'}</p>
   <div class="field"><label for="pm_email">Email</label><input class="txt" id="pm_email" placeholder="you@yourcompany.com"></div>
-  <div class="field"><label for="pm_pw">Password</label><input class="txt" id="pm_pw" type="password" placeholder="Click to fill (demo)"></div>
-  <div class="field"><label for="pm_code">6-digit code from your phone</label><input class="txt" id="pm_code" inputmode="numeric" maxlength="6" placeholder="– – – – – –" style="letter-spacing:6px;font-size:18px"></div>
-  <button class="btn primary mt" id="pmBtn" style="width:100%" onclick="pmSignIn(this)">Sign in</button></div>`;
-async function pmSignIn(b){ ['pm_email','pm_pw','pm_code'].forEach((k,i)=>{ const el=document.getElementById(k); if(el&&!el.value) el.value=['justin@yourcompany.com','demo-password','275104'][i]; });
-  b.disabled=true; b.textContent='Signing in…'; await wait(600); setRole('production'); toast('Signed in as Justin Butler · project manager.'); }
+  ${c?'':`<div class="field"><label for="pm_pw">Password</label><input class="txt" id="pm_pw" type="password" placeholder="Click to fill (demo)"></div>`}
+  <div class="field"><label for="pm_code">6-digit code ${c?'we emailed you':'from your phone'}</label><input class="txt" id="pm_code" inputmode="numeric" maxlength="6" placeholder="– – – – – –" style="letter-spacing:6px;font-size:18px"></div>
+  <button class="btn primary mt" id="pmBtn" style="width:100%" onclick="signIn(this)">Sign in</button></div>`; };
+function fillLogin(){ [['pm_email',ROLE_LOGIN[loginAs][0]],['pm_pw','demo-password'],['pm_code','275104']].forEach(([k,v])=>{ const el=document.getElementById(k); if(el&&!el.value) el.value=v; }); }
+async function signIn(b){ fillLogin(); b.disabled=true; b.textContent='Signing in…'; await wait(600); setRole(loginAs); toast(`Signed in as ${ROLE_LOGIN[loginAs][1]}.`); }
+const pmSignIn = signIn;
+async function loginStep(r){ closeModal(); loginAs=r; role=r; view=r==='client'?'client':'team'; document.getElementById('roleSel').value=r; page='login'; render(); window.scrollTo({top:0}); await wait(300);
+  await typeIn('pm_email',ROLE_LOGIN[r][0]); if(document.getElementById('pm_pw')) await typeIn('pm_pw','demo-password'); await typeIn('pm_code','275104'); await wait(250); await signIn(document.getElementById('pmBtn')); }
+function asRole(r,p){ closeModal(); if(role!==r){ role=r; view=r==='client'?'client':'team'; document.getElementById('roleSel').value=r; } useJob(1); go(p); }
+async function typeNum(el,text){ if(!el) return; el.focus(); el.value=''; for(const ch of text){ el.value+=ch; el.dispatchEvent(new Event('input',{bubbles:true})); await wait(70); } }
+
+// ---------- a day in the life of each role ----------
+const SALES_STEPS = [
+  {t:'Austin signs in', who:'7:30 AM · Austin · sales', d:'Lands on the sales desk: pipeline, follow-ups and nothing about crews or POs.', run: async()=>{ await loginStep('owner'); }},
+  {t:'New homeowners to mail', who:'7:40 AM · Leads', d:'New-build closings from county records. Pick them and a postcard goes out (demo: nothing is really sent).', run: async()=>{
+    asRole('owner','leads'); await wait(300); pickAllLeads(true); await wait(400); mailerModal(); await wait(900); sendMailer(); await wait(900); flash('main .card'); }},
+  {t:'A customer calls', who:'9:15 AM · Quotes & design', d:'Taylor Reyes saw the postcard and called. Austin opens a quote request with the site-visit notes.', run: async()=>{
+    asRole('owner','quotes'); if(!QUOTES.some(x=>x.id==='Q-2050')) QUOTES.unshift({id:'Q-2050', client:'Taylor Reyes', city:'Queen Creek', scope:'Pavers, turf, fire pit and lighting', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:42000});
+    selQ='Q-2050'; render(); await wait(200); flash('#qdetail'); toast('Quote request Q-2050 opened for Taylor Reyes.'); }},
+  {t:'Send the specs to design', who:'9:30 AM · Quotes & design', d:'Site-visit notes and photos go to the designer in one click. Austin’s part is done until the drawing is ready.', run: async()=>{
+    asRole('owner','quotes'); const q=QUOTES.find(x=>x.id==='Q-2050')||QUOTES[0]; selQ=q.id; render(); await wait(300); await specsOut(q.id,document.getElementById('qAct')); flash('#qdetail'); }},
+  {t:'Price it and check the margin', who:'2:00 PM · Quotes & design', d:'The drawing came back with quantities. Austin types the pergola price higher and watches the margin turn green.', run: async()=>{
+    asRole('owner','quotes'); const q=QUOTES.find(x=>x.id===selQ); await attachDwg(q.id,null); await priceIt(q.id,null); await wait(300);
+    const el=[...document.querySelectorAll('#qdetail input.num')].find(x=>(x.getAttribute('aria-label')||'').includes('pergola'));
+    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); await wait(500); await typeNum(el,'11500'); flash(el.closest('tr')); } }},
+  {t:'Send it, and the client signs', who:'2:10 PM · client e-signs', d:'Austin approves and sends it. The client signs from their phone, and the signed quote becomes a sold job with no retyping.', run: async()=>{
+    asRole('owner','quotes'); const q=QUOTES.find(x=>x.id===selQ); render(); await approveQ(q.id,document.getElementById('qAct')); await wait(500); await signQ(q.id,document.getElementById('qAct')); await wait(400); await pushProd(q.id,document.getElementById('qAct')); }},
+  {t:'Hand the sold job to Justin', who:'2:20 PM · Sold → handoff', d:'Austin adds notes for the crew and hands it off. It leaves the sales desk and lands on Justin’s My day.', run: async()=>{
+    asRole('owner','handoff'); await wait(300); const j=jobs.find(x=>x.status==='Sold'&&!x.handed); if(!j) return;
+    await typeIn('ho_'+j.id,'Gate on the left · two dogs · client works from home'); await wait(300); handOff(j.id); }},
+  {t:'End of the day', who:'5:00 PM · Sales home', d:'Leads mailed, a job quoted, signed and handed off. Austin never touched a crew calendar or a PO.', run: async()=>{
+    asRole('owner','sales'); await wait(200); flash('main .grid.g4'); toast('Austin’s day done: sell, hand off, move on.'); }},
+];
+const ADMIN_STEPS = [
+  {t:'Joel signs in with 2-step', who:'8:00 AM · Joel · Master Admin', d:'Finance needs a password and a 6-digit code every time. Every sign-in is logged.', run: async()=>{
+    closeModal(); finOpen=false; role='admin'; view='team'; document.getElementById('roleSel').value='admin'; go('admin'); await wait(300);
+    await typeIn('fin_pw','demo-password'); await typeIn('fin_code','482913'); await wait(250); await finSignIn(document.getElementById('finBtn')); }},
+  {t:'The whole business on one screen', who:'8:05 AM · Master Admin', d:'Revenue, margin, money owed, sales and production. Every number opens the screen behind it.', run: async()=>{ asRole('admin','admin'); await wait(200); flash('main .grid.g4'); }},
+  {t:'Approve the crew pay', who:'9:00 AM · Payroll', d:'Crews clocked in on their phones all week, so the pay is already figured. One click approves it and sends it to QuickBooks.', run: async()=>{
+    asRole('admin','time'); await wait(300); const b=[...document.querySelectorAll('#main button')].find(x=>x.textContent.includes('Approve')); if(b&&!b.disabled) await approveTime(b); flash('main .card.mt'); }},
+  {t:'Fix the one QuickBooks item', who:'9:20 AM · QuickBooks', d:'A field receipt came in with no cost code. Joel picks one and it syncs to the right job.', run: async()=>{
+    asRole('admin','qbo'); await wait(300); const i=QBO_LOG.findIndex(x=>x.st!=='Synced'); if(i>=0) fixQbo(i); flash('main .card.mt'); }},
+  {t:'Approve a company-card purchase', who:'10:30 AM · Company cards', d:'A crew lead needs polymeric sand. Joel approves that one purchase; the card opens for it and locks again after.', run: async()=>{
+    if(!CARDS.req) cardRequest(); asRole('admin','cards'); await wait(400); if(CARDS.req.st==='pending') cardDecide('approved'); flash('main .card.mt'); }},
+  {t:'Update a supplier price', who:'1:00 PM · Cost book', d:'Belgard sent a new price sheet: pavers up 40¢ a foot. Joel updates the cost book once, and every new quote prices from it.', run: async()=>{
+    asRole('admin','costbook'); await wait(300); const el=document.querySelector('input[aria-label^="Materials per sf for Concrete pavers"]'); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); await wait(400); el.value=''; await typeIn(el.id||'',''); el.value='5.90'; cbSet(1,'mat','5.90'); } flash('main .card.mt'); }},
+  {t:'Check the reports', who:'3:00 PM · Finance reports', d:'Job profitability, money owed and payroll, each one exports to PDF or CSV for the accountant.', run: async()=>{ asRole('admin','finance'); await wait(200); flash('main .card'); toast('Every number ties back to QuickBooks.'); }},
+];
+const DESIGNER_STEPS = [
+  {t:'Mia signs in', who:'8:30 AM · Mia R. · designer', d:'Only the design queue and selections: no prices, no payroll.', run: async()=>{ await loginStep('designer'); }},
+  {t:'Open the next design', who:'8:35 AM · Design queue', d:'Austin’s site-visit specs and photos are waiting on the quote. No email chain to dig through.', run: async()=>{
+    asRole('designer','quotes'); const q=QUOTES.find(x=>x.stage==='Design')||QUOTES[0]; selQ=q.id; render(); await wait(200); flash('#qdetail'); }},
+  {t:'Attach the AutoCAD drawing', who:'1:00 PM · Design queue', d:'Mia saves the drawing to the quote. The app reads the quantities from its layers, ready for Austin to price.', run: async()=>{
+    asRole('designer','quotes'); const q=QUOTES.find(x=>x.id===selQ); if(q.stage==='Design') await attachDwg(q.id,null); flash('#qdetail'); }},
+  {t:'Check the drawing', who:'1:10 PM · AutoCAD viewer', d:'Each layer (pavers, walls, turf, lights) is what the takeoff reads. Click a layer to hide it.', run: async()=>{
+    asRole('designer','quotes'); openDrawing(selQ,'DWG'); await wait(600); toast('Phase 2: quantities read straight from the drawing. In the MVP they are typed in.'); }},
+  {t:'Help with selections', who:'3:00 PM · Selections', d:'Mia sees what each client still has to pick, and what it does to the budget.', run: async()=>{ asRole('designer','selections'); await wait(200); flash('main .grid.g3'); toast('Mia’s day done: designs in, quotes ready to price.'); }},
+];
+const FIELD_STEPS = [
+  {t:'Marco opens the crew app', who:'6:55 AM · Marco T. · crew lead', d:'On the phone, signed in once. Today’s job, the checklist and the crew are already there.', run: async()=>{ await loginStep('field'); }},
+  {t:'Clock in at the job', who:'7:02 AM · crew app', d:'One tap. The location is saved at the job site, so pay and job costing fill themselves.', run: async()=>{
+    asRole('field','field'); await wait(200); if(!FIELD.clocked){ FIELD.clocked='7:02 AM'; render(); } toast('Clocked in at 7:02 AM on Henderson Backyard.'); }},
+  {t:'Send the crew day', who:'7:05 AM · crew app', d:'Tick who is on site. Their day goes to Time & pay, figured from each person’s rate.', run: async()=>{ asRole('field','field'); if(!FIELD.crewSent) sendCrewDay(); }},
+  {t:'Snap a receipt', who:'10:10 AM · crew app', d:'A photo of the receipt. The app reads vendor and amount and puts it on the job.', run: async()=>{
+    asRole('field','field'); if(!FIELD.receipt) await snapReceipt(); await wait(500); if(!FIELD.receipt.sent) sendReceipt(); }},
+  {t:'Flag extra work', who:'10:20 AM · crew app', d:'A soft spot under the seat wall footing. Flag it with photos; the app says not signed yet, don’t start.', run: async()=>{ asRole('field','field'); if(!FIELD.flagged) fieldFlag(); }},
+  {t:'Ask to use the company card', who:'11:00 AM · crew app', d:'Need sand from SiteOne. Ask in the app; the card opens only once it’s approved.', run: async()=>{
+    asRole('field','field'); if(!CARDS.req) cardRequest(); await wait(300); toast('Request sent. Marco’s day: clocked, paid, receipts in, nothing on paper.'); }},
+];
+const CLIENT_STEPS = [
+  {t:'Dana signs in to the portal', who:'7:30 PM · Dana Henderson · client', d:'No password: a 6-digit code by email. Dana sees only Dana’s own project.', run: async()=>{ await loginStep('client'); }},
+  {t:'See the project', who:'7:31 PM · My project', d:'Progress, the schedule, payments and new photos from the crew, in one place.', run: async()=>{ asRole('client','portal'); await wait(200); flash('main .card'); }},
+  {t:'Pick a finish', who:'7:35 PM · Selections', d:'Dana picks natural brass lighting. The price difference shows right away, before anything is ordered.', run: async()=>{
+    asRole('client','c-selections'); await wait(300); const s=selections.find(x=>x.id==='s4'); if(s&&s.chosen==null) pickSel('s4',2); flash('main'); }},
+  {t:'Approve a change order', who:'7:40 PM · Change orders', d:'The grill upgrade has waited 12 days. Dana approves it on the phone, and the contract updates.', run: async()=>{
+    asRole('client','c-changes'); await wait(300); const i=cos.findIndex(c=>c.status==='sent'); if(i>=0){ apprCO(i,document.createElement('button')); await wait(800); } flash('main'); }},
+  {t:'Back to the project', who:'7:45 PM · My project', d:'Everything Dana approved is already on Justin’s screen. No phone tag.', run: async()=>{ asRole('client','portal'); await wait(200); flash('main .card'); toast('Dana’s evening: two decisions made in five minutes.'); }},
+];
 
 // ---------- Justin's day: the default walkthrough ----------
 function asJustin(p){ closeModal(); if(role!=='production'){ role='production'; view='team'; document.getElementById('roleSel').value='production'; } useJob(1); go(p); }
 const JUSTIN_STEPS = [
   {t:'Justin signs in', who:'6:45 AM · Justin Butler', d:'Password plus a 6-digit code by phone. Justin lands on a personal screen, not a menu of everything.', run: async()=>{
-    closeModal(); page='login'; render(); window.scrollTo({top:0}); await wait(300);
-    await typeIn('pm_email','justin@yourcompany.com'); await typeIn('pm_pw','demo-password'); await typeIn('pm_code','275104'); await wait(250);
-    await pmSignIn(document.getElementById('pmBtn')); }},
+    await loginStep('production'); }},
   {t:'One list of what needs Justin', who:'6:50 AM · My day', d:'Overnight the app gathered everything on Justin’s jobs that needs a decision: a double-booked crew, a sub\'s insurance, change orders, selections and POs.', run: async()=>{
     asJustin('pm'); await wait(200); flash('main .grid.g2 .card'); toast(`${document.querySelectorAll('#main .grid.g2 .card:first-child .todo').length} things need Justin today. Each one opens the screen to fix it.`); }},
   {t:'Fix the double-booked crew', who:'7:05 AM · Crew calendar', d:'Crew C is on two jobs on Nov 11. Justin moves the Nguyen job back four days. The crew and the client are told automatically.', run: async()=>{
@@ -2575,11 +2697,19 @@ const JUSTIN_STEPS = [
 
 // ---------- two walkthroughs: Justin's day (default) and one job start to finish ----------
 const TOURS = {
-  justin:{title:'A day in the life of Justin', blurb:'Justin Butler, project manager, signs in and runs the day from one screen.', done:'✓ Justin\'s day, done', doneSub:'Crews, subs, change orders and POs handled without a single call or spreadsheet.', steps:JUSTIN_STEPS},
-  job:{title:'One job, start to finish', blurb:'Each click fills in the forms and shows where the work lands.', done:'✓ Done: first call to final invoice', doneSub:'Every screen you saw shared the same job record. Nothing was typed twice.', steps:STEPS},
+  sales:{title:'A day in the life of Austin (sales)', name:'Austin', blurb:'Austin signs in, mails new leads, quotes and prices a job, and hands the sale to Justin.', done:'✓ Austin\'s day, done', doneSub:'From a postcard to a signed job on Justin\'s desk, without leaving the sales portal.', steps:SALES_STEPS},
+  admin:{title:'A day in the life of Joel (Master Admin)', name:'Joel', blurb:'Joel signs in with 2-step, approves pay and a card purchase, fixes QuickBooks and checks the reports.', done:'✓ Joel\'s day, done', doneSub:'Payroll, QuickBooks, spending and reports handled from one portal.', steps:ADMIN_STEPS},
+  designer:{title:'A day in the life of Mia (designer)', name:'Mia', blurb:'Mia picks up a design, attaches the AutoCAD drawing and helps with selections.', done:'✓ Mia\'s day, done', doneSub:'Designs in, quantities ready for Austin to price.', steps:DESIGNER_STEPS},
+  field:{title:'A day in the life of Marco (crew lead)', name:'Marco', blurb:'Marco clocks in, sends the crew day, snaps a receipt, flags extra work and asks for the card.', done:'✓ Marco\'s day, done', doneSub:'No paper, no texts to the office, no receipts in the truck.', steps:FIELD_STEPS},
+  client:{title:'An evening with Dana (client)', name:'Dana', blurb:'Dana signs in with a code, picks a finish and approves a change order from the couch.', done:'✓ Dana\'s evening, done', doneSub:'Two decisions made in five minutes, already on Justin\'s screen.', steps:CLIENT_STEPS},
+  justin:{title:'A day in the life of Justin (project manager)', name:'Justin', blurb:'Justin Butler, project manager, signs in and runs the day from one screen.', done:'✓ Justin\'s day, done', doneSub:'Crews, subs, change orders and POs handled without a single call or spreadsheet.', steps:JUSTIN_STEPS},
+  job:{title:'One job, start to finish', name:'the job', blurb:'Each click fills in the forms and shows where the work lands.', done:'✓ Done: first call to final invoice', doneSub:'Every screen you saw shared the same job record. Nothing was typed twice.', steps:STEPS},
 };
 let tourKind = 'justin';
+const ROLE_TOUR = {production:'justin', owner:'sales', admin:'admin', designer:'designer', field:'field', client:'client'};
+const roleTour = () => ROLE_TOUR[role]||'justin';
 const tourSteps = () => TOURS[tourKind].steps;
+function roleChanged(r){ if(tourBusy){ document.getElementById('roleSel').value=role; return; } if(tourStep>0){ tourStep=0; } setRole(r); renderTour(); }
 function startTour(k){ if(tourBusy) return; if(tourStep>0){ location.href = location.pathname + '?tour=' + k; return; } tourKind=k; nextStep(); }
 
 function syncTop(){ document.documentElement.style.setProperty('--hdr', document.querySelector('header.top').offsetHeight+'px'); }
