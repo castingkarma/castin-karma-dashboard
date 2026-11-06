@@ -510,6 +510,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='handoff'){const n=jobs.filter(j=>j.status==='Sold'&&!j.handed).length;return n?`<span class="n">${n}</span>`:''}
   if(key==='changes'){const n=coCount();return n?`<span class="n">${n}</span>`:''}
   if(key==='subs'){const n=SUBS.filter(x=>coiDays(x)<=30).length;return n?`<span class="n">${n}</span>`:''}
   if(key==='cards'&&CARDS.req&&CARDS.req.st==='pending') return `<span class="n">1</span>`;
@@ -910,7 +911,7 @@ PAGES.jobs = () => {
     ${STAGES.map(st=>{const list=jobs.filter(j=>j.status===st);return `<div class="col"><div class="colh"><span>${st}</span><span class="muted">${list.length}</span></div>
       ${list.map(j=>`<div class="bcard" id="jc-${j.id}" onclick="pickJob(${j.id})"><div class="bthumb" style="background:${j.thumb}"></div>
         <strong>${j.name}</strong><div class="small muted">${j.client} · ${j.city}</div>
-        <div class="row between" style="margin-top:8px"><span class="pill ${stPill(j.status)}">${j.status}</span><strong class="small">${val(j)?fmt(val(j)):'No estimate yet'}</strong></div></div>`).join('')||'<div class="small muted" style="padding:8px 2px">No jobs</div>'}
+        <div class="row between" style="margin-top:8px"><span class="pill ${stPill(j.status)}">${j.status}</span><strong class="small">${val(j)?fmt(val(j)):'No estimate yet'}</strong></div>${j.status==='Sold'?`<div class="small" style="margin-top:6px">${j.handed?'<span class="pos">🤝 From sales · schedule the kickoff</span>':'<span style="color:var(--warn)">With sales · not handed off yet</span>'}</div>`:''}</div>`).join('')||'<div class="small muted" style="padding:8px 2px">No jobs</div>'}
     </div>`}).join('')}
   </div></div></div>`;
 };
@@ -936,7 +937,7 @@ function createJob(id){
   const last = v('name').split(' ').pop();
   jobs.push({id:newId, name:`${last} Backyard`, client:v('name'), email:v('email'), city:v('city'), status:'Lead', thumb:'linear-gradient(135deg,#e0cfae,#a88d5f)'});
   DATA[newId] = {est:{status:'draft', lines:[]}, cos:[], selections:[], pos:[], schedule:[], otherActual:{DEMO:0,PAV:0,TURF:0,KIT:0,FIRE:0,LITE:0}};
-  closeModal(); go('jobs'); flash('#jc-'+newId); toast(`Job created: "${last} Backyard" is on the board under Lead.`);
+  closeModal(); go(role==='owner'?'sales':'jobs'); flash('#jc-'+newId); toast(`Job created: "${last} Backyard" is on the board under Lead.`);
   return newId;
 }
 
@@ -1190,9 +1191,9 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
-const MVP_PAGES = new Set(['pm','changes','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
+const MVP_PAGES = new Set(['pm','changes','sales','handoff','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
-  owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
+  owner:{l:'Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'sales', nav:[['sales','Sales home'],['leads','Leads'],['quotes','Quotes & design'],['estimate','Estimates'],['proposal','Proposals'],['handoff','Sold → handoff'],['jobs','Jobs board'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
@@ -1358,12 +1359,60 @@ function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[sampleIdx++
   const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:[40000,52000,30000][n%3]});
   selQ=id; render(); toast(`Quote request ${id} created for ${c.name}.`); }
 
+// ---------- sales portal (Austin): leads → quotes → estimates → proposals → sold → handed to the PM ----------
+const SALES_ST = ['Lead','Estimating','Proposal sent','Sold'];
+const daysSince = d => Math.max(0, CO_TODAY - (+String(d).replace(/\D/g,'') || CO_TODAY));
+PAGES.sales = () => {
+  const open = jobs.filter(j=>['Lead','Estimating','Proposal sent'].includes(j.status)), sold = jobs.filter(j=>j.status==='Sold'&&!j.handed);
+  const qIn = QUOTES.filter(q=>q.stage==='Request').length, qDes = QUOTES.filter(q=>q.stage==='Design').length;
+  const follow = [
+    ...(leads.filter(l=>l.st==='new').length?[['📬',`${leads.filter(l=>l.st==='new').length} new homeowner leads`,'New-build closings this month, ready for a postcard','leads']]:[]),
+    ...(qIn?[['📝',`${qIn} quote request${qIn>1?'s':''} to send to the designer`,'Specs go to design in one click','quotes']]:[]),
+    ...(qDes?[['🎨',`${qDes} in design`,'You get a ping when the drawing is ready to price','quotes']]:[]),
+    ...jobs.filter(j=>j.status==='Proposal sent').map(j=>['✉️',`${j.name}: proposal out, not signed`,`${j.client} · resend or call to close it`,'proposal']),
+    ...sold.map(j=>['🤝',`${j.name} is sold: hand it to Justin`,'Contract signed, deposit invoiced','handoff']),
+  ];
+  return `<div class="row between"><div><h1>Sales · Austin</h1><p class="sub">Everything you need to win the job, and nothing you don't. Once it's signed, you hand it to Justin and it leaves your desk.</p></div>
+    <button class="btn primary" onclick="newJobModal()">+ New job</button></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Open pipeline</div><div class="v">${fmt(open.reduce((a,j)=>a+jobValue(j),0))}</div><div class="d muted">${open.length} jobs not signed yet</div></div>
+    <div class="card stat"><div class="k">Proposals out</div><div class="v">${jobs.filter(j=>j.status==='Proposal sent').length}</div><div class="d muted">waiting on a signature</div></div>
+    <div class="card stat"><div class="k">Close rate (90 days)</div><div class="v">31%</div><div class="d muted">quotes sent → signed</div></div>
+    <div class="card stat"><div class="k">Ready to hand off</div><div class="v ${sold.length?'':'pos'}">${sold.length}</div><div class="d muted">sold, not yet with Justin</div></div>
+  </div>
+  <div class="card mt"><h2>Your pipeline</h2><div class="grid g4" style="gap:10px;margin-top:8px">${SALES_ST.map(st=>{ const js=jobs.filter(j=>j.status===st&&!(st==='Sold'&&j.handed));
+    return `<div style="background:var(--bg);border-radius:10px;padding:10px;min-height:120px"><div class="row between"><strong class="small" style="text-transform:uppercase;letter-spacing:.6px">${st}</strong><span class="small muted">${js.length}</span></div>
+      ${js.map(j=>`<div class="card" id="jc-${j.id}" style="padding:10px 12px;margin-top:8px;cursor:pointer" onclick="${st==='Sold'?"go('handoff')":`pickJob(${j.id})`}"><strong class="small">${j.name}</strong><div class="small muted">${j.client} · ${j.city}</div><div class="small" style="margin-top:4px"><strong>${fmt(jobValue(j))}</strong></div></div>`).join('')||'<div class="small muted" style="margin-top:8px">None</div>'}</div>`; }).join('')}</div>
+    <p class="small muted" style="margin:10px 0 0">In progress and finished jobs live with Justin. You can still see them on the Jobs board.</p></div>
+  <div class="card mt"><h2>Your follow-ups</h2>${follow.map(([i,t,d,pg])=>`<div class="todo" role="button" tabindex="0" style="cursor:pointer" onclick="go('${pg}')"><div class="ic" style="background:var(--accent-soft)">${i}</div><div style="flex:1"><strong>${t}</strong><div class="small muted">${d}</div></div><span class="small muted">Open →</span></div>`).join('')||'<p class="small pos" style="margin:0">✓ All caught up.</p>'}</div>`;
+};
+PAGES.handoff = () => {
+  const sold = jobs.filter(j=>j.status==='Sold'&&!j.handed), done = jobs.filter(j=>j.handed);
+  const chk = (ok,t) => `<div class="small" style="margin-top:4px">${ok?'<span class="pos">✓</span>':'<span style="color:var(--warn)">•</span>'} ${t}</div>`;
+  return `<div class="row between"><div><h1>Sold → hand off to Justin</h1><p class="sub">When a proposal is signed, the job comes here. One click sends it to Justin with everything sales knows, so nothing gets lost between the sale and the build.</p></div></div>
+  ${sold.length?sold.map(j=>{ const d=DATA[j.id]||{}, sels=(d.selections||[]).filter(s=>s.status==='open').length;
+    return `<div class="card mt"><div class="row between" style="gap:10px;flex-wrap:wrap;align-items:flex-start"><div style="flex:1;min-width:240px"><div class="small muted">${j.client} · ${j.city}</div><strong style="font-size:17px">${j.name}</strong> <span class="pill p-green">Sold · ${fmt(jobValue(j))}</span>
+      ${chk(true,'Contract signed online')}${chk(true,'30% deposit invoice sent')}${chk(!sels,sels?`${sels} selection${sels>1?'s':''} still open (Justin will see them)`:'Selections started in the portal')}${chk(true,'Estimate, design files and client notes travel with the job')}
+      <div class="field" style="margin-top:10px"><label for="ho_${j.id}">Notes for Justin</label><input class="txt" id="ho_${j.id}" placeholder="e.g. Gate code 4417, client works from home, dog in the yard"></div></div>
+      <button class="btn primary" onclick="handOff(${j.id})">Hand off to Justin →</button></div></div>`; }).join('')
+    :`<div class="card empty">No sold jobs waiting. ${roleLink('client','c-proposal','Sign the Alvarez proposal as the client')} to see one land here.</div>`}
+  ${done.length?`<h2 class="mt2">Handed off</h2><div class="card"><div class="tablewrap"><table><thead><tr><th>Job</th><th>With</th><th>Status</th></tr></thead><tbody>${done.map(j=>`<tr><td><strong>${j.name}</strong><div class="small muted">${j.client}</div></td><td class="small">Justin Butler</td><td><span class="pill ${j.status==='Sold'&&!j.kicked?'p-amber':'p-green'}">${j.status==='Sold'?(j.kicked?'Kickoff scheduled':'Kickoff to schedule'):j.status}</span></td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+};
+function handOff(id){ const j=jobs.find(x=>x.id===id), n=document.getElementById('ho_'+id); j.handed=true; j.hoNote=(n&&n.value.trim())||''; render(); toast(`${j.name} handed to Justin. It's on Justin's My day to schedule the kickoff.`); }
+// a handed-off job gets its first phases on the crew calendar (demo: Ellis is the sample that arrives during Justin's day)
+function schedKickoff(id){ const j=jobs.find(x=>x.id===id); j.kicked=true;
+  if(!CAL.some(e=>e.jid===id)){ const nx=Math.max(...CAL.map(e=>e.id))+1;
+    CAL.push({id:nx, jid:id, job:j.name, label:'Demo + base', crew:'Crew A', start:19, len:2, c:'#be185d'},{id:nx+1, jid:id, job:j.name, label:'Pavers + turf', crew:'Crew C', start:21, len:5, c:'#be185d'}); }
+  go('calendar'); toast(`${j.name} booked: Crew A Nov 19–20, Crew C Nov 21–25. No conflicts. The client and both crews were told.`); }
+function pmOpen(pg){ const [p,id]=pg.split('@'); if(id&&!DATA[+id]){ go('calendar'); toast(`${jobs.find(j=>j.id==id).name}: book the kickoff on the crew calendar. Its full schedule builds from the signed estimate.`); return; } if(id) useJob(+id); go(p); }
+
 // ---------- Justin's day: what a project manager sees first (MVP) ----------
 PAGES.pm = () => {
-  const run = jobs.filter(j=>j.status!=='Complete'), coSent = DATA[1].cos.filter(c=>c.status==='sent'), selOpen = DATA[1].selections.filter(s=>s.status==='open');
+  const run = jobs.filter(j=>j.status==='In progress'||(j.status==='Sold'&&j.handed)), coSent = DATA[1].cos.filter(c=>c.status==='sent'), selOpen = DATA[1].selections.filter(s=>s.status==='open');
   const poOpen = DATA[1].pos.filter(p=>p.status==='draft'||p.status==='sent'), conf = calConflicts();
   const coi = CAL.map(e=>[e,subOf(e.crew)]).filter(([e,x])=>x&&!x.inhouse&&x.coi&&new Date(x.coi)<new Date(2026,10,e.start+e.len-1));
   const todo = [
+    ...jobs.filter(j=>j.handed&&j.status==='Sold'&&!j.kicked).map(j=>['🤝',`New job from sales: ${j.name}`,`${j.client} · contract signed, deposit invoiced${j.hoNote?' · '+j.hoNote:''} · schedule the kickoff`,'schedule@'+j.id,'var(--accent-soft)']),
     ...conf.map(([a,b])=>['⚠',`${a.crew} is double-booked`,`${a.job} and ${b.job} overlap in November`,'calendar','var(--bad-soft)']),
     ...coi.map(([e,x])=>['📄',`${x.co}: insurance ends ${x.coi}`,`Booked on ${e.job} through Nov ${e.start+e.len-1}`,'subs','var(--warn-soft)']),
     ...(CO_REQ.length?[['🚩',`${CO_REQ.length} change request${CO_REQ.length>1?'s':''} to price`,CO_REQ.map(r=>r.t.split(':')[0]).join(' · '),'changes','var(--warn-soft)']]:[]),
@@ -1373,15 +1422,19 @@ PAGES.pm = () => {
   ];
   const next = [...CAL].sort((a,b)=>a.start-b.start).slice(0,5);
   const keep = curJob; useJob(1); const t = totals(); useJob(keep);
-  return `<div class="row between"><div><h1>Good morning, Justin</h1><p class="sub">Project manager · everything on your jobs that needs you, on one screen. No calls, texts or spreadsheets to piece it together.</p></div></div>
+  const fresh = jobs.filter(j=>j.handed&&j.status==='Sold'&&!j.kicked);
+  const alert = fresh.length?`<div class="card" id="soldAlert" style="background:#0b3b2e;color:#fff;border:0;margin-bottom:14px"><div class="row between" style="gap:10px;flex-wrap:wrap"><div><div class="small" style="color:#9ff0d2;font-weight:700;letter-spacing:.5px">🔔 NEW JOB LANDED · SOLD BY AUSTIN</div>
+    <strong style="font-size:17px">${fresh[0].name} · ${fmt(jobValue(fresh[0]))}</strong><div class="small" style="color:#cfe9df">${fresh[0].client} · ${fresh[0].city} · contract signed, deposit invoiced${fresh[0].hoNote?' · '+fresh[0].hoNote:''}</div></div>
+    <button class="btn" style="background:#5fe0b5;border-color:#5fe0b5;color:#06281f" onclick="schedKickoff(${fresh[0].id})">Start this job: schedule crews →</button></div></div>`:'';
+  return `${alert}<div class="row between"><div><h1>Good morning, Justin</h1><p class="sub">Project manager · everything on your jobs that needs you, on one screen. No calls, texts or spreadsheets to piece it together.</p></div></div>
   <div class="grid g4">
-    <div class="card stat"><div class="k">Jobs you're running</div><div class="v">${run.length}</div><div class="d muted">estimating to in progress</div></div>
+    <div class="card stat"><div class="k">Jobs you're running</div><div class="v">${run.length}</div><div class="d muted">sold + in progress</div></div>
     <div class="card stat"><div class="k">Needs you today</div><div class="v ${todo.length?'':'pos'}">${todo.length}</div><div class="d muted">listed below</div></div>
     <div class="card stat"><div class="k">Crews booked in November</div><div class="v">${new Set(CAL.map(e=>e.crew)).size}</div><div class="d muted">${CAL.length} phases on the calendar</div></div>
     <div class="card stat"><div class="k">Henderson margin</div><div class="v">${Math.round((t.contract-t.budget)/t.contract*100)}%</div><div class="d muted">planned, while it runs</div></div>
   </div>
   <div class="grid g2 mt">
-    <div class="card"><h2>Needs you today</h2>${todo.length?todo.map(([i,tt,d,pg,bg])=>`<div class="todo" role="button" tabindex="0" style="cursor:pointer" onclick="go('${pg}')"><div class="ic" style="background:${bg}">${i}</div><div style="flex:1"><strong>${tt}</strong><div class="small muted">${d}</div></div><span class="small muted">Open →</span></div>`).join(''):'<p class="small pos" style="margin:0">✓ Nothing waiting on you.</p>'}</div>
+    <div class="card"><h2>Needs you today</h2>${todo.length?todo.map(([i,tt,d,pg,bg])=>`<div class="todo" role="button" tabindex="0" style="cursor:pointer" onclick="pmOpen('${pg}')"><div class="ic" style="background:${bg}">${i}</div><div style="flex:1"><strong>${tt}</strong><div class="small muted">${d}</div></div><span class="small muted">Open →</span></div>`).join(''):'<p class="small pos" style="margin:0">✓ Nothing waiting on you.</p>'}</div>
     <div class="card"><h2>Coming up on the calendar</h2>${next.map(e=>{const x=subOf(e.crew);return `<div class="todo" role="button" tabindex="0" style="cursor:pointer" onclick="go('calendar')"><div class="ic" style="background:${e.c};color:#fff;font-size:12px;font-weight:700">${e.start}</div><div style="flex:1"><strong>${e.label}</strong><div class="small muted">${e.job} · Nov ${e.start}${e.len>1?'–'+(e.start+e.len-1):''} · ${e.crew}${x&&!x.inhouse?' ('+x.co+')':''}</div></div></div>`}).join('')}</div>
   </div>
   <div class="card mt"><h2>Your jobs</h2><div class="tablewrap"><table><thead><tr><th>Job</th><th>Client</th><th>Stage</th><th class="r">Value</th></tr></thead><tbody>
@@ -2360,7 +2413,7 @@ function teamOn(r='owner'){ if(role!==r){ role=r; view='team'; document.getEleme
 const TL = (sec,code,d,q,u,c,m) => ({sec,code,d,q,u,c,m});
 const STEPS = [
   {t:'A new customer calls', who:'Austin · owner / sales', d:'Create the customer and the job in one form. It lands on the Jobs board under Lead.', run: async()=>{
-    teamOn(); go('jobs'); await wait(300); newJobModal(); await wait(250);
+    teamOn(); go('sales'); await wait(300); newJobModal(); await wait(250);
     await typeIn('nj_name','Taylor Reyes'); await typeIn('nj_email','taylor.reyes@example.com'); await typeIn('nj_phone','(480) 555-0131');
     await typeIn('nj_addr','Sample address, Queen Creek'); await typeIn('nj_city','Queen Creek'); document.getElementById('nj_src').value='Postcard (Leads)';
     await typeIn('nj_scope','Pavers, turf + putting green, fire pit, BBQ island, lighting');
@@ -2384,9 +2437,12 @@ const STEPS = [
         {n:'Catalina Grana, Sand', v:'Belgard', p:4680, sw:'linear-gradient(135deg,#e6d5b5,#c7ad80)'}, {n:'Catalina Grana, Toscana', v:'Belgard', p:4990, sw:'linear-gradient(135deg,#c9a27a,#8f6a45)'}, {n:'Catalina Grana, Charcoal', v:'Belgard', p:4680, sw:'linear-gradient(135deg,#6b6b6b,#383838)'}]},
       {id:'r2', cat:'Turf', title:'Turf style', allowance:3380, due:'Oct 30', status:'open', chosen:null, opts:[
         {n:'Pet-friendly 85oz', v:'SYNLawn', p:3380, sw:'linear-gradient(135deg,#7fb069,#4c7a3b)'}, {n:'Premium Spring 92oz', v:'SYNLawn', p:3640, sw:'linear-gradient(135deg,#8cc26f,#567f3c)'}, {n:'Bermuda Classic', v:'SYNLawn', p:3380, sw:'linear-gradient(135deg,#9bbf6a,#6a8a3e)'}]});
-    go('selections'); await wait(700);
+    teamOn('production'); go('selections'); await wait(700);
     selections[0].chosen=1; selections[0].status='picked'; selections[1].chosen=0; selections[1].status='picked'; render(); flash('main .grid.g3');
     toast('Taylor picked Toscana pavers (+$310 over allowance) and the pet-friendly turf.'); }},
+  {t:'Hand the sold job to Justin', who:'Austin · sales', d:'Sales adds notes for the crew and hands it off. It leaves the sales desk and lands in Justin\'s Sold column.', run: async()=>{
+    teamOn(); go('handoff'); await wait(300); const n=document.getElementById('ho_'+TOUR_ID); if(n) await typeIn('ho_'+TOUR_ID,'Gate code 4417 · dog in the yard · client works from home');
+    await wait(300); handOff(TOUR_ID); await wait(600); teamOn('production'); go('jobs'); await wait(200); flash('#jc-'+TOUR_ID); toast('Reyes Backyard lands in Justin\'s Sold column, and on Justin\'s My day: schedule the kickoff.'); }},
   {t:'Schedule crews and subs', who:'Justin Butler · project manager', d:'Phases go on one calendar with the crew assigned. The job moves to In progress.', run: async()=>{
     teamOn('production'); useJob(TOUR_ID); J().status='In progress'; schedule.length=0; DATA[TOUR_ID].schedSet=true;
     [['Demo & haul-off','Crew A',0,2,'#64748b'],['Grade & base','Crew A',2,2,'#64748b'],['BBQ island + fire pit','Masonry sub',4,5,'#b26a00'],
@@ -2404,7 +2460,7 @@ const STEPS = [
     go('estimate'); await wait(200); flash('main .card.mt:last-child'); await wait(1400);
     cos[0].status='approved'; render(); flash('main .grid.g4'); toast(`Austin OK’d it, then Taylor approved CO-1 (+${fmt(coPriceOf(cos[0]))}). Contract and budget updated.`); }},
   {t:'Costs roll in', who:'Crew lead · field app + Joel · finance', d:'Vendor bills and crew labor post against the budget. You see the margin while the job is still running.', run: async()=>{
-    teamOn(); useJob(TOUR_ID); const t0=totals(), estM=(t0.contract-t0.budget)/t0.contract*100; pos.forEach(p=>p.status='billed'); Object.assign(otherActual,{DEMO:1600, PAV:1500, TURF:700, KIT:1100, FIRE:900, LITE:450});
+    teamOn('admin'); useJob(TOUR_ID); const t0=totals(), estM=(t0.contract-t0.budget)/t0.contract*100; pos.forEach(p=>p.status='billed'); Object.assign(otherActual,{DEMO:1600, PAV:1500, TURF:700, KIT:1100, FIRE:900, LITE:450});
     go('costing'); await wait(200); flash('main .card.mt'); const t=totals(); toast(`All costs in. Turf ran ${fmt(t.byCode.TURF.actual-t.byCode.TURF.budget)} over, but the job landed at ${pct((t.contract-t.actual)/t.contract*100)} margin vs. ${pct(estM)} estimated.`); }},
   {t:'Final walkthrough and close', who:'Justin Butler · PM + Joel · final invoice', d:'The job moves to Complete, the final invoice goes out, and a review request is sent automatically.', run: async()=>{
     teamOn('production'); useJob(TOUR_ID); J().status='Complete'; go('jobs'); await wait(200); flash('#jc-'+TOUR_ID); toast('Job complete. Final invoice and review request sent.'); }},
@@ -2486,6 +2542,11 @@ const JUSTIN_STEPS = [
   {t:'The client signs, the follow-through happens', who:'11:10 AM · Dana (client) + Justin', d:'Dana signs in the client portal. Justin orders the base, and the crew app flips to "signed: OK to start".', run: async()=>{
     asJustin('changes'); const C=DATA[1].cos, c=[...C].reverse().find(x=>x.status==='sent'&&x.title.startsWith('Soft spot'))||C.find(x=>x.status==='sent'); if(!c) return;
     const i=C.indexOf(c); coSigned(i); await wait(700); coOrder(i); await wait(500); coSched(i); coTell(i); flash('main'); toast(`CO-${c.n} signed, materials on a draft PO, crew told. About 30 minutes, start to finish.`); }},
+  {t:'A new job lands', who:'12:15 PM · alert from sales', d:'Austin just closed the Ellis backyard and handed it off. It pops up at the top of Justin\'s My day with the contract, deposit and sales notes.', run: async()=>{
+    if(!jobs.some(j=>j.id===77)) jobs.push({id:77, name:'Ellis Backyard', client:'Morgan Ellis', city:'Queen Creek', status:'Sold', value:34800, handed:true, hoNote:'Gate code 2210 · two dogs', thumb:'linear-gradient(135deg,#e2c7c9,#a8737c)'});
+    asJustin('pm'); await wait(200); flash('#soldAlert'); toast('🔔 New job landed: Ellis Backyard, $34,800, sold by Austin. Ready to start.'); }},
+  {t:'Start the new job', who:'12:20 PM · Crew calendar', d:'One click from the alert. The app books open crews around the jobs already on the calendar, with no double-booking.', run: async()=>{
+    closeModal(); if(role!=='production'){ role='production'; view='team'; document.getElementById('roleSel').value='production'; } schedKickoff(77); await wait(300); flash('main .card.mt'); }},
   {t:'Nudge the slow ones', who:'1:30 PM · Change orders', d:'CO-2 has waited 12 days for a signature and 3 selections are still open. One click reminds the client by email and text.', run: async()=>{
     asJustin('changes'); await wait(300); const w=[...document.querySelectorAll('#main h2')].find(x=>x.textContent.startsWith('Waiting on the client')); if(w) flash(w.parentElement.nextElementSibling||w);
     toast('Reminder sent to the Hendersons: CO-2 to sign and 3 selections to pick.'); }},
