@@ -2462,22 +2462,26 @@ PAGES.infra = () => {
 };
 
 // ---------- the offer (reached only from the hidden hotspot on Traditional Development) ----------
-const OFFER = {mvp:50000, support:1500, flat:9000, growth:7000, pct:0.03, base:2000000, tradUS:383800, tradOff:103210, raise:0.05, perf:0.10, rev:[2.4e6,2.9e6,3.5e6]};
-// 3-year view: fee raises from the year-2 review; revenue share (Plan B only) on an ASSUMED ~20%/yr growth path
-function offer3(monthly, withShare, r){ return OFFER.rev.map((rev,i)=>{ const fee=monthly*12*Math.pow(1+r,i), share=withShare?Math.max(0,rev-OFFER.base)*OFFER.pct:0; return {y:i+1, rev, fee, share, total:fee+share}; }); }
+// both monthly plans share in revenue GROWTH above a baseline (this year's revenue, from their books at signing); no assumed revenue figure
+const OFFER = {mvp:50000, support:1500, flat:10000, pctA:0.02, growth:7500, pct:0.05, exitA:0.01, exitB:0.02, tradUS:383800, tradOff:103210, raise:0.05, perf:0.10, gpath:[4e5,9e5,1.5e6]};
+const GROW_CASES = [0,5e5,1e6,2e6];
+const gShort = g => { g=Math.round(g/1e3)*1e3; return g>=1e6 ? '$'+(+(g/1e6).toFixed(2))+'M' : '$'+(g/1e3)+'k'; };
+const gLabel = g => g ? `If revenue grows ${gShort(g)}` : 'If revenue stays flat';
+// 3-year view: fee raises from the year-2 review; share of growth on an ASSUMED path above the baseline
+function offer3(monthly, pct, r){ return OFFER.gpath.map((g,i)=>{ const fee=monthly*12*Math.pow(1+r,i), share=g*pct; return {y:i+1, g, fee, share, total:fee+share}; }); }
 PAGES.offer = () => {
   const o = OFFER, yr1 = o.flat*12;
   const usY1 = o.tradUS + o.tradUS*0.175, offY1 = o.tradOff*1.3 + o.tradOff*0.175; // build + a year of upkeep (offshore +30% rework)
   const bars = [['Traditional US agency','build + first year of upkeep',usY1,'#9aa6b3'],['Offshore agency','build + rework + first year of upkeep',offY1,'#c2cbd5'],['Casting Karma','build + upkeep + new features, all 12 months',yr1,'#d6b25e']];
   const max = Math.max(...bars.map(b=>b[2]));
-  const grow = [2e6,3e6,4e6,5e6].map(r=>({r, g:o.growth*12 + Math.max(0,r-o.base)*o.pct}));
+  const yearTbl = (m,pct) => `<div class="small" style="margin-top:10px"><strong>Your total for the year</strong> <span class="muted">(monthly fees + share of growth)</span></div><table class="small" style="margin-top:4px"><tbody>${GROW_CASES.map(g=>`<tr><td class="muted">${gLabel(g)}</td><td class="r"><strong>${fmt(m*12+g*pct)}</strong> / yr<div class="muted" style="font-size:11px">${fmt(m*12)} fees${g?` + ${fmt(g*pct)} share`:', no share'}</div></td></tr>`).join('')}</tbody></table>`;
   return `<div class="row noprint" style="margin-bottom:14px"><button class="btn" onclick="go('trad')">← Back</button></div>
   <div class="offer">
     <div class="ohero">
       <div class="small" style="letter-spacing:1.2px;text-transform:uppercase;color:#d6b25e">Proposal for Platinum Outdoors · prepared by Jamin Austin</div>
       <div class="ohgrid"><div>
       <h1>Your own technology team.<br>One monthly fee.</h1>
-      <p>I build your platform, run it, and keep improving it, as your dedicated growth partner and tech lead. The MVP goes live in 3–4 months, and the same fee continues for new features and upkeep for as long as you want me on.</p>
+      <p>I build your platform, run it, and keep improving it, as your strategic growth business partner and tech lead. The MVP goes live in 3–4 months, and the same fee continues for new features and upkeep for as long as you want me on.</p>
       </div>
       <div class="ovalue"><div class="small" style="letter-spacing:1px;text-transform:uppercase;color:#d6b25e">The point</div>
         <div class="ovh">You're paying for the result, not the hours.</div>
@@ -2496,36 +2500,41 @@ PAGES.offer = () => {
         <div class="oprice">${fmt(o.mvp)}<small>one time</small></div><div class="small muted">${fmt(o.mvp/2)} to start · ${fmt(o.mvp/2)} when it's live</div>
         <ul><li>Quotes + design workflow</li><li>Estimates + change orders</li><li>Proposals, e-sign + client portal</li><li>Selections</li><li>Jobs board + drag-and-drop schedule, crew confirmations</li><li>Crew + subcontractor accounts</li><li>Purchase orders + job costing</li><li>30 days of fixes after launch</li></ul>
         <ul class="ono"><li>Leads engine</li><li>Master Admin portal + QuickBooks sync</li><li>Time + pay (crew payroll)</li><li>Field receipts</li><li>New features after launch</li></ul>
-        <div class="onext"><strong>After it's delivered</strong><div class="small" style="margin-top:4px">We sit down and plan what's next together: ongoing maintenance, Phase 2 features (leads engine, Master Admin, time + pay, field receipts) and enhancements from your wish list. Options then: a support plan from ${fmt(o.support)}/mo (monitoring + fixes, business hours), a Phase 2 price, moving to Dedicated Growth Partner, <strong>or a clean handover</strong>: you get everything (code, accounts, documentation and the AI build setup for your app) plus a training session, and your team runs it from there.</div></div></div>
-      <div class="oplan rec"><span class="otag">Recommended</span><div class="oname">Dedicated Growth Partner · Tech Lead</div><div class="small muted" style="margin-top:2px">Plan A · flat fee</div>
-        <div class="oprice">${fmt(o.flat)}<small>/ month</small></div><div class="small muted">One flat fee. Simple to budget.</div>
-        <ul><li>Core MVP live in 3–4 months</li><li>Time + pay, field app, field receipts, Master Admin + QuickBooks by month 6</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} for the first full year</li><li>Urgent issues: reply within 1 hour, 6am–10pm Arizona time, every day</li><li>Yearly review: +5% standard, up to +10% when goals are hit</li></ul>
+        <div class="onext"><strong>After it's delivered</strong><div class="small" style="margin-top:4px">We sit down and plan what's next together: ongoing maintenance, Phase 2 features (leads engine, Master Admin, time + pay, field receipts) and enhancements from your wish list. Options then: a support plan from ${fmt(o.support)}/mo (monitoring + fixes, business hours), a Phase 2 price, moving to Strategic Growth Business Partner, <strong>or a clean handover</strong>: you get everything (code, accounts, documentation and the AI build setup for your app) plus a training session, and your team runs it from there.</div></div></div>
+      <div class="oplan"><div class="oname">Strategic Growth Business Partner · Tech Lead</div><div class="small muted" style="margin-top:2px">Plan A · higher fee, smaller share</div>
+        <div class="oprice">${fmt(o.flat)}<small>/ month</small></div><div class="small muted">+ ${o.pctA*100}% of revenue growth, paid at year end</div>
+        <ul><li>Core MVP live in 3–4 months</li><li>Time + pay, field app, field receipts, Master Admin + QuickBooks by month 6</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} in fees for the first full year, plus ${o.pctA*100}% of any growth</li><li>Urgent issues: reply within 1 hour, 6am–10pm Arizona time, every day</li><li>Yearly review: +5% standard, up to +10% when goals are hit</li><li>Exit bonus: ${o.exitA*100}% of the sale price if the company is sold</li></ul>
+        ${yearTbl(o.flat,o.pctA)}
         <div class="ogrow"><strong>What strategic growth means</strong><div class="small" style="margin-top:4px">Not just building what's asked. Bringing ideas that grow the business, then building and testing them with your team:</div>
           <ul class="small" style="margin:6px 0 0;padding-left:18px;line-height:1.55"><li>Cutting the third-party apps you pay for (JobTread, Jobber, GoHighLevel)</li><li>A leads engine from public records: new homeowners every month</li><li>An admin portal so the owners see the whole business at once</li><li>Company cards that only open for an approved purchase</li><li>Selling the app to other companies as a second income</li></ul>
           <div class="small" style="margin-top:6px"><strong>Innovate, iterate, scale</strong>: new ideas tried on real jobs, kept if they work.</div></div></div>
-      <div class="oplan"><div class="oname">Dedicated Growth Partner · Tech Lead</div><div class="small muted" style="margin-top:2px">Plan B · revenue share</div>
-        <div class="oprice">${fmt(o.growth)}<small>/ month</small></div><div class="small muted">+ ${o.pct*100}% of revenue above $${o.base/1e6}M a year</div>
-        <ul><li>Lower monthly fee today</li><li>You only pay the share when you grow past today</li><li>Everything in Plan A, including strategic growth</li><li>Same yearly review: +5% standard, up to +10%</li></ul>
-        <div class="small" style="margin-top:10px"><strong>Your total for the year</strong> <span class="muted">(monthly fees + share)</span></div>
-        <table class="small" style="margin-top:4px"><tbody>${grow.map(g=>{const share=g.g-o.growth*12;return `<tr><td class="muted">At $${g.r/1e6}M revenue</td><td class="r"><strong>${fmt(g.g)}</strong> / yr<div class="muted" style="font-size:11px">${fmt(o.growth*12)} fees${share?` + ${fmt(share)} share`:', no share'}</div></td></tr>`}).join('')}</tbody></table>
+      <div class="oplan"><div class="oname">Strategic Growth Business Partner · Tech Lead</div><div class="small muted" style="margin-top:2px">Plan B · lower fee, bigger share</div>
+        <div class="oprice">${fmt(o.growth)}<small>/ month</small></div><div class="small muted">+ ${o.pct*100}% of revenue growth, paid at year end</div>
+        <ul><li>Lower monthly fee today</li><li>The share only applies to growth above today's revenue</li><li>Everything in Plan A, including strategic growth</li><li>Same yearly review: +5% standard, up to +10%</li><li>Exit bonus: ${o.exitB*100}% of the sale price if the company is sold</li></ul>
+        ${yearTbl(o.growth,o.pct)}
         <div class="ogrow"><strong>What strategic growth means</strong><div class="small" style="margin-top:4px">Not just building what's asked. Bringing ideas that grow the business, then building and testing them with your team:</div>
           <ul class="small" style="margin:6px 0 0;padding-left:18px;line-height:1.55"><li>Cutting the third-party apps you pay for (JobTread, Jobber, GoHighLevel)</li><li>A leads engine from public records: new homeowners every month</li><li>An admin portal so the owners see the whole business at once</li><li>Company cards that only open for an approved purchase</li><li>Selling the app to other companies as a second income</li></ul>
           <div class="small" style="margin-top:6px"><strong>Innovate, iterate, scale</strong>: new ideas tried on real jobs, kept if they work.</div></div></div>
     </div>
-    <p class="small muted" style="text-align:center;margin:-4px 0 18px">Prefer to share in the company’s growth another way? I’m open to discussing an equity share in place of the revenue share.</p>
+    <div class="ocard" style="margin-top:-4px"><h2>Which plan costs less?</h2>
+      <p class="small" style="margin:0 0 8px"><strong>Growth</strong> means revenue above your <strong>baseline</strong>: this year's revenue, taken from your books when we sign. Both shares are paid once a year, after your year-end numbers are in. If revenue doesn't grow, there's no share.</p>
+      <div class="tablewrap"><table><thead><tr><th>Your year</th><th class="r">Plan A</th><th class="r">Plan B</th><th>Lower</th></tr></thead><tbody>
+        ${GROW_CASES.map(g=>{ const a=o.flat*12+g*o.pctA, b=o.growth*12+g*o.pct; return `<tr><td>${gLabel(g)}</td><td class="r">${fmt(a)}</td><td class="r">${fmt(b)}</td><td class="small">${a===b?'Same':a<b?'Plan A':'Plan B'}</td></tr>`; }).join('')}</tbody></table></div>
+      <p class="small muted" style="margin:8px 0 0">The plans cost the same at ${gShort((o.flat-o.growth)*12/(o.pct-o.pctA))} of growth. Below that, Plan B costs less; above it, Plan A does. Plan B is the bet on growing together.</p></div>
+    <p class="small muted" style="text-align:center;margin:0 0 18px">Prefer to share in the company’s growth another way? I’m open to discussing an equity share in place of the revenue share and exit bonus.</p>
 
     <div class="ocard"><h2>Your first 3 years together</h2>
-      <p class="small muted" style="margin:0 0 12px">The fee is reviewed every year: <strong>+5% standard</strong>, or <strong>up to +10%</strong> in a year when the agreed goals below are met. Plan B adds its revenue share on top.</p>
+      <p class="small muted" style="margin:0 0 12px">The fee is reviewed every year: <strong>+5% standard</strong>, or <strong>up to +10%</strong> in a year when the agreed goals below are met. Both plans add their share of growth on top.</p>
       <div class="grid g2" style="gap:16px">
-        ${[['Plan A · flat fee',o.flat,false],['Plan B · revenue share',o.growth,true]].map(([nm,m,sh])=>{ const st=offer3(m,sh,o.raise), pf=offer3(m,sh,o.perf), tot=a=>a.reduce((x,y)=>x+y.total,0);
+        ${[['Plan A · '+fmt(o.flat)+'/mo + '+o.pctA*100+'%',o.flat,o.pctA],['Plan B · '+fmt(o.growth)+'/mo + '+o.pct*100+'%',o.growth,o.pct]].map(([nm,m,sh])=>{ const st=offer3(m,sh,o.raise), pf=offer3(m,sh,o.perf), tot=a=>a.reduce((x,y)=>x+y.total,0);
           return `<div class="o3"><div class="oname" style="margin-bottom:8px">${nm}</div><div class="tablewrap"><table><thead><tr><th>Year</th>${sh?'<th class="r">Rev. share</th>':''}<th class="r">Standard</th><th class="r">With performance</th></tr></thead><tbody>
-          ${st.map((r,i)=>`<tr><td>Year ${r.y}${sh?`<div class="small muted">at ~$${(r.rev/1e6).toFixed(1)}M revenue</div>`:''}</td>${sh?`<td class="r small">${fmt(r.share)}</td>`:''}<td class="r">${fmt(r.total)}<div class="small muted">${fmt(r.fee/12)}/mo</div></td><td class="r">${fmt(pf[i].total)}<div class="small muted">${fmt(pf[i].fee/12)}/mo</div></td></tr>`).join('')}
+          ${st.map((r,i)=>`<tr><td>Year ${r.y}<div class="small muted">growth ~${gShort(r.g)}</div></td>${sh?`<td class="r small">${fmt(r.share)}</td>`:''}<td class="r">${fmt(r.total)}<div class="small muted">${fmt(r.fee/12)}/mo</div></td><td class="r">${fmt(pf[i].total)}<div class="small muted">${fmt(pf[i].fee/12)}/mo</div></td></tr>`).join('')}
           <tr class="tot"><td>3-year total</td>${sh?'<td></td>':''}<td class="r">${fmt(tot(st))}</td><td class="r">${fmt(tot(pf))}</td></tr></tbody></table></div></div>`; }).join('')}
       </div>
       <div class="grid g2 mt" style="gap:16px">
         <div><strong>What earns the performance raise</strong><ul class="ochecks" style="margin-top:6px">
           <li>MVP live on schedule (within 4 months)</li><li>JobTread canceled</li><li>The year's agreed roadmap delivered</li><li>99.5%+ uptime and same-day fixes</li><li>The owners' yearly review: they decide</li></ul></div>
-        <div class="small muted" style="align-self:end">Plan B's revenue share uses an <strong>assumed</strong> path of about 20% growth a year ($2.4M → $2.9M → $3.5M). The real share is 3% of whatever revenue actually comes in above $2M: less if growth is slower, more if it's faster.</div>
+        <div class="small muted" style="align-self:end">The share uses an <strong>assumed</strong> path: revenue about $400k above the baseline in year 1, $900k in year 2 and $1.5M in year 3. The real share is ${o.pctA*100}% (Plan A) or ${o.pct*100}% (Plan B) of whatever growth actually happens: less if growth is slower, more if it's faster.</div>
       </div>
     </div>
 
@@ -2572,7 +2581,9 @@ PAGES.offer = () => {
         <li>Discovery + design sessions with Austin, Joel + Justin</li><li>The core MVP in 3–4 months: quotes + design, estimates, proposals, portal, selections, calendar, crew + subcontractor accounts, job costing</li><li>Then by month 6: time + pay, field app, field receipts, Master Admin + QuickBooks</li>
         <li>Running side by side with JobTread until you're ready to switch</li><li>Hosting setup, security, backups + monitoring</li><li>New features after launch, from one shared priority list</li><li>Urgent system issues: reply within 1 hour, 6am–10pm Arizona time, every day; overnight within 4 hours. Everything else: same business day (see "What counts as urgent")</li></ul></div>
       <div class="ocard"><h2>Terms, in plain words</h2><ul class="ochecks">
-        <li><strong>12-month minimum.</strong> It covers the build plus a full year of upkeep and new features.</li><li><strong>After 12 months:</strong> month to month, with 60 days' notice to end it</li><li><strong>Plan B revenue share:</strong> 3% of gross revenue above $2M, from your year-end statements, billed once a year</li>
+        <li><strong>12-month minimum.</strong> It covers the build plus a full year of upkeep and new features.</li><li><strong>After 12 months:</strong> month to month, with 60 days' notice to end it</li><li><strong>Share of growth:</strong> Plan A ${o.pctA*100}%, Plan B ${o.pct*100}% of gross revenue above the baseline (this year's revenue, from your books at signing), from your year-end statements, billed once a year after year end</li>
+        <li><strong>Exit bonus:</strong> Plan A ${o.exitA*100}%, Plan B ${o.exitB*100}% of the sale price if the company is sold while we work together or within 24 months after</li>
+        <li><strong>Optional year-end bonus:</strong> in a year the agreed goals are hit, the owners can add a bonus at the yearly review. Your call, never required.</li>
         <li><strong>Price for MVP:</strong> 50% at signing, 50% when the MVP is live or 30 days after it's delivered for testing, whichever comes first. It covers the MVP list only; anything added is quoted first.</li>
         <li><strong>Timeline:</strong> the 3–4 months covers the MVP scope we lock together in discovery. Adding to it either moves the date or goes into the first update after launch. We decide that together.</li>
         <li><strong>You own everything</strong>: code, data and accounts, all in Platinum's name. I keep my own general tools and build methods for other work, never your data or brand.</li><li>Account costs (about $67–95 a month) are billed to your card directly. Card-processing fees on client payments are separate, as they are today. Travel + paid data only with your OK.</li>
