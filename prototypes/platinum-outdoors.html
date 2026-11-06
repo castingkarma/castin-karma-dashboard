@@ -589,7 +589,7 @@ PAGES.leads = () => {
   <div class="card">
     <div class="row between">
       <div><strong>10 of last month's new-build closings</strong><div class="small muted">Recorded Sep 2026 · Queen Creek, Mesa, Gilbert</div></div>
-      <button class="btn primary" ${leadPick.size?'':'disabled'} onclick="mailerModal()">Send postcard to ${leadPick.size||''} selected</button>
+      <button class="btn" ${leadPick.size?'':'disabled'} onclick="campEnrollModal()">Add ${leadPick.size||''} to a campaign</button><button class="btn primary" ${leadPick.size?'':'disabled'} onclick="mailerModal()">Send postcard to ${leadPick.size||''} selected</button>
     </div>
     <div class="tablewrap mt"><table>
       <thead><tr><th>${newOnes.length?`<input type="checkbox" aria-label="Select all new" ${allPicked?'checked':''} onchange="pickAllLeads(this.checked)">`:''}</th><th>Owner</th><th>Property</th><th>Signal</th><th>Closed</th><th class="r">Home price</th><th>Stage</th></tr></thead>
@@ -1230,7 +1230,7 @@ const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
 const MVP_PAGES = new Set(['pm','changes','sales','handoff','costbook','c-schedule','c-walk','c-sign','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
-  owner:{l:'Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'sales', nav:[['sales','Sales home'],['leads','Leads'],['quotes','Quotes & design'],['proposal','Proposals'],['handoff','Sold → handoff'],['jobs','Jobs board'],FLOW]},
+  owner:{l:'Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'sales', nav:[['sales','Sales home'],['leads','Leads'],['campaigns','Campaigns'],['quotes','Quotes & design'],['proposal','Proposals'],['handoff','Sold → handoff'],['jobs','Jobs board'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costbook','Cost book'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
@@ -1491,6 +1491,73 @@ async function pushProd(id,b){
 function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[sampleIdx++ % SAMPLE_CUSTOMERS.length];
   const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:[40000,52000,30000][n%3]});
   selQ=id; render(); toast(`Quote request ${id} created for ${c.name}.`); }
+
+// ---------- drip campaigns (sales): automated postcards, emails + texts, funnels and A/B tests (demo: nothing is sent) ----------
+const FUNNEL = ['In the campaign','Opened','Replied','Visit booked','Sold'];
+const CAMPS = [
+  {id:'c1', name:'New-homeowner welcome', trigger:'Added from Leads', status:'Active', enrolled:46, funnel:[46,31,9,4,1], steps:[
+    {d:0, ch:'📬 Postcard', t:'Welcome to the neighborhood + a free design visit'},
+    {d:5, ch:'✉️ Email', t:'3 backyard ideas for new builds', ab:{a:'3 backyard ideas for your new home', b:'Your new yard: what it costs to finish', ar:24, br:31}},
+    {d:12, ch:'💬 Text', t:'Free design visit this month? Reply YES and Austin calls you'},
+    {d:21, ch:'✉️ Email', t:'Before and after: a Queen Creek new build'}]},
+  {id:'c2', name:'Proposal follow-up', trigger:'Proposal sent, not signed', status:'Active', enrolled:7, funnel:[7,6,4,3,2], steps:[
+    {d:2, ch:'✉️ Email', t:'Any questions about your proposal?'},
+    {d:5, ch:'💬 Text', t:'Austin checking in on your backyard', ab:{a:'Hi, it’s Austin. Any questions?', b:'We have a crew opening next month. Want it?', ar:38, br:52}},
+    {d:10, ch:'✉️ Email', t:'Lock in a spot on this season’s schedule'}]},
+  {id:'c3', name:'Past clients: reviews + referrals', trigger:'Job marked complete', status:'Active', enrolled:38, funnel:[38,29,14,6,3], steps:[
+    {d:3, ch:'✉️ Email', t:'How did we do? (review link)'},
+    {d:30, ch:'✉️ Email', t:'Refer a neighbor, get $250'},
+    {d:180, ch:'✉️ Email', t:'Spring care plan for your yard'}]},
+  {id:'c4', name:'Pool permit owners', trigger:'Pool permit found (Leads)', status:'Draft', enrolled:0, funnel:[0,0,0,0,0], steps:[
+    {d:0, ch:'📬 Postcard', t:'Finish the yard around your new pool'},
+    {d:7, ch:'✉️ Email', t:'Pool deck, turf + lighting ideas'}]},
+];
+let campSel = 'c1';
+const campPct = (a,b) => b ? Math.round(a/b*100)+'%' : '0%';
+PAGES.campaigns = () => { const c=CAMPS.find(x=>x.id===campSel)||CAMPS[0], act=CAMPS.filter(x=>x.status==='Active');
+  const tot=k=>act.reduce((a,x)=>a+x.funnel[k],0);
+  return `<div class="row between" style="gap:10px;flex-wrap:wrap"><div><h1>Campaigns</h1><p class="sub">Automated follow-up for every lead and client: postcards, emails and texts on a schedule, with funnels and A/B tests so you can see what books design visits. Demo: nothing is sent.</p></div>
+    <button class="btn primary" onclick="campNew()">+ New campaign</button></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Active campaigns</div><div class="v">${act.length}</div><div class="d muted">${CAMPS.length-act.length} draft</div></div>
+    <div class="card stat"><div class="k">People in campaigns</div><div class="v">${tot(0)}</div><div class="d muted">leads, quotes + past clients</div></div>
+    <div class="card stat"><div class="k">Replies</div><div class="v">${tot(2)}</div><div class="d muted">${campPct(tot(2),tot(0))} reply rate</div></div>
+    <div class="card stat"><div class="k">Design visits booked</div><div class="v pos">${tot(3)}</div><div class="d muted">${tot(4)} sold so far</div></div>
+  </div>
+  <div class="grid g2 mt" style="grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)">
+    <div class="card"><h2>Your campaigns</h2>${CAMPS.map(x=>`<div class="qrow ${x.id===c.id?'on':''}" onclick="campSel='${x.id}';render()"><div class="row between"><strong>${x.name}</strong><span class="pill ${x.status==='Active'?'p-green':x.status==='Paused'?'p-amber':'p-grey'}">${x.status}</span></div>
+      <div class="small muted">When: ${x.trigger} · ${x.steps.length} steps · ${x.enrolled} people</div></div>`).join('')}</div>
+    <div class="card" id="campDetail"><div class="row between" style="gap:8px;flex-wrap:wrap"><div><h2 style="margin:0">${c.name}</h2><div class="small muted">Starts when: ${c.trigger}</div></div>
+      <div class="row" style="gap:6px">${c.status==='Active'?`<button class="btn sm" onclick="campSet('Paused')">Pause</button>`:`<button class="btn sm primary" onclick="campSet('Active')">${c.status==='Draft'?'Turn on':'Resume'}</button>`}<button class="btn sm" onclick="campStep()">+ Add a step</button></div></div>
+      <h3 style="font-size:14px;margin:14px 0 4px">The steps</h3>
+      ${c.steps.map((st,i)=>`<div class="todo"><div class="ic" style="background:var(--accent-soft);font-size:12px;font-weight:700">Day ${st.d}</div><div style="flex:1"><strong>${st.ch}</strong><div class="small">${st.t}</div>
+        ${st.ab?`<div class="small" style="margin-top:6px;padding:8px 10px;border:1px dashed #9fb0c2;border-radius:8px;background:#f8fafc"><strong>A/B test</strong> · half get each version
+          <div class="row between" style="margin-top:4px"><span>A: “${st.ab.a}”</span><span class="${st.ab.ar>=st.ab.br?'pos':'muted'}">${st.ab.ar}% opened</span></div>
+          <div class="row between"><span>B: “${st.ab.b}”</span><span class="${st.ab.br>st.ab.ar?'pos':'muted'}">${st.ab.br}% opened</span></div>
+          ${st.ab.done?`<div class="pos" style="margin-top:4px">✓ Using the winner for everyone</div>`:`<button class="btn sm" style="margin-top:6px" onclick="campWinner(${i})">Use the winner (${st.ab.br>st.ab.ar?'B':'A'}, +${Math.abs(st.ab.br-st.ab.ar)} pts)</button>`}</div>`:
+          (c.status!=='Draft'?'':`<a href="#" class="small" onclick="campAB(${i});return false">+ A/B test this step</a>`)}</div></div>`).join('')}
+      <h3 style="font-size:14px;margin:16px 0 6px">Funnel</h3>
+      ${c.funnel.map((n,i)=>`<div style="margin-top:6px"><div class="row between small"><span>${FUNNEL[i]}</span><span><strong>${n}</strong>${i?` · ${campPct(n,c.funnel[0])}`:''}</span></div><div style="height:10px;background:#eef0f3;border-radius:999px;margin-top:3px;overflow:hidden"><div style="height:100%;width:${c.funnel[0]?n/c.funnel[0]*100:0}%;background:var(--accent);border-radius:999px"></div></div></div>`).join('')}
+      <p class="small muted" style="margin:12px 0 0">Anyone who replies, books a visit or unsubscribes leaves the campaign on their own. Texts only go to people who opted in.</p></div>
+  </div>`; };
+function campSet(st){ const c=CAMPS.find(x=>x.id===campSel); c.status=st; render(); toast(`${c.name}: ${st==='Active'?'on. New people start at step 1.':'paused. Nobody gets the next step until you resume.'}`); }
+function campWinner(i){ const c=CAMPS.find(x=>x.id===campSel), ab=c.steps[i].ab; ab.done=true; c.steps[i].t=ab.br>ab.ar?ab.b:ab.a; render(); toast(`Winner picked: version ${ab.br>ab.ar?'B':'A'} now goes to everyone.`); }
+function campAB(i){ const c=CAMPS.find(x=>x.id===campSel), st=c.steps[i]; st.ab={a:st.t, b:st.t+' (shorter)', ar:0, br:0}; render(); toast('A/B test set up: half get each version once the campaign is on.'); }
+function campStep(){ const c=CAMPS.find(x=>x.id===campSel), last=c.steps[c.steps.length-1]; c.steps.push({d:(last?last.d:0)+7, ch:'✉️ Email', t:'New step: write the message'}); render(); toast('Step added a week after the last one.'); }
+function campNew(){ openModal(`<h2>New campaign</h2><p class="small muted" style="margin:0">Demo: saves on this page only.</p>
+  <div class="field"><label for="cp_name">Name</label><input class="txt" id="cp_name" placeholder="e.g. Fall turf promo"></div>
+  <div class="field"><label for="cp_trig">Starts when</label><select class="txt" id="cp_trig" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px"><option>Added from Leads</option><option>Proposal sent, not signed</option><option>Job marked complete</option><option>Design visit booked</option><option>Added by hand</option></select></div>
+  <div class="field"><label for="cp_tpl">Start from</label><select class="txt" id="cp_tpl" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px"><option value="c1">New-homeowner welcome (4 steps)</option><option value="c2">Proposal follow-up (3 steps)</option><option value="c3">Reviews + referrals (3 steps)</option><option value="">Blank</option></select></div>
+  <div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="campSave()">Create</button></div>`); }
+function campSave(){ const v=k=>document.getElementById(k).value, n=v('cp_name').trim()||'New campaign', tpl=CAMPS.find(x=>x.id===v('cp_tpl')), id='c'+Date.now();
+  CAMPS.push({id, name:n, trigger:v('cp_trig'), status:'Draft', enrolled:0, funnel:[0,0,0,0,0], steps:tpl?tpl.steps.map(st=>({d:st.d,ch:st.ch,t:st.t})):[{d:0,ch:'✉️ Email',t:'First message'}]});
+  campSel=id; closeModal(); render(); toast(`${n} created as a draft. Add steps, then turn it on.`); }
+function campEnrollModal(){ const n=leadPick.size; if(!n) return;
+  openModal(`<h2>Add ${n} lead${n>1?'s':''} to a campaign</h2><p class="small muted" style="margin:0">They start at step 1. Demo: nothing is sent.</p>
+    ${CAMPS.map(c=>`<label class="check" style="cursor:pointer"><input type="radio" name="cp_pick" value="${c.id}" ${c.id==='c1'?'checked':''}> ${c.name} <span class="small muted" style="margin-left:auto">${c.status}</span></label>`).join('')}
+    <div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="campEnroll()">Add to campaign</button></div>`); }
+function campEnroll(id){ const pick=id||(document.querySelector('input[name="cp_pick"]:checked')||{}).value||'c1', c=CAMPS.find(x=>x.id===pick), n=leadPick.size;
+  c.enrolled+=n; c.funnel[0]+=n; leads.forEach(l=>{ if(leadPick.has(l.id)) l.camp=c.name; }); leadPick.clear(); closeModal(); campSel=c.id; render(); toast(`${n} lead${n>1?'s':''} added to ${c.name}. Step 1 goes out today (demo: nothing sent).`); }
 
 // ---------- sales portal (Austin): leads → quotes → estimates → proposals → sold → handed to the PM ----------
 const SALES_ST = ['Lead','Estimating','Proposal sent','Sold'];
@@ -2952,6 +3019,9 @@ const SALES_STEPS = [
   {t:'Austin signs in', who:'7:30 AM · Austin · sales', d:'Lands on the sales desk: pipeline, follow-ups and nothing about crews or POs.', run: async()=>{ await loginStep('owner'); }},
   {t:'New homeowners to mail', who:'7:40 AM · Leads', d:'New-build closings from county records. Pick them and a postcard goes out (demo: nothing is really sent).', run: async()=>{
     asRole('owner','leads'); await wait(300); pickAllLeads(true); await wait(400); mailerModal(); await wait(900); sendMailer(); await wait(900); flash('main .card'); }},
+  {t:'Put the new leads on autopilot', who:'8:00 AM · Campaigns', d:'The new homeowners go into the welcome campaign: a postcard, then emails and a text on a schedule. An A/B test already shows which email gets opened more.', run: async()=>{
+    asRole('owner','leads'); await wait(300); leads.filter(l=>l.st!=='new').slice(0,10).forEach(l=>leadPick.add(l.id)); if(!leadPick.size) leads.slice(0,10).forEach(l=>leadPick.add(l.id)); render(); await wait(400);
+    campEnroll('c1'); go('campaigns'); await wait(400); flash('#campDetail'); await wait(700); const i=CAMPS[0].steps.findIndex(x=>x.ab&&!x.ab.done); if(i>=0) campWinner(i); }},
   {t:'A customer calls', who:'9:15 AM · Quotes & design', d:'Taylor Reyes saw the postcard and called. Austin opens a quote request with the site-visit notes.', run: async()=>{
     asRole('owner','quotes'); if(!QUOTES.some(x=>x.id==='Q-2050')) QUOTES.unshift({id:'Q-2050', client:'Taylor Reyes', city:'Queen Creek', scope:'Pavers, turf, fire pit and lighting', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:42000});
     selQ='Q-2050'; render(); await wait(200); flash('#qdetail'); toast('Quote request Q-2050 opened for Taylor Reyes.'); }},
