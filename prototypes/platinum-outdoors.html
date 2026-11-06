@@ -791,9 +791,9 @@ PAGES.trad = () => {
   <p class="sub">The same app (5 job modules, client portal and leads engine) built by a hired software team. Hours and rates are industry ballparks for 2026, not vendor quotes.</p>
   <div class="grid g4">
     <div class="card stat"><div class="k">Build hours</div><div class="v">${H.toLocaleString()}</div><div class="d muted">across 7 roles, about 9 people</div></div>
-    <div class="card stat"><div class="k">US agency</div><div class="v">${k(US)}</div><div class="d muted">typical range ${k(US*0.8)}–${k(US*1.25)}</div></div>
-    <div class="card stat"><div class="k">Offshore agency</div><div class="v">${k(OFF)}</div><div class="d muted">typical range ${k(OFF*0.8)}–${k(OFF*1.25)}</div></div>
-    <div class="card stat"><div class="k">Time to launch</div><div class="v">6–10 mo</div><div class="d muted">US 6–8 months · offshore 7–10</div></div>
+    <div class="card stat"><div class="k">US agency</div><div class="v">$384k–$450k</div><div class="d muted">depends on the team and how much changes mid-build</div></div>
+    <div class="card stat"><div class="k">Offshore agency</div><div class="v">$103k–$250k</div><div class="d muted">low rates; rework, handoffs and oversight push it up</div></div>
+    <div class="card stat"><div class="k">Time to launch</div><div class="v">8–12 mo</div><div class="d muted">US 8–10 months · offshore 9–12</div></div>
   </div>
   <div class="card mt"><h2>By role</h2><div class="tablewrap"><table>
     <thead><tr><th>Role</th><th class="r">Hours</th><th class="r">US rate</th><th class="r">US cost</th><th class="r">Offshore rate</th><th class="r">Offshore cost</th></tr></thead>
@@ -810,14 +810,14 @@ PAGES.trad = () => {
       <div class="row between" style="margin-top:8px"><span class="muted">Hosting + tools</span><strong>$1k–$5k</strong></div>
       <p class="small muted" style="margin:12px 0 0">Industry rule of thumb: keeping custom software running costs 15–20% of the build every year (fixes, updates, security, small changes).</p>
       <h2 class="mt2">What the hidden costs look like</h2>
-      <p class="small muted" style="margin:0">Offshore rates are lower, but time-zone gaps, handoffs and rework usually add 20–40% to the hours. Either way you also spend your own time in meetings, testing and approvals across 6–10 months.</p>
+      <p class="small muted" style="margin:0">Offshore rates are lower, but time-zone gaps, handoffs and rework usually add 20–40% to the hours. Either way you also spend your own time in meetings, testing and approvals across 8–12 months.</p>
     </div>
   </div>
   <div class="card mt" style="position:relative;border-color:#9fd8c6;background:linear-gradient(180deg,#f3fbf8,#fff)">
     <div class="row between"><h2 style="margin:0">Built with Casting Karma's AI build system</h2><span class="pill p-green">The same app</span></div>
     <div class="grid g3 mt">
       <div class="stat"><div class="k">Team</div><div class="v">1 builder + AI</div><div class="d muted">no team to hire or manage</div></div>
-      <div class="stat"><div class="k">Time to launch</div><div class="v">3–4 months</div><div class="d muted">MVP live, vs. 6–10 with a traditional team</div></div>
+      <div class="stat"><div class="k">Time to launch</div><div class="v">3–4 months</div><div class="d muted">MVP live, vs. 8–12 with a traditional team</div></div>
       <div class="stat"><div class="k">Price</div><div class="v">Quoted to you</div><div class="d muted">a fraction of the traditional cost</div></div>
     </div>
     <p class="small muted" style="margin:12px 0 0">And you own it: the code, the data and the accounts are in your name.</p>
@@ -2279,7 +2279,7 @@ PAGES.reqdoc = () => {
 
     <h2 class="mt2">10. Milestones + deliverables</h2>
     <div class="tablewrap"><table><thead><tr><th>Milestone</th><th>Delivers</th><th>Target</th></tr></thead><tbody>${RQ_MS.map(m=>`<tr><td><strong>${m[0]}</strong></td><td class="small">${m[1]}</td><td class="small" style="white-space:nowrap">${m[2]}</td></tr>`).join('')}</tbody></table></div>
-    <p class="small muted">A traditional team would typically plan 6–10 months for this scope (see Traditional Development). The targets above (about 3–4 months) assume the AI-assisted build.</p>
+    <p class="small muted">A traditional team would typically plan 8–12 months for this scope (see Traditional Development). The targets above (about 3–4 months) assume the AI-assisted build.</p>
 
     <h2 class="mt2">11. Acceptance + sign-off</h2>
     <ul class="small" style="line-height:1.7"><li>Every "Must" requirement is demonstrated on a test job and signed off by the owner of that area (Austin, Joel or Justin).</li><li>One live job is run in both JobTread and the new system with matching numbers.</li><li>QuickBooks entries for that job are checked by Joel or the bookkeeper.</li><li>Training is done for each role.</li></ul>
@@ -2477,7 +2477,7 @@ PAGES.offer = () => {
       </div>
       <div class="ovalue"><div class="small" style="letter-spacing:1px;text-transform:uppercase;color:#d6b25e">The point</div>
         <div class="ovh">You're paying for the result, not the hours.</div>
-        <div class="ovrow"><span class="ovlab">Before</span><span>9 people · 2,470 hours · 6–10 months</span></div>
+        <div class="ovrow"><span class="ovlab">Before</span><span>9 people · 2,470 hours · 8–12 months</span></div>
         <div class="ovrow now"><span class="ovlab">Now</span><span>1 lead + AI · 3–4 months</span></div>
         <div class="ovsame">Same app. Same result.</div>
         <p class="ovq">You don't price a backyard by the hours your crew stands in it. You price the finished backyard. Software works the same way now.</p>
@@ -2528,7 +2528,7 @@ PAGES.offer = () => {
     <div class="ocard"><h2>What the same result costs the traditional way (first 12 months)</h2>
       ${bars.map(([l,d,v,c])=>`<div style="margin-top:14px"><div class="row between"><span><strong>${l}</strong> <span class="small muted">· ${d}</span></span><strong>${fmt(v)}</strong></div>
         <div style="height:14px;background:#eef0f3;border-radius:999px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${v/max*100}%;background:${c};border-radius:999px"></div></div></div>`).join('')}
-      <div class="osave">You save about <strong>${fmt(usY1-yr1)}</strong> against a US agency in year one. You get a working MVP in 3–4 months instead of 6–10, and your tech lead stays on afterward.</div>
+      <div class="osave">You save about <strong>${fmt(usY1-yr1)}</strong> against a US agency in year one. You get a working MVP in 3–4 months instead of 8–12, and your tech lead stays on afterward.</div>
       <p class="small muted" style="margin:10px 0 0">Traditional figures come from the Traditional Development breakdown (2,470 hours at 2026 industry rates) plus 17.5% a year for upkeep. Offshore adds 30% for rework and handoffs. These are ballparks, not vendor quotes.</p>
     </div>
 
@@ -2536,8 +2536,8 @@ PAGES.offer = () => {
       <p class="small muted" style="margin:0 0 6px">Solid bar = typical time to launch. Striped = where it commonly slips.</p>
       <div class="tl">
         <div class="tlaxis"><span></span><div>${Array.from({length:13},(_,i)=>`<i style="left:${i/12*100}%">${i}</i>`).join('')}</div></div>
-        ${[['Traditional US agency','#9aa6b3',[[0,1,'Discovery'],[1,6,'Design + build']],[6,8],null],
-           ['Offshore agency','#c2cbd5',[[0,1.5,'Requirements'],[1.5,7,'Build + rework']],[7,10],null],
+        ${[['Traditional US agency','#9aa6b3',[[0,1.5,'Discovery'],[1.5,8,'Design + build']],[8,10],null],
+           ['Offshore agency','#c2cbd5',[[0,2,'Requirements'],[2,9,'Build + rework']],[9,12],null],
            ['Casting Karma','#d6b25e',[[0,0.5,''],[0.5,3,'Build · weekly demos']],[3,4],[4,12,'Live, running your business + improving']]]
           .map(([name,c,segs,slip,live])=>`<div class="tlrow"><span>${name}</span><div class="tltrack">
             ${segs.map(([a,b,l])=>`<div class="tlseg" style="left:${a/12*100}%;width:${(b-a)/12*100}%;background:${c}">${l}</div>`).join('')}
@@ -2547,7 +2547,7 @@ PAGES.offer = () => {
           </div></div>`).join('')}
         <div class="small muted" style="margin-top:8px">Months from signing</div>
       </div>
-      <div class="osave">In month 5 you're already running jobs on your own system. A traditional team is still building, and an offshore team may not deliver until month 10 or later.</div>
+      <div class="osave">In month 5 you're already running jobs on your own system. A traditional team is still building, and an offshore team may not deliver until month 12.</div>
     </div>
 
     <div class="ocard"><h2>Why offshore projects often run late</h2>
