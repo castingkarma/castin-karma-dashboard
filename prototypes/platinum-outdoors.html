@@ -265,6 +265,7 @@ body.dragging{cursor:grabbing;user-select:none}
 .oplans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
 .oplan.mvp{border:2px solid #9fb0c2}
 .otag.mvpt{background:#1f2a37;color:#f3dc9b}
+.navkey{padding:12px 10px 0;margin-top:8px;border-top:1px solid var(--line);line-height:1.5}
 .mvpb{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;padding:1px 7px;border-radius:999px;background:#1f2a37;color:#f3dc9b;vertical-align:middle;margin-left:6px}
 tr.mvprow td{background:#fbf7ea}
 .onext{margin-top:12px;border:1px dashed #9fb0c2;border-radius:10px;padding:10px 12px;background:#f8fafc}
@@ -319,6 +320,7 @@ td input[type=checkbox]{width:17px;height:17px}
   .rolewrap span{display:none}
   nav.side a{flex:none;padding:7px 12px;font-size:14px;background:var(--bg)}
   nav.side a .n{display:none}
+  nav.side .navkey{display:none}
   main{padding:18px 16px 60px}
   .proposal .body{padding:18px}
   .proposal .hero{padding:20px}
@@ -515,7 +517,9 @@ function renderNav(){
   const items = ROLES[role].nav;
   const pick = ['owner','production'].includes(role) ? `<div class="jobpick"><label>Current job</label><select onchange="pickJob(this.value)">${jobs.map(j=>`<option value="${j.id}" ${j.id===curJob?'selected':''}>${j.name}</option>`).join('')}</select></div>`
     : `<div class="rolecard"><label>Signed in as</label><div style="margin-top:6px;font-weight:600">${ROLES[role].who}</div><div class="small muted">${ROLES[role].sub}</div></div>`;
-  document.getElementById('nav').innerHTML = pick + items.map(([k,l])=>`<a class="${page===k?'on':''}" onclick="go('${k}')">${l}${badge(k)}</a>`).join('');
+  const anyMvp = items.some(([k])=>MVP_PAGES.has(k));
+  document.getElementById('nav').innerHTML = pick + items.map(([k,l])=>`<a class="${page===k?'on':''}" onclick="go('${k}')">${l}${MVP_PAGES.has(k)?'<span class="mvpb">MVP</span>':''}${badge(k)}</a>`).join('')
+    + (anyMvp?`<div class="navkey small muted"><span class="mvpb" style="margin:0 4px 0 0">MVP</span> in the first release (3–4 months). The rest comes after, by month 6 or in a later phase.</div>`:'');
 }
 function go(p){page=p;render();window.scrollTo({top:0})}
 function setView(v){ setRole(v==='client'?'client':'owner'); }
@@ -1180,6 +1184,8 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
+// menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, job costing, QuickBooks)
+const MVP_PAGES = new Set(['jobs','quotes','estimate','selections','proposal','calendar','schedule','costing','qbo','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
