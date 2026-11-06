@@ -1195,7 +1195,7 @@ const ROLES = {
   owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
-  production:{l:'Project manager (Justin)', who:'Justin', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
+  production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
   field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
 };
@@ -2356,7 +2356,7 @@ const TOUR_ID = 99;
 const wait = ms => new Promise(r=>setTimeout(r,ms));
 async function typeIn(id,text){ const el=document.getElementById(id); if(!el) return; el.focus(); el.value=''; for(const ch of text){ el.value+=ch; await wait(12); } el.dispatchEvent(new Event('input',{bubbles:true})); }
 function flash(sel){ const el=typeof sel==='string'?document.querySelector(sel):sel; if(!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({behavior:'smooth',block:'center'}); }
-function teamOn(){ if(role!=='owner'){ role='owner'; view='team'; document.getElementById('roleSel').value='owner'; } closeModal(); }
+function teamOn(r='owner'){ if(role!==r){ role=r; view='team'; document.getElementById('roleSel').value=r; } closeModal(); }
 const TL = (sec,code,d,q,u,c,m) => ({sec,code,d,q,u,c,m});
 const STEPS = [
   {t:'A new customer calls', who:'Austin · owner / sales', d:'Create the customer and the job in one form. It lands on the Jobs board under Lead.', run: async()=>{
@@ -2387,45 +2387,48 @@ const STEPS = [
     go('selections'); await wait(700);
     selections[0].chosen=1; selections[0].status='picked'; selections[1].chosen=0; selections[1].status='picked'; render(); flash('main .grid.g3');
     toast('Taylor picked Toscana pavers (+$310 over allowance) and the pet-friendly turf.'); }},
-  {t:'Schedule crews and subs', who:'Justin · production manager', d:'Phases go on one calendar with the crew assigned. The job moves to In progress.', run: async()=>{
-    useJob(TOUR_ID); J().status='In progress'; schedule.length=0; DATA[TOUR_ID].schedSet=true;
+  {t:'Schedule crews and subs', who:'Justin Butler · project manager', d:'Phases go on one calendar with the crew assigned. The job moves to In progress.', run: async()=>{
+    teamOn('production'); useJob(TOUR_ID); J().status='In progress'; schedule.length=0; DATA[TOUR_ID].schedSet=true;
     [['Demo & haul-off','Crew A',0,2,'#64748b'],['Grade & base','Crew A',2,2,'#64748b'],['BBQ island + fire pit','Masonry sub',4,5,'#b26a00'],
      ['Paver install','Crew B',5,5,'#0f8a6a'],['Turf + putting green','Crew C',10,3,'#4d7c0f'],['Lighting + walkthrough','Crew A',13,2,'#2856b6']]
       .forEach(([n,crew,st,d,c])=>schedule.push({n,crew,s:st,d,c,st:'next'}));
     go('schedule'); await wait(200); flash('.gantt'); toast('Crews scheduled. Everyone sees the same calendar.'); }},
-  {t:'Order materials', who:'Justin · production manager', d:'Purchase orders go to vendors against the job, so every dollar lands in the right cost group.', run: async()=>{
-    useJob(TOUR_ID);
+  {t:'Order materials', who:'Justin Butler · project manager', d:'Purchase orders go to vendors against the job, so every dollar lands in the right cost group.', run: async()=>{
+    teamOn('production'); useJob(TOUR_ID);
     [['PO-1051','Belgard / SiteOne','Catalina pavers 500 sf + sand','PAV',4520],['PO-1052','SYNLawn Arizona','Turf 650 sf + putting green kit','TURF',3280],
      ['PO-1053','BBQ Island Supply','Island block, grill cutout, stucco','KIT',3900],['PO-1054','Ferguson','Fire pit burner + gas parts','FIRE',2350],['PO-1055','FX Luminaire / Ewing','10 fixtures + transformer','LITE',1240]]
       .forEach(([n,v,d,code,amt])=>pos.push({n,v,d,code,amt,date:'Nov 3',status:'sent'}));
     go('schedule'); await wait(200); flash('main .card.mt:last-child'); toast('5 purchase orders sent to vendors.'); }},
-  {t:'A change order mid-job', who:'Austin · sales + Taylor · client', d:'Taylor (client) asks for a seat wall and 2 palm uplights. They approve it on their phone and the contract updates.', run: async()=>{
-    useJob(TOUR_ID); cos.push({n:1, title:'Add seat wall + 2 palm uplights', status:'sent', date:'Nov 6', lines:[TL('','PAV','Seat wall, 12 lf',12,'lf',140,35), TL('','LITE','2 palm uplights',2,'ea',165,45)]});
+  {t:'A change order mid-job', who:'Justin Butler · PM + Austin + Taylor · client', d:'Taylor asks for a seat wall and 2 palm uplights. Justin prices it; it\'s over $2,500, so Austin OKs it first. Taylor approves on their phone and the contract updates.', run: async()=>{
+    teamOn(); useJob(TOUR_ID); cos.push({n:1, title:'Add seat wall + 2 palm uplights', status:'sent', date:'Nov 6', lines:[TL('','PAV','Seat wall, 12 lf',12,'lf',140,35), TL('','LITE','2 palm uplights',2,'ea',165,45)]});
     go('estimate'); await wait(200); flash('main .card.mt:last-child'); await wait(1400);
-    cos[0].status='approved'; render(); flash('main .grid.g4'); toast(`Taylor approved CO-1 (+${fmt(coPriceOf(cos[0]))}). Contract and budget updated.`); }},
+    cos[0].status='approved'; render(); flash('main .grid.g4'); toast(`Austin OK’d it, then Taylor approved CO-1 (+${fmt(coPriceOf(cos[0]))}). Contract and budget updated.`); }},
   {t:'Costs roll in', who:'Crew lead · field app + Joel · finance', d:'Vendor bills and crew labor post against the budget. You see the margin while the job is still running.', run: async()=>{
-    useJob(TOUR_ID); const t0=totals(), estM=(t0.contract-t0.budget)/t0.contract*100; pos.forEach(p=>p.status='billed'); Object.assign(otherActual,{DEMO:1600, PAV:1500, TURF:700, KIT:1100, FIRE:900, LITE:450});
+    teamOn(); useJob(TOUR_ID); const t0=totals(), estM=(t0.contract-t0.budget)/t0.contract*100; pos.forEach(p=>p.status='billed'); Object.assign(otherActual,{DEMO:1600, PAV:1500, TURF:700, KIT:1100, FIRE:900, LITE:450});
     go('costing'); await wait(200); flash('main .card.mt'); const t=totals(); toast(`All costs in. Turf ran ${fmt(t.byCode.TURF.actual-t.byCode.TURF.budget)} over, but the job landed at ${pct((t.contract-t.actual)/t.contract*100)} margin vs. ${pct(estM)} estimated.`); }},
-  {t:'Final walkthrough and close', who:'Justin · production + Joel · final invoice', d:'The job moves to Complete, the final invoice goes out, and a review request is sent automatically.', run: async()=>{
-    useJob(TOUR_ID); J().status='Complete'; go('jobs'); await wait(200); flash('#jc-'+TOUR_ID); toast('Job complete. Final invoice and review request sent.'); }},
+  {t:'Final walkthrough and close', who:'Justin Butler · PM + Joel · final invoice', d:'The job moves to Complete, the final invoice goes out, and a review request is sent automatically.', run: async()=>{
+    teamOn('production'); useJob(TOUR_ID); J().status='Complete'; go('jobs'); await wait(200); flash('#jc-'+TOUR_ID); toast('Job complete. Final invoice and review request sent.'); }},
 ];
 let tourStep = 0, tourBusy = false;
 function renderTour(){
-  const el=document.getElementById('tour'); const n=STEPS.length;
-  if(tourStep===0) el.innerHTML = `<div class="tstep"><b>▶ Guided demo: one job, start to finish</b><span>${n} clicks. Each one fills in the forms and shows you where the work lands.</span></div>
-    <button class="btn tnext" onclick="nextStep()">Start the walkthrough</button>`;
-  else if(tourStep>n) el.innerHTML = `<div class="tstep"><b>✓ Done: first call to final invoice</b><span>Every screen you saw shared the same job record. Nothing was typed twice.</span><div class="tbar"><i style="width:100%"></i></div></div>
+  const el=document.getElementById('tour'), T=TOURS[tourKind], n=T.steps.length, other=tourKind==='justin'?'job':'justin';
+  if(tourStep===0) el.innerHTML = `<div class="tstep"><b>▶ Guided demo: ${TOURS.justin.title}</b><span>${TOURS.justin.steps.length} clicks. ${TOURS.justin.blurb}</span></div>
+    <button class="btn tnext" onclick="startTour('justin')">Start Justin's day</button>
+    <button class="btn treset" onclick="startTour('job')">Or: one job, start to finish</button>`;
+  else if(tourStep>n) el.innerHTML = `<div class="tstep"><b>${T.done}</b><span>${T.doneSub}</span><div class="tbar"><i style="width:100%"></i></div></div>
+    <button class="btn tnext" onclick="startTour('${other}')">Now: ${TOURS[other].title.toLowerCase()}</button>
     <button class="btn treset" onclick="startOver()">↺ Start over</button>`;
-  else { const st=STEPS[tourStep-1];
+  else { const st=T.steps[tourStep-1];
     el.innerHTML = `<div class="tstep"><b>Step ${tourStep} of ${n}: ${st.t} <span class="twho">👤 ${st.who}</span></b><span>${st.d}</span><div class="tbar"><i style="width:${tourStep/n*100}%"></i></div></div>
     <button class="btn tnext" id="tourNext" onclick="nextStep()" ${tourBusy?'disabled':''}>${tourBusy?'Working…':tourStep===n?'Finish':'Next step →'}</button>
     <button class="btn treset" onclick="startOver()">↺ Start over</button>`; }
 }
 async function nextStep(){
   if(tourBusy) return;
-  if(tourStep>=STEPS.length){ tourStep=STEPS.length+1; renderTour(); return; }
+  const S=tourSteps();
+  if(tourStep>=S.length){ tourStep=S.length+1; renderTour(); return; }
   tourStep++; tourBusy=true; renderTour();
-  try{ await STEPS[tourStep-1].run(); } finally { tourBusy=false; renderTour(); }
+  try{ await S[tourStep-1].run(); } finally { tourBusy=false; renderTour(); }
 }
 // ---------- click-to-fill: clicking an empty demo field fills it, so nobody types during a demo ----------
 const SAMPLE_CUSTOMERS = [
@@ -2445,14 +2448,67 @@ document.addEventListener('click', e=>{
   if(el.id.startsWith('nj_')) fillNewJob();
   else if(el.id==='sigName'){ el.value = propSrc().client; el.dispatchEvent(new Event('input',{bubbles:true})); }
   else if(el.id==='q_budget'){ const q=QUOTES.find(x=>x.id===selQ); setBudget(selQ, q.hint || Math.round((qVal(q)||40000)*1.1/500)*500); }
+  else if(el.id==='pm_email'||el.id==='pm_pw'||el.id==='pm_code'){ [['pm_email','justin@yourcompany.com'],['pm_pw','demo-password'],['pm_code','275104']].forEach(([k,v])=>{ const f=document.getElementById(k); if(f&&!f.value) f.value=v; }); }
   else if(el.id==='fin_pw'){ el.value='demo-password'; document.getElementById('fin_code').value='482913'; }
   else if(el.id==='fin_code'){ el.value='482913'; const pw=document.getElementById('fin_pw'); if(!pw.value) pw.value='demo-password'; }
 });
 function startOver(){ location.href = location.pathname + '?start=' + Date.now(); }
+// ---------- Justin's sign-in (demo: any password works; real app = password + 2-step code) ----------
+PAGES.login = () => `<div class="gate card"><div class="small muted">Platinum Outdoors · Job Hub</div><h1 style="margin-top:4px">Sign in</h1>
+  <p class="small muted">Your team signs in with a password and a 6-digit code to their phone.</p>
+  <div class="field"><label for="pm_email">Email</label><input class="txt" id="pm_email" placeholder="you@yourcompany.com"></div>
+  <div class="field"><label for="pm_pw">Password</label><input class="txt" id="pm_pw" type="password" placeholder="Click to fill (demo)"></div>
+  <div class="field"><label for="pm_code">6-digit code from your phone</label><input class="txt" id="pm_code" inputmode="numeric" maxlength="6" placeholder="– – – – – –" style="letter-spacing:6px;font-size:18px"></div>
+  <button class="btn primary mt" id="pmBtn" style="width:100%" onclick="pmSignIn(this)">Sign in</button></div>`;
+async function pmSignIn(b){ ['pm_email','pm_pw','pm_code'].forEach((k,i)=>{ const el=document.getElementById(k); if(el&&!el.value) el.value=['justin@yourcompany.com','demo-password','275104'][i]; });
+  b.disabled=true; b.textContent='Signing in…'; await wait(600); setRole('production'); toast('Signed in as Justin Butler · project manager.'); }
+
+// ---------- Justin's day: the default walkthrough ----------
+function asJustin(p){ closeModal(); if(role!=='production'){ role='production'; view='team'; document.getElementById('roleSel').value='production'; } useJob(1); go(p); }
+const JUSTIN_STEPS = [
+  {t:'Justin signs in', who:'6:45 AM · Justin Butler', d:'Password plus a 6-digit code by phone. Justin lands on a personal screen, not a menu of everything.', run: async()=>{
+    closeModal(); page='login'; render(); window.scrollTo({top:0}); await wait(300);
+    await typeIn('pm_email','justin@yourcompany.com'); await typeIn('pm_pw','demo-password'); await typeIn('pm_code','275104'); await wait(250);
+    await pmSignIn(document.getElementById('pmBtn')); }},
+  {t:'One list of what needs Justin', who:'6:50 AM · My day', d:'Overnight the app gathered everything on Justin’s jobs that needs a decision: a double-booked crew, a sub\'s insurance, change orders, selections and POs.', run: async()=>{
+    asJustin('pm'); await wait(200); flash('main .grid.g2 .card'); toast(`${document.querySelectorAll('#main .grid.g2 .card:first-child .todo').length} things need Justin today. Each one opens the screen to fix it.`); }},
+  {t:'Fix the double-booked crew', who:'7:05 AM · Crew calendar', d:'Crew C is on two jobs on Nov 11. Justin moves the Nguyen job back four days. The crew and the client are told automatically.', run: async()=>{
+    asJustin('calendar'); await wait(400); const ev=CAL.find(e=>e.job==='Nguyen Front Yard'); if(ev){ ev.start=15; render(); }
+    flash('main .card'); toast('Nguyen Front Yard moved to Nov 15–18. No crew conflicts. Crew C and the client were notified.'); }},
+  {t:'Chase the sub\'s insurance', who:'7:20 AM · Crews & subs', d:'Desert Stoneworks\' insurance ends Nov 4, mid-job. Their new certificate came in, so Justin updates the date and the warning clears.', run: async()=>{
+    asJustin('subs'); await wait(300); subEdit(2); await wait(300); const el=document.getElementById('s_coi'); el.value=''; await typeIn('s_coi','Jun 30, 2027'); await wait(300); subSave(2); flash('main .grid.g2 .card:nth-child(2)'); toast('Insurance good to Jun 30, 2027. The calendar warning for Henderson is gone.'); }},
+  {t:'A crew flags extra work', who:'10:20 AM · Marco, crew lead', d:'On site, Marco finds a soft spot under the seat wall footing. It gets flagged from the crew app with 2 photos. The app says: not signed yet, don\'t start.', run: async()=>{
+    closeModal(); role='field'; view='team'; document.getElementById('roleSel').value='field'; go('field'); await wait(300); if(!FIELD.flagged) fieldFlag(); await wait(200);
+    const h=[...document.querySelectorAll('#main h2')].find(x=>x.textContent.includes('Changes on this job')); if(h) flash(h.nextElementSibling||h); }},
+  {t:'Price it and send it', who:'10:35 AM · Change orders', d:'Justin prices the flag from the cost book in a minute. It\'s under $2,500, so it goes straight to the client to sign.', run: async()=>{
+    asJustin('changes'); await wait(300); const r=CO_REQ.find(x=>x.t.startsWith('Soft spot'))||CO_REQ[0]; if(!r){ toast('Nothing new to price.'); return; }
+    coPrice(r.id); await wait(500); coSave(r.id); await wait(400); const C=DATA[1].cos, c=C[C.length-1]; coSend(C.indexOf(c)); flash('main'); }},
+  {t:'The client signs, the follow-through happens', who:'11:10 AM · Dana (client) + Justin', d:'Dana signs in the client portal. Justin orders the base, and the crew app flips to "signed: OK to start".', run: async()=>{
+    asJustin('changes'); const C=DATA[1].cos, c=[...C].reverse().find(x=>x.status==='sent'&&x.title.startsWith('Soft spot'))||C.find(x=>x.status==='sent'); if(!c) return;
+    const i=C.indexOf(c); coSigned(i); await wait(700); coOrder(i); await wait(500); coSched(i); coTell(i); flash('main'); toast(`CO-${c.n} signed, materials on a draft PO, crew told. About 30 minutes, start to finish.`); }},
+  {t:'Nudge the slow ones', who:'1:30 PM · Change orders', d:'CO-2 has waited 12 days for a signature and 3 selections are still open. One click reminds the client by email and text.', run: async()=>{
+    asJustin('changes'); await wait(300); const w=[...document.querySelectorAll('#main h2')].find(x=>x.textContent.startsWith('Waiting on the client')); if(w) flash(w.parentElement.nextElementSibling||w);
+    toast('Reminder sent to the Hendersons: CO-2 to sign and 3 selections to pick.'); }},
+  {t:'Send the purchase orders', who:'3:00 PM · Job schedule & POs', d:'The lighting PO was still a draft. Justin sends it, so the fixtures arrive before the lighting phase.', run: async()=>{
+    asJustin('schedule'); await wait(300); DATA[1].pos.filter(p=>p.status==='draft').forEach(p=>p.status='sent'); render(); flash('main .card.mt:last-child'); toast('Draft POs sent to vendors. Each one is tied to the job and its cost group.'); }},
+  {t:'End of the day', who:'5:30 PM · My day', d:'Everything that needed Justin is handled, from one screen. This is how one project manager runs 8–10 jobs instead of 4.', run: async()=>{
+    asJustin('pm'); await wait(200); flash('main .grid.g4'); toast('Day done. Nothing slipped through a text thread.'); }},
+];
+
+// ---------- two walkthroughs: Justin's day (default) and one job start to finish ----------
+const TOURS = {
+  justin:{title:'A day in the life of Justin', blurb:'Justin Butler, project manager, signs in and runs the day from one screen.', done:'✓ Justin\'s day, done', doneSub:'Crews, subs, change orders and POs handled without a single call or spreadsheet.', steps:JUSTIN_STEPS},
+  job:{title:'One job, start to finish', blurb:'Each click fills in the forms and shows where the work lands.', done:'✓ Done: first call to final invoice', doneSub:'Every screen you saw shared the same job record. Nothing was typed twice.', steps:STEPS},
+};
+let tourKind = 'justin';
+const tourSteps = () => TOURS[tourKind].steps;
+function startTour(k){ if(tourBusy) return; if(tourStep>0){ location.href = location.pathname + '?tour=' + k; return; } tourKind=k; nextStep(); }
+
 function syncTop(){ document.documentElement.style.setProperty('--hdr', document.querySelector('header.top').offsetHeight+'px'); }
 window.addEventListener('resize', syncTop);
 
 populateRoles(); render(); renderTour(); syncTop();
+{ const k=new URLSearchParams(location.search).get('tour'); if(k&&TOURS[k]){ history.replaceState(null,'',location.pathname); startTour(k); } }
 // logo + name: back to the start with every flow reset (the demo keeps no saved state, so a fresh load is a clean slate)
 function resetDemo(){ location.replace(location.pathname + '#reset'); location.reload(); }
 if(location.hash==='#reset'){ history.replaceState(null,'',location.pathname); toast('Back to the start. Every flow in the demo is reset.'); }
