@@ -510,6 +510,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='changes'){const n=coCount();return n?`<span class="n">${n}</span>`:''}
   if(key==='subs'){const n=SUBS.filter(x=>coiDays(x)<=30).length;return n?`<span class="n">${n}</span>`:''}
   if(key==='cards'&&CARDS.req&&CARDS.req.st==='pending') return `<span class="n">1</span>`;
   if(key==='leads'){const n=leads.filter(l=>l.st==='new').length;return n?`<span class="n" style="background:var(--accent-soft);color:#075e48">${n} new</span>`:''}
@@ -1189,12 +1190,12 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
-const MVP_PAGES = new Set(['pm','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
+const MVP_PAGES = new Set(['pm','changes','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
-  production:{l:'Project manager (Justin)', who:'Justin', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['estimate','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
+  production:{l:'Project manager (Justin)', who:'Justin', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
   field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
 };
@@ -1365,7 +1366,8 @@ PAGES.pm = () => {
   const todo = [
     ...conf.map(([a,b])=>['⚠',`${a.crew} is double-booked`,`${a.job} and ${b.job} overlap in November`,'calendar','var(--bad-soft)']),
     ...coi.map(([e,x])=>['📄',`${x.co}: insurance ends ${x.coi}`,`Booked on ${e.job} through Nov ${e.start+e.len-1}`,'subs','var(--warn-soft)']),
-    ...coSent.map(c=>['✍️',`Change order #${c.n} waiting on the client`,`Henderson · ${c.title} · sent ${c.date}`,'estimate','var(--info-soft)']),
+    ...(CO_REQ.length?[['🚩',`${CO_REQ.length} change request${CO_REQ.length>1?'s':''} to price`,CO_REQ.map(r=>r.t.split(':')[0]).join(' · '),'changes','var(--warn-soft)']]:[]),
+    ...coSent.map(c=>['✍️',`Change order #${c.n} waiting on the client`,`Henderson · ${c.title} · sent ${c.date}`,'changes','var(--info-soft)']),
     ...(selOpen.length?[['🎨',`${selOpen.length} selection${selOpen.length>1?'s':''} still open`,`Henderson · next due ${selOpen[0].due} (${selOpen[0].title.toLowerCase()})`,'selections','var(--info-soft)']]:[]),
     ...(poOpen.length?[['📦',`${poOpen.length} purchase order${poOpen.length>1?'s':''} to send or confirm`,poOpen.map(p=>`${p.n} ${p.v}`).join(' · '),'schedule','var(--accent-soft)']]:[]),
   ];
@@ -1387,6 +1389,88 @@ PAGES.pm = () => {
   </tbody></table></div>
   <p class="small muted" style="margin:10px 0 0">This is how one project manager runs 8–10 jobs at once: the app gathers what needs attention, and every line opens the screen to fix it.</p></div>`;
 };
+
+// ---------- change orders, the project manager's side: requests in from clients, crews and selections → priced → signed → done ----------
+// demo: Henderson is the job in progress, so its change orders live in DATA[1].cos (the same list the estimate and client portal read)
+const CO_LIMIT = 2500;           // over this, Austin OKs before it goes to the client (the real number is set in discovery)
+const CO_TODAY = 27;             // Tue Oct 27 in the demo
+Object.assign(DATA[1].cos[0], {src:'client', by:'Dana Henderson', days:1, ordered:true, scheduled:true, told:true, crewSeen:true});
+Object.assign(DATA[1].cos[1], {src:'client', by:'Mark Henderson', days:0, sentDay:15});
+const CO_REQ = [
+  {id:1, src:'crew', by:'Marco T. (crew lead)', t:'Old irrigation main under the paver area: reroute before pavers go down', photos:2, date:'Oct 26', guess:{code:'TURF', c:640, m:35, days:1}},
+  {id:2, src:'client', by:'Dana Henderson (portal)', t:'Add 2 uplights on the palm trees', photos:0, date:'Oct 25', guess:{code:'LITE', c:420, m:45, days:0}},
+];
+const CO_SRC = {client:['🏠','Client asked'], crew:['🚩','Crew flagged'], selection:['🎨','Selection over allowance'], office:['🗂','Office']};
+const coCost = c => c.lines.reduce((a,l)=>a+lineCost(l),0);
+const coMargin = c => { const p=coPriceOf(c); return p?Math.round((p-coCost(c))/p*100):0; };
+const coDone = c => c.status==='approved' && c.ordered && c.scheduled && c.told;
+const selOver = () => DATA[1].selections.filter(s=>s.chosen!=null && selDiff(s)>0 && !s.coMade);
+const coCount = () => CO_REQ.length + selOver().length + DATA[1].cos.filter(c=>c.status==='sent').length;
+PAGES.changes = () => {
+  const C = DATA[1].cos, drafts=C.filter(c=>c.status==='draft'), waiting=C.filter(c=>c.status==='sent'), todo=C.filter(c=>c.status==='approved'&&!coDone(c)), done=C.filter(c=>coDone(c)||c.status==='declined');
+  const signedAdd = C.filter(c=>c.status==='approved').reduce((a,c)=>a+coPriceOf(c),0);
+  const src = c => { const s=CO_SRC[c.src||'office']; return `<span class="pill p-grey">${s[0]} ${s[1]}</span>`; };
+  const head = (t,n,note) => `<div class="row between" style="margin:18px 0 6px"><h2 style="margin:0">${t} <span class="muted" style="font-weight:500">· ${n}</span></h2>${note?`<span class="small muted">${note}</span>`:''}</div>`;
+  const coRow = (c,actions,extra='') => `<div class="card" style="padding:14px 16px;margin-top:8px"><div class="row between" style="gap:10px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px"><div class="small muted">CO-${c.n} · Henderson Backyard · ${c.date}${c.by?` · ${c.by}`:''}</div><strong>${c.title}</strong>
+        <div class="small" style="margin-top:6px">${src(c)} <span class="pill p-grey">+${fmt(coPriceOf(c))}</span> <span class="pill p-grey">${coMargin(c)}% margin</span> <span class="pill p-grey">${c.days?`+${c.days} day${c.days>1?'s':''}`:'no added days'}</span></div>${extra}</div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">${actions}</div></div></div>`;
+  return `<div class="row between"><div><h1>Change orders</h1><p class="sub">Every change on your jobs, from the first ask to done: what came in, what you've priced, what's waiting on the client and what still needs ordering or scheduling.</p></div>
+    <button class="btn primary" onclick="coPrice()">+ New change order</button></div>
+  <div class="card" style="border-color:#f1d49a;background:var(--warn-soft);padding:12px 16px"><strong style="color:var(--warn)">The rule: no extra work starts until the client signs.</strong> <span class="small">Crews see "not signed yet" on their phone until it is. Changes over ${fmt(CO_LIMIT)} get Austin's OK before they go out.</span></div>
+  <div class="grid g4 mt">
+    <div class="card stat"><div class="k">New, to price</div><div class="v ${CO_REQ.length+selOver().length?'':'pos'}">${CO_REQ.length+selOver().length}</div><div class="d muted">from clients, crews, selections</div></div>
+    <div class="card stat"><div class="k">Waiting on the client</div><div class="v">${waiting.length}</div><div class="d muted">${waiting.length?`oldest ${Math.max(...waiting.map(c=>CO_TODAY-(c.sentDay||CO_TODAY)))} days`:'none'}</div></div>
+    <div class="card stat"><div class="k">Signed, to finish</div><div class="v">${todo.length}</div><div class="d muted">order, schedule, tell the crew</div></div>
+    <div class="card stat"><div class="k">Signed changes</div><div class="v pos">+${fmt(signedAdd)}</div><div class="d muted">added to Henderson's contract</div></div>
+  </div>
+  ${head('New requests',CO_REQ.length+selOver().length,'Price it, then send it')}
+  ${CO_REQ.map(r=>`<div class="card" style="padding:14px 16px;margin-top:8px"><div class="row between" style="gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><div class="small muted">Henderson Backyard · ${r.date} · ${r.by}</div><strong>${r.t}</strong>
+      <div class="small" style="margin-top:6px"><span class="pill p-grey">${CO_SRC[r.src][0]} ${CO_SRC[r.src][1]}</span>${r.photos?` <span class="pill p-grey">📷 ${r.photos} photos</span>`:''}</div></div>
+      <div class="row" style="gap:6px"><button class="btn sm primary" onclick="coPrice(${r.id})">Price it</button><button class="btn sm" onclick="coDismiss(${r.id})">Not a change</button></div></div></div>`).join('')}
+  ${selOver().map(s=>`<div class="card" style="padding:14px 16px;margin-top:8px"><div class="row between" style="gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><div class="small muted">Henderson Backyard · client's pick in the portal</div><strong>${s.title}: ${s.opts[s.chosen].n}</strong>
+      <div class="small" style="margin-top:6px"><span class="pill p-grey">🎨 Selection over allowance</span> <span class="pill p-amber">+${fmt(selDiff(s))} over the ${fmt(s.allowance)} allowance</span></div></div>
+      <button class="btn sm primary" onclick="coFromSel('${s.id}')">Make the change order</button></div></div>`).join('')}
+  ${CO_REQ.length+selOver().length?'':'<p class="small pos">✓ Nothing new to price.</p>'}
+  ${drafts.length?head('Drafts',drafts.length,'Priced, not sent')+drafts.map(c=>{ const i=C.indexOf(c), big=coPriceOf(c)>CO_LIMIT&&!c.ok;
+     return coRow(c, big?`<button class="btn sm primary" onclick="coOk(${i})">Ask Austin to OK it</button>`:`<button class="btn sm primary" onclick="coSend(${i})">Send to client</button>`, big?`<div class="small" style="margin-top:6px;color:var(--warn)">Over ${fmt(CO_LIMIT)}: needs Austin's OK first</div>`:c.ok?`<div class="small pos" style="margin-top:6px">✓ Austin OK'd it</div>`:''); }).join(''):''}
+  ${head('Waiting on the client',waiting.length,'They sign in their portal')}
+  ${waiting.length?waiting.map(c=>{ const i=C.indexOf(c), d=CO_TODAY-(c.sentDay||CO_TODAY);
+     return coRow(c, `<button class="btn sm" onclick="toast('Reminder sent to the client by email and text.')">Send a reminder</button><button class="btn sm primary" onclick="coSigned(${i})">Signed on site</button>`,
+       `<div class="small ${d>=7?'neg':'muted'}" style="margin-top:6px">Waiting ${d} day${d===1?'':'s'}${d>=7?' · worth a call':''} · ${roleLink('client','c-changes','approve it as the client')}</div>`); }).join(''):'<p class="small muted">Nothing out for signature.</p>'}
+  ${head('Signed: finish the follow-through',todo.length,'Before the crew starts it')}
+  ${todo.length?todo.map(c=>{ const i=C.indexOf(c);
+     const step=(ok,l,fn)=>ok?`<span class="pill p-green">✓ ${l}</span>`:`<button class="btn sm" onclick="${fn}(${i})">${l}</button>`;
+     return coRow(c, step(c.ordered,'Order materials','coOrder')+step(c.scheduled,c.days?`Add ${c.days} day${c.days>1?'s':''} to schedule`:'Schedule','coSched')+step(c.told,'Tell the crew','coTell'),
+       `<div class="small pos" style="margin-top:6px">✓ Signed ${c.date}. Contract and job budget already updated.</div>`); }).join(''):'<p class="small muted">Nothing signed is waiting on you.</p>'}
+  ${head('Done',done.length)}
+  <div class="card"><div class="tablewrap"><table><thead><tr><th>#</th><th>Change</th><th>Signed</th><th class="r">Amount</th></tr></thead><tbody>
+    ${done.map(c=>`<tr><td>CO-${c.n}</td><td>${c.title}</td><td>${c.status==='declined'?'<span class="pill p-red">Declined</span>':c.date}</td><td class="r">${c.status==='declined'?'—':'+'+fmt(coPriceOf(c))}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">None yet.</td></tr>'}
+  </tbody></table></div></div>`;
+};
+function coPrice(rid){ const r=CO_REQ.find(x=>x.id===rid), g=r?r.guess:{code:'PAV',c:0,m:35,days:0};
+  openModal(`<h2>${r?'Price this change':'New change order'}</h2><p class="small muted" style="margin:0">Henderson Backyard${r?` · ${CO_SRC[r.src][1].toLowerCase()} · ${r.by}`:''}</p>
+    <div class="field"><label for="co_t">What's changing</label><input class="txt" id="co_t" value="${r?r.t.replace(/"/g,'&quot;'):''}" placeholder="e.g. Extend the seat wall 4 ft"></div>
+    <div class="field"><label for="co_code">Cost group</label><select class="txt" id="co_code" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px">${Object.entries(CODES).map(([k,v])=>`<option value="${k}" ${k===g.code?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="grid g3" style="gap:10px"><div class="field"><label for="co_c">Your cost</label><input class="txt" id="co_c" type="number" min="0" value="${g.c||''}"></div>
+      <div class="field"><label for="co_m">Markup %</label><input class="txt" id="co_m" type="number" min="0" value="${g.m}"></div>
+      <div class="field"><label for="co_d">Days it adds</label><input class="txt" id="co_d" type="number" min="0" value="${g.days}"></div></div>
+    <div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="coSave(${rid||0})">Save draft</button></div>`); }
+function coSave(rid){ const v=k=>document.getElementById(k).value, t=v('co_t').trim(), c=+v('co_c')||0, m=+v('co_m')||0, days=Math.max(0,parseInt(v('co_d'))||0), code=v('co_code');
+  if(!t||!c){ toast('Add what is changing and your cost.'); return; }
+  const r=CO_REQ.find(x=>x.id===rid), C=DATA[1].cos;
+  C.push({n:Math.max(0,...C.map(x=>x.n))+1, title:t, status:'draft', date:'Oct 27', src:r?r.src:'office', by:r?r.by.replace(/ \(.*\)/,''):'Justin', days, lines:[{code,d:t,q:1,u:'ls',c,m}]});
+  if(r) CO_REQ.splice(CO_REQ.indexOf(r),1); closeModal(); render(); toast('Priced and saved as a draft.'); }
+function coDismiss(rid){ const r=CO_REQ.find(x=>x.id===rid); CO_REQ.splice(CO_REQ.indexOf(r),1); render(); toast('Marked as part of the original scope. No change order.'); }
+function coFromSel(sid){ const s=DATA[1].selections.find(x=>x.id===sid), C=DATA[1].cos, d=selDiff(s); s.coMade=true;
+  C.push({n:Math.max(0,...C.map(x=>x.n))+1, title:`${s.title}: ${s.opts[s.chosen].n} (over allowance)`, status:'draft', date:'Oct 27', src:'selection', by:'Dana Henderson', days:0, lines:[{code:'LITE',d:`${s.opts[s.chosen].n} over the allowance`,q:1,u:'ls',c:d,m:0}]});
+  render(); toast(`Change order drafted for the ${fmt(d)} difference.`); }
+function coOk(i){ DATA[1].cos[i].ok=true; render(); toast('Austin OK’d it from his phone. Ready to send.'); }
+function coSend(i){ const c=DATA[1].cos[i]; c.status='sent'; c.sentDay=CO_TODAY; render(); toast(`CO-${c.n} sent. The client gets an email and a text with a link to sign.`); }
+function coSigned(i){ const c=DATA[1].cos[i]; c.status='approved'; c.date='Oct 27'; if(!c.days) c.scheduled=true; render(); toast(`CO-${c.n} signed on your phone. Contract and budget updated.`); }
+function coOrder(i){ const c=DATA[1].cos[i], P=DATA[1].pos; c.ordered=true; P.push({n:'PO-'+(1040+P.length+1), v:'Vendor to pick', d:c.title, code:c.lines[0].code, amt:Math.round(coCost(c)), date:'Oct 27', status:'draft'}); render(); toast('Draft PO created on Henderson for the materials.'); }
+function coSched(i){ const c=DATA[1].cos[i], S=DATA[1].schedule; c.scheduled=true; if(c.days){ const p=S.find(x=>x.st!=='done'&&x.s>=TODAY_IDX)||S[S.length-1]; p.d+=c.days; } render(); toast(c.days?`${c.days} day${c.days>1?'s':''} added to the Henderson schedule. The client sees the new date.`:'Scheduled.'); }
+function coTell(i){ DATA[1].cos[i].told=true; render(); toast('Crew notified on their phones: signed, OK to start.'); }
 
 // ---------- crews + subcontractors: one record per company, its crews, contact, paperwork and a score from real jobs ----------
 // sample companies only (no real businesses or people). Scores come from jobs run in this system.
@@ -1562,6 +1646,9 @@ PAGES.field = () => `<div class="phone">
       <div class="small muted">Job: ${FIELD.receipt.job} · ${FIELD.receipt.code}</div><div class="small muted">${FIELD.receipt.note}</div>
       ${FIELD.receipt.sent?`<div class="small pos" style="margin-top:6px">✓ In QuickBooks as an expense on this job</div>`:`<button class="bigbtn go" onclick="sendReceipt()">Send to QuickBooks</button>`}</div>`
     :`<button class="bigbtn alt" onclick="snapReceipt()">📷 Snap a receipt</button>`}
+  ${(()=>{ const wait=[...CO_REQ.map(r=>r.t), ...DATA[1].cos.filter(c=>c.status==='draft'||c.status==='sent').map(c=>c.title)], ok=DATA[1].cos.filter(c=>c.status==='approved'&&c.told&&!c.crewSeen);
+    return `<h2 style="font-size:15px;margin:18px 0 4px">Changes on this job</h2>${wait.map(t=>`<div class="card" style="padding:10px 12px;margin-top:6px;background:var(--warn-soft);border-color:#f1d49a"><strong class="small" style="color:var(--warn)">⏸ Not signed yet: don't start</strong><div class="small">${t}</div></div>`).join('')}${ok.map(c=>`<div class="card" style="padding:10px 12px;margin-top:6px;background:var(--accent-soft);border-color:#9fd8c6"><strong class="small pos">✓ Signed: OK to start</strong><div class="small">${c.title}</div></div>`).join('')}${wait.length||ok.length?'':'<div class="small muted">No changes waiting.</div>'}`; })()}
+  <button class="bigbtn alt" ${FIELD.flagged?'disabled':''} onclick="fieldFlag()">${FIELD.flagged?'✓ Extra work flagged to Justin':'🚩 Flag extra work'}</button>
   <button class="bigbtn alt" onclick="FIELD.photos+=3;render();toast('3 job photos added to Henderson Backyard. The client sees them in their portal.')">🖼 Add job photos ${FIELD.photos?`(${FIELD.photos})`:''}</button>
 </div>
 <p class="small muted" style="text-align:center;margin-top:12px">This is what the crew lead sees on their phone. No logins to QuickBooks, no paper.</p>`;
@@ -1569,6 +1656,7 @@ async function snapReceipt(){ toast('Reading the receipt…'); await wait(700); 
 function sendReceipt(){ FIELD.receipt.sent=true; DATA[1].otherActual.PAV=(DATA[1].otherActual.PAV||0)+86.42;
   QBO_LOG.unshift({t:'Oct 26 · 10:14 AM', type:'Expense (receipt)', ref:'SiteOne #48213 · photo attached', job:'Henderson Backyard', amt:86.42, st:'Synced'});
   render(); toast('Receipt sent. It\'s in QuickBooks and in Henderson\'s job costing.'); }
+function fieldFlag(){ FIELD.flagged=true; CO_REQ.push({id:Date.now(), src:'crew', by:'Marco T. (crew lead)', t:'Soft spot under the seat wall footing: needs 2 extra yards of base', photos:2, date:'Oct 27', guess:{code:'PAV', c:310, m:35, days:0}}); render(); toast('Sent to Justin with 2 photos. Don’t start it until the client signs.'); }
 function sendCrewDay(){ FIELD.crewSent=true; const n=Object.values(FIELD.crew).filter(Boolean).length; render(); toast(`Crew day sent: Marco + ${n} installer${n===1?'':'s'}, full day on Henderson. Pay is figured from each day rate.`); }
 
 // ---------- company cards: locked by default, unlocked for one approved purchase (demo: no real card program) ----------
