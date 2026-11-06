@@ -1184,8 +1184,8 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
-// menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, job costing, QuickBooks)
-const MVP_PAGES = new Set(['jobs','quotes','estimate','selections','proposal','calendar','schedule','costing','qbo','portal','c-selections','c-changes','c-proposal']);
+// menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
+const MVP_PAGES = new Set(['jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
@@ -1871,7 +1871,7 @@ const INFRA = [
     ['Error alerts (Sentry)','Tells us the moment something breaks','Free tier',0,0,'Enough for one company.',1],
   ]],
   ['Third parties (required)', [
-    ['QuickBooks Online','Their books. The app syncs invoices, bills, receipts and pay into it','They already pay',0,0,'No new subscription. Connecting the app through Intuit\'s developer program is free at their volume.',1],
+    ['QuickBooks Online','Their books. The app syncs invoices, bills, receipts and pay into it','They already pay',0,0,'No new subscription. Connecting the app through Intuit\'s developer program is free at their volume. Comes with Master Admin, after the MVP.'],
     ['Receipt + document reading (Claude AI)','Reads vendor, amount and date from receipt photos','Pay per use 💲',2,10,'About a penny or less per receipt. Turned on only with an approved budget.'],
     ['E-signature','Client accepts proposals + change orders','Built in',0,0,'Typed-name e-sign with time, IP and device recorded. DocuSign (~$25+/mo per sender) only if they want it.',1],
     ['Maps','Job addresses, clock-in location','Free tier',0,0,'Well within the free monthly allowance.'],
@@ -1955,12 +1955,12 @@ PAGES.offer = () => {
     <div class="oplans">
       <div class="oplan mvp"><span class="otag mvpt">MVP</span><div class="oname">Price for MVP</div>
         <div class="oprice">${fmt(o.mvp)}<small>one time</small></div><div class="small muted">${fmt(o.mvp/2)} to start · ${fmt(o.mvp/2)} when it's live</div>
-        <ul><li>Quotes + design workflow</li><li>Estimates + change orders</li><li>Proposals, e-sign + client portal</li><li>Selections</li><li>Jobs board + drag-and-drop schedule, crew confirmations</li><li>Purchase orders + job costing</li><li>QuickBooks: invoices + payments</li><li>30 days of fixes after launch</li></ul>
-        <ul class="ono"><li>Leads engine</li><li>Master Admin portal</li><li>Time + pay (crew payroll)</li><li>Field receipts to QuickBooks</li><li>New features after launch</li></ul>
+        <ul><li>Quotes + design workflow</li><li>Estimates + change orders</li><li>Proposals, e-sign + client portal</li><li>Selections</li><li>Jobs board + drag-and-drop schedule, crew confirmations</li><li>Crew + subcontractor accounts</li><li>Purchase orders + job costing</li><li>30 days of fixes after launch</li></ul>
+        <ul class="ono"><li>Leads engine</li><li>Master Admin portal + QuickBooks sync</li><li>Time + pay (crew payroll)</li><li>Field receipts</li><li>New features after launch</li></ul>
         <div class="onext"><strong>After it's delivered</strong><div class="small" style="margin-top:4px">We sit down and plan what's next together: ongoing maintenance, Phase 2 features (leads engine, Master Admin, time + pay, field receipts) and enhancements from your wish list. Options then: a support plan from ${fmt(o.support)}/mo (monitoring + fixes, business hours), a Phase 2 price, moving to Dedicated tech lead, <strong>or a clean handover</strong>: you get everything (code, accounts, documentation and the AI build setup for your app) plus a training session, and your team runs it from there.</div></div></div>
       <div class="oplan rec"><span class="otag">Recommended</span><div class="oname">Dedicated tech lead</div>
         <div class="oprice">${fmt(o.flat)}<small>/ month</small></div><div class="small muted">One flat fee. Simple to budget.</div>
-        <ul><li>Core MVP live in 3–4 months</li><li>Time + pay, field app, field receipts + Master Admin by month 6</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} for the first full year</li><li>Urgent issues: reply within 1 hour, 6am–10pm Arizona time, every day</li><li>Yearly review: +5% standard, up to +10% when goals are hit</li></ul></div>
+        <ul><li>Core MVP live in 3–4 months</li><li>Time + pay, field app, field receipts, Master Admin + QuickBooks by month 6</li><li>Then new features, upkeep + admin at the same fee</li><li>${fmt(yr1)} for the first full year</li><li>Urgent issues: reply within 1 hour, 6am–10pm Arizona time, every day</li><li>Yearly review: +5% standard, up to +10% when goals are hit</li></ul></div>
       <div class="oplan"><div class="oname">Growth partner</div>
         <div class="oprice">${fmt(o.growth)}<small>/ month</small></div><div class="small muted">+ ${o.pct*100}% of revenue above $${o.base/1e6}M a year</div>
         <ul><li>Lower monthly fee today</li><li>You only pay the share when you grow past today</li><li>Everything in Dedicated tech lead</li><li>Same yearly review: +5% standard, up to +10%</li></ul>
@@ -2024,7 +2024,7 @@ PAGES.offer = () => {
 
     <div class="grid g2" style="gap:16px">
       <div class="ocard"><h2>What's included</h2><ul class="ochecks">
-        <li>Discovery + design sessions with Austin, Joel + Justin</li><li>The core MVP in 3–4 months: quotes + design, estimates, proposals, portal, selections, calendar, job costing, QuickBooks</li><li>Then by month 6: time + pay, field app, field receipts + Master Admin</li>
+        <li>Discovery + design sessions with Austin, Joel + Justin</li><li>The core MVP in 3–4 months: quotes + design, estimates, proposals, portal, selections, calendar, crew + subcontractor accounts, job costing</li><li>Then by month 6: time + pay, field app, field receipts, Master Admin + QuickBooks</li>
         <li>Running side by side with JobTread until you're ready to switch</li><li>Hosting setup, security, backups + monitoring</li><li>New features after launch, from one shared priority list</li><li>Urgent system issues: reply within 1 hour, 6am–10pm Arizona time, every day; overnight within 4 hours. Everything else: same business day (see "What counts as urgent")</li></ul></div>
       <div class="ocard"><h2>Terms, in plain words</h2><ul class="ochecks">
         <li><strong>12-month minimum.</strong> It covers the build plus a full year of upkeep and new features.</li><li><strong>After 12 months:</strong> month to month, with 60 days' notice to end it</li><li><strong>Growth partner share:</strong> 3% of gross revenue above $2M, from your year-end statements, billed once a year</li>
