@@ -362,7 +362,7 @@ td input[type=checkbox]{width:17px;height:17px}
 <body>
 <div class="demo-bar">Demo prototype · sample data only · built by Casting Karma for Platinum Outdoors</div>
 <header class="top">
-  <div class="logo" role="button" tabindex="0" title="Back to the start (resets the demo)" onclick="resetDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();resetDemo()}" style="cursor:pointer"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
+  <div class="logo" role="button" tabindex="0" title="Home: Company Overview (resets the demo)" onclick="resetDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();resetDemo()}" style="cursor:pointer"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
   <div class="spacer"></div>
   <button class="hdr-btn" id="coBtn" onclick="go('company')">Company Overview</button>
   <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
@@ -3188,8 +3188,8 @@ window.addEventListener('resize', syncTop);
 populateRoles(); render(); renderTour(); syncTop();
 { const qs=new URLSearchParams(location.search), k=qs.get('tour'), up=qs.get('upto'); if(k&&TOURS[k]){ history.replaceState(null,'',location.pathname); if(up!=null) tourReplay(k,+up); else startTour(k); } }
 // logo + name: back to the start with every flow reset (the demo keeps no saved state, so a fresh load is a clean slate)
-function resetDemo(){ location.replace(location.pathname + '#reset'); location.reload(); }
-if(location.hash==='#reset'){ history.replaceState(null,'',location.pathname); toast('Back to the start. Every flow in the demo is reset.'); }
+function resetDemo(){ location.href = location.pathname + '?r=' + Date.now() + '#reset'; }
+if(location.hash==='#reset'){ history.replaceState(null,'',location.pathname); go('company'); toast('Back to the start: Company Overview. Every flow in the demo is reset.'); }
 </script>
 </body>
 </html>
