@@ -504,6 +504,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='subs'){const n=SUBS.filter(x=>coiDays(x)<=30).length;return n?`<span class="n">${n}</span>`:''}
   if(key==='cards'&&CARDS.req&&CARDS.req.st==='pending') return `<span class="n">1</span>`;
   if(key==='leads'){const n=leads.filter(l=>l.st==='new').length;return n?`<span class="n" style="background:var(--accent-soft);color:#075e48">${n} new</span>`:''}
   if(key==='selections'||key==='c-selections'){const n=selections.filter(s=>s.status==='open').length;return n?`<span class="n">${n}</span>`:''}
@@ -1167,10 +1168,10 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 const ROLES = {
-  owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
-  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['users','Users & permissions'],FLOW]},
+  owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
+  admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
-  production:{l:'Production manager (Justin)', who:'Justin', sub:'Production manager', home:'calendar', nav:[['jobs','Jobs'],['calendar','Crew calendar'],['schedule','Job schedule & POs'],['time','Time & pay'],['cards','Company cards'],['costing','Job costing'],FLOW]},
+  production:{l:'Production manager (Justin)', who:'Justin', sub:'Production manager', home:'calendar', nav:[['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['time','Time & pay'],['cards','Company cards'],['costing','Job costing'],FLOW]},
   field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
 };
@@ -1333,6 +1334,68 @@ function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[sampleIdx++
   const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:[40000,52000,30000][n%3]});
   selQ=id; render(); toast(`Quote request ${id} created for ${c.name}.`); }
 
+// ---------- crews + subcontractors: one record per company, its crews, contact, paperwork and a score from real jobs ----------
+// sample companies only (no real businesses or people). Scores come from jobs run in this system.
+const TRADES = ['Hardscape + install','Masonry','Electrical','Gas lines','Turf + planting','Irrigation','Pools + water features','Other'];
+const SUBS = [
+  {id:1, co:'Platinum Outdoors install crews', inhouse:true, trade:'Hardscape + install', who:'Justin (production)', ph:'(480) 555-0100', em:'crews@yourcompany.com', coi:null, crews:[['Crew A','Marco T.',3],['Crew B','Luis P.',3],['Crew C','Sam D.',2]], jobs:41, ontime:96, punch:1.2, callbacks:1, rating:4.8},
+  {id:2, co:'Desert Stoneworks (sample)', trade:'Masonry', who:'Ray M. (sample)', ph:'(480) 555-0142', em:'office@example.com', coi:'Nov 4, 2026', crews:[['Masonry sub','Ray M.',4]], jobs:12, ontime:88, punch:2.6, callbacks:2, rating:4.3},
+  {id:3, co:'Bright Line Electric (sample)', trade:'Electrical', who:'Dee K. (sample)', ph:'(602) 555-0177', em:'dispatch@example.com', coi:'Aug 30, 2027', crews:[['Electrical sub','Dee K.',2]], jobs:18, ontime:97, punch:0.6, callbacks:0, rating:4.9},
+  {id:4, co:'Valley Gas Pros (sample)', trade:'Gas lines', who:'Tom H. (sample)', ph:'(480) 555-0119', em:'jobs@example.com', coi:'Mar 15, 2027', crews:[['Gas sub','Tom H.',2]], jobs:9, ontime:74, punch:3.1, callbacks:3, rating:3.6},
+];
+const TODAY_D = new Date(2026,9,26);
+const coiDays = x => x.coi ? Math.round((new Date(x.coi)-TODAY_D)/864e5) : 9999;
+const subOf = crew => SUBS.find(x=>x.crews.some(c=>c[0]===crew));
+const subGrade = x => !x.jobs ? ['New','p-grey','No jobs yet'] : x.ontime>=95&&x.rating>=4.5&&x.callbacks<=1 ? ['A','p-green','Top pick'] : x.ontime>=85&&x.rating>=4 ? ['B','p-blue','Solid'] : ['C','p-amber','Watch'];
+const SUB_COLORS = ['#be185d','#0e7490','#a16207','#4338ca'];
+function coiPill(x){ if(x.inhouse) return '<span class="pill p-grey">Your team</span>'; const d=coiDays(x);
+  return d<0?`<span class="pill p-red">Insurance expired ${x.coi}</span>`:d<=30?`<span class="pill p-amber">Insurance expires ${x.coi}</span>`:`<span class="pill p-green">Insurance to ${x.coi}</span>`; }
+PAGES.subs = () => {
+  const crewsAll = SUBS.flatMap(x=>x.crews), soon = SUBS.filter(x=>!x.inhouse&&coiDays(x)<=30);
+  return `<div class="row between"><div><h1>Crews + subcontractors</h1><p class="sub">Every company you work with, its crews, the main contact and its paperwork in one place. The calendar and schedule pick crews from this list, and every job they finish feeds their score.</p></div>
+    <button class="btn primary" onclick="subEdit()">+ Add a subcontractor</button></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Companies</div><div class="v">${SUBS.length}</div><div class="d muted">${SUBS.filter(x=>!x.inhouse).length} subcontractors + your crews</div></div>
+    <div class="card stat"><div class="k">Crews</div><div class="v">${crewsAll.length}</div><div class="d muted">${crewsAll.reduce((a,c)=>a+c[2],0)} people</div></div>
+    <div class="card stat"><div class="k">Insurance to chase</div><div class="v ${soon.length?'neg':'pos'}">${soon.length}</div><div class="d muted">expired or due in 30 days</div></div>
+    <div class="card stat"><div class="k">Booked in November</div><div class="v">${new Set(CAL.map(e=>e.crew)).size}</div><div class="d muted">crews on the calendar</div></div>
+  </div>
+  <div class="grid g2 mt">${SUBS.map(x=>{ const g=subGrade(x); return `<div class="card">
+    <div class="row between" style="gap:8px;align-items:flex-start"><div><strong style="font-size:16px">${x.co}</strong><div class="small muted">${x.trade}</div></div>
+      <span class="pill ${g[1]}" title="Score from jobs in this system">${g[0]} · ${g[2]}</span></div>
+    <div class="small" style="margin-top:10px">👤 <strong>${x.who}</strong> · ${x.ph} · ${x.em}</div>
+    <div style="margin-top:8px">${coiPill(x)}</div>
+    <div class="small" style="margin-top:10px"><strong>Crews:</strong> ${x.crews.map(([n,l,k])=>`<span class="pill p-grey" style="margin:2px 4px 2px 0"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${crewColor(n)};margin-right:5px"></span>${n} · ${l} · ${k} people</span>`).join('')}</div>
+    <div class="grid g4" style="margin-top:12px;gap:8px">${[['On time',x.jobs?x.ontime+'%':'–'],['Punch items / job',x.jobs?x.punch:'–'],['Callbacks',x.jobs?x.callbacks:'–'],['Your rating',x.jobs?x.rating+' ★':'–']].map(([k,v])=>`<div style="background:var(--bg);border-radius:8px;padding:8px"><div class="small muted" style="font-size:11.5px">${k}</div><strong>${v}</strong></div>`).join('')}</div>
+    <div class="row between" style="margin-top:12px"><span class="small muted">${x.jobs} jobs with you</span><button class="btn sm" onclick="subEdit(${x.id})">Edit</button></div>
+  </div>`; }).join('')}</div>
+  <div class="card mt" style="border-left:4px solid var(--accent)"><h2>How the score works</h2>
+    <p class="small" style="margin:0">Each finished job adds to it: <strong>on time</strong> (did they start and finish on the dates in the schedule), <strong>punch items</strong> left at the walkthrough, <strong>callbacks</strong> after the job closed, and the <strong>1–5 rating</strong> Justin gives at closeout. A = book first, B = solid, C = watch. Nobody types a score in: it comes from the jobs.</p></div>`;
+};
+function subEdit(id){ const x=SUBS.find(s=>s.id===id)||{co:'',trade:'Masonry',who:'',ph:'',em:'',coi:'',crews:[]};
+  openModal(`<h2>${id?'Edit':'Add'} a subcontractor</h2><p class="small muted" style="margin:0">Demo: saves in this page only.</p>
+    <div class="field"><label for="s_co">Company name</label><input class="txt" id="s_co" value="${x.co}" placeholder="e.g. Sonoran Pavers LLC"></div>
+    <div class="field"><label for="s_tr">Trade</label><select class="txt" id="s_tr" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px">${TRADES.map(t=>`<option ${t===x.trade?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="grid g2" style="gap:10px"><div class="field"><label for="s_who">Main contact</label><input class="txt" id="s_who" value="${x.who}" placeholder="Name"></div>
+      <div class="field"><label for="s_ph">Phone</label><input class="txt" id="s_ph" value="${x.ph}" placeholder="(480) 555-0000"></div></div>
+    <div class="grid g2" style="gap:10px"><div class="field"><label for="s_em">Email</label><input class="txt" id="s_em" value="${x.em}" placeholder="office@…"></div>
+      <div class="field"><label for="s_coi">Insurance good until</label><input class="txt" id="s_coi" value="${x.coi||''}" placeholder="e.g. Jun 30, 2027" ${x.inhouse?'disabled':''}></div></div>
+    <div class="field"><label for="s_cr">Crews (one per line: crew name, lead, people)</label><textarea class="txt" id="s_cr" rows="3" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit">${x.crews.map(c=>c.join(', ')).join('\n')}</textarea></div>
+    <div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="subSave(${id||0})">Save</button></div>`); }
+function subSave(id){ const v=k=>document.getElementById(k).value.trim(); if(!v('s_co')){ toast('Add the company name.'); return; }
+  const crews=v('s_cr').split('\n').map(l=>l.split(',').map(t=>t.trim())).filter(c=>c[0]).map(([n,l,k])=>[n,l||'',+k||1]);
+  let x=SUBS.find(s=>s.id===id); if(!x){ x={id:Date.now(), jobs:0, ontime:0, punch:0, callbacks:0, rating:0, isNew:true}; SUBS.push(x); }
+  Object.assign(x,{co:v('s_co'), trade:v('s_tr'), who:v('s_who'), ph:v('s_ph'), em:v('s_em'), crews}); if(!x.inhouse) x.coi=v('s_coi')||null;
+  crews.forEach(([n],i)=>{ if(!CREWS.some(c=>c[0]===n)) CREWS.push([n, SUB_COLORS[(CREWS.length+i)%SUB_COLORS.length]]); });
+  closeModal(); render(); toast(`${x.co} saved. Its crews now show on the calendar and the schedule.`); }
+function calCoiWarn(){ const w=[]; CAL.forEach(e=>{ const x=subOf(e.crew); if(!x||x.inhouse||!x.coi) return; const end=new Date(2026,10,e.start+e.len-1), exp=new Date(x.coi);
+    if(exp<end) w.push(`<div class="small" style="margin-top:4px"><strong>${x.co}</strong> (${e.crew}) is booked on ${e.job} through Nov ${e.start+e.len-1}, but their insurance ends ${x.coi}. <a href="#" onclick="subEdit(${x.id});return false">Update it →</a></div>`); });
+  return w.length?`<div class="card" style="border-color:#f1d49a;background:var(--warn-soft);margin-bottom:12px"><strong style="color:var(--warn)">⚠ Paperwork before the job</strong>${w.join('')}</div>`:''; }
+function calCrewStrip(){ const used=[...new Set(CAL.map(e=>e.crew))];
+  return `<div class="card mt"><div class="row between"><h2 style="margin:0">Crews booked this month</h2><a href="#" class="small" onclick="go('subs');return false">All crews + subs →</a></div>
+    <div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Crew</th><th>Company</th><th class="r">Days booked</th><th>Score</th></tr></thead><tbody>${used.map(n=>{ const x=subOf(n), g=x?subGrade(x):null, days=CAL.filter(e=>e.crew===n).reduce((a,e)=>a+e.len,0);
+      return `<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${crewColor(n)};margin-right:6px"></span><strong>${n}</strong></td><td class="small">${x?x.co:'Not set up yet'}<div class="muted">${x?x.trade:''}</div></td><td class="r">${days}</td><td>${g?`<span class="pill ${g[1]}">${g[0]} · ${g[2]}</span>`:''}</td></tr>`; }).join('')}</tbody></table></div></div>`; }
+
 // ---------- crew calendar: drag to move, drag the right edge to stretch ----------
 const CAL = [
   {id:1, jid:1, job:'Henderson Backyard', label:'Kitchen island', crew:'Masonry sub', start:2, len:5, c:'#b26a00'},
@@ -1350,13 +1413,15 @@ PAGES.calendar = () => {
     const wd=(NOV_START+d-1)%7;
     const evs = CAL.filter(e=>d>=e.start && d<=e.start+e.len-1);
     cells.push(`<div class="dc ${wd===0||wd===6?'wkend':''}" data-day="${d}"><div class="dn">${d}</div>${evs.map(e=>{const first=d===e.start||wd===0, last=d===e.start+e.len-1;
-      return `<div class="calchip ${first?'':'cont'} ${confIds.has(e.id)?'conf':''}" data-ev="${e.id}" style="background:${e.c}" title="${e.job}: ${e.label} · ${e.crew}">${first?`${e.label} · ${e.crew}`:'&nbsp;'}${last?'<span class="calhandle" title="Drag to stretch"></span>':''}</div>`}).join('')}</div>`);
+      return `<div class="calchip ${first?'':'cont'} ${confIds.has(e.id)?'conf':''}" data-ev="${e.id}" style="background:${e.c}" title="${e.job}: ${e.label} · ${e.crew}${subOf(e.crew)?' ('+subOf(e.crew).co+')':''}">${first?`${e.label} · ${e.crew}`:'&nbsp;'}${last?'<span class="calhandle" title="Drag to stretch"></span>':''}</div>`}).join('')}</div>`);
   }
   while(cells.length%7) cells.push(`<div class="dc blank"></div>`);
-  return `<div class="row between"><div><h1>Crew calendar · November 2026</h1><p class="sub">Drag a job to move it. Drag its right edge to make it longer or shorter. Crews and clients are notified automatically.</p></div></div>
+  return `<div class="row between"><div><h1>Crew calendar · November 2026</h1><p class="sub">Drag a job to move it. Drag its right edge to make it longer or shorter. Crews and clients are notified automatically.</p></div><button class="btn" onclick="go('subs')">👷 Add / edit crews</button></div>
+  ${calCoiWarn()}
   ${conf.length?`<div class="card" style="border-color:#f3b4ad;background:var(--bad-soft)"><strong class="neg">⚠ ${conf.length} crew conflict${conf.length>1?'s':''}</strong>${conf.map(([a,b])=>`<div class="small" style="margin-top:4px">${a.crew} is on <strong>${a.job}</strong> (${a.label}) and <strong>${b.job}</strong> (${b.label}) at the same time. Drag one to fix it.</div>`).join('')}</div>`
     :`<div class="card" style="border-color:#9fd8c6;background:var(--accent-soft)"><strong>✓ No crew conflicts</strong><div class="small muted">Every crew is booked on one job at a time.</div></div>`}
   <div class="card mt" style="padding:12px"><div class="tablewrap"><div class="cal">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dh">${x}</div>`).join('')}${cells.join('')}</div></div></div>
+  ${calCrewStrip()}
   <div class="row mt" style="gap:16px">${[...new Map(CAL.map(e=>[e.job,e.c])).entries()].map(([j,c])=>`<span class="small"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};margin-right:5px"></span>${j}</span>`).join('')}</div>`;
 };
 let calDrag = null;
