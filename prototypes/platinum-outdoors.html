@@ -945,9 +945,9 @@ PAGES.jobs = () => {
   </div>
   <div class="card mt" style="padding:14px"><div class="tablewrap"><div class="board">
     ${STAGES.map(st=>{const list=jobs.filter(j=>j.status===st);return `<div class="col"><div class="colh"><span>${st}</span><span class="muted">${list.length}</span></div>
-      ${list.map(j=>`<div class="bcard" id="jc-${j.id}" onclick="${j.handed&&!j.kicked?`schedKickoff(${j.id})`:`pickJob(${j.id})`}"><div class="bthumb" style="background:${j.thumb}"></div>
+      ${list.map(j=>`<div class="bcard" id="jc-${j.id}" onclick="${j.status==='Sold'&&!j.kicked?`schedKickoff(${j.id})`:`pickJob(${j.id})`}"><div class="bthumb" style="background:${j.thumb}"></div>
         <strong>${j.name}</strong><div class="small muted">${j.client} · ${j.city}</div>
-        <div class="row between" style="margin-top:8px"><span class="pill ${stPill(j.status)}">${j.status}</span><strong class="small">${val(j)?fmt(val(j)):'No estimate yet'}</strong></div>${j.status==='Sold'?`<div class="small" style="margin-top:6px">${j.handed?(j.kicked?'<span class="pos">✓ Kickoff scheduled</span>':'<span class="pos">🤝 From sales · click to start the job</span>'):'<span style="color:var(--warn)">With sales · not handed off yet</span>'}</div>`:''}</div>`).join('')||'<div class="small muted" style="padding:8px 2px">No jobs</div>'}
+        <div class="row between" style="margin-top:8px"><span class="pill ${stPill(j.status)}">${j.status}</span><strong class="small">${val(j)?fmt(val(j)):'No estimate yet'}</strong></div>${j.status==='Sold'?`<div class="small" style="margin-top:6px">${j.handed?(j.kicked?'<span class="pos">✓ Kickoff scheduled</span>':'<span class="pos">🤝 From sales · click to start the job</span>'):'<span style="color:var(--warn)">With sales · click to start it anyway</span>'}</div>`:''}</div>`).join('')||'<div class="small muted" style="padding:8px 2px">No jobs</div>'}
     </div>`}).join('')}
   </div></div></div>`;
 };
@@ -1697,7 +1697,7 @@ const KICK_COLOR = '#be185d';
 function kickPhases(j){ const L=DATA[j.id]?.est?.lines||[], codes=L.length?[...new Set(L.map(l=>l.code))]:['DEMO','PAV','TURF','LITE'];
   const ph=['DEMO','PAV','KIT','FIRE','PERG','TURF','LITE'].filter(c=>codes.includes(c)).map(c=>({n:KICK_PH[c][0], crew:KICK_PH[c][1], d:KICK_PH[c][2], start:null}));
   ph.push({n:'Walkthrough', crew:'Crew A', d:1, start:null}); return ph; }
-function schedKickoff(id){ const j=jobs.find(x=>x.id===id); if(!j) return; closeModal(); if(KICK.jid!==id) KICK={jid:id, ph:kickPhases(j), sel:null}; go('kickoff'); }
+function schedKickoff(id){ const j=jobs.find(x=>x.id===id); if(!j) return; closeModal(); if(KICK.jid!==id){ KICK={jid:id, ph:kickPhases(j), sel:null, from:16}; KICK.ph.forEach(p=>p.ppl=LEAD_OF[p.crew]?[LEAD_OF[p.crew]]:[]); } go('kickoff'); }
 const kickOverlap = (a,al,b,bl) => a<=b+bl-1 && b<=a+al-1;
 function kickClash(i){ const p=KICK.ph[i]; if(p.start==null) return null;
   const old=CAL.find(e=>e.jid!==KICK.jid && e.crew===p.crew && kickOverlap(p.start,p.d,e.start,e.len)); if(old) return `${p.crew} is already on ${old.job} (${old.label})`;
@@ -1714,7 +1714,8 @@ PAGES.kickoff = () => { const j=jobs.find(x=>x.id===KICK.jid); if(!j) return PAG
       ${mine.map(([p,i])=>`<div class="kev ${kickClash(i)?'kbad':''}" draggable="true" data-kev="${i}" style="background:${KICK_COLOR}" onclick="event.stopPropagation();kickEv(${i})" title="${p.n} · ${p.crew}${kickClash(i)?' · '+kickClash(i):''}">${d===p.start||wd===0?`<b>${p.n}</b> · ${p.crew}<span class="kx" onclick="event.stopPropagation();kickUn(${i})" title="Take it off the calendar">×</span>`:'&nbsp;'}</div>`).join('')}</div>`); }
   while(cells.length%7) cells.push(`<div class="dc blank"></div>`);
   const contact = (k,v) => `<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="small muted">${k}</span><span class="small" style="text-align:right">${v||'—'}</span></div>`;
-  return `<div class="row between"><div><h1>Start a new job: ${j.name}</h1><p class="sub">Sold by Austin · ${fmt(jobValue(j))} · contract signed, deposit invoiced. Everything sales knows is below. Drag the phases onto the calendar around the work already booked.</p></div>
+  const ppl = KICK.ph.map((p,i)=>[p,i]).filter(([p])=>LEAD_OF[p.crew]), short = ppl.filter(([p])=>p.start!=null&&(p.ppl||[]).length<fmNeed({label:p.n})).length, pBad = ppl.some(([p])=>(p.ppl||[]).some(n=>kickPplIssue(p,n)));
+  return `${!j.handed?`<div class="card" style="border-color:#f1d49a;background:var(--warn-soft);padding:12px 16px;margin-bottom:12px"><strong style="color:var(--warn)">Austin hasn't handed this off yet.</strong> <span class="small">The sales notes may be missing. Starting it here takes it from sales.</span></div>`:''}<div class="row between"><div><h1>Start a new job: ${j.name}</h1><p class="sub">Sold by Austin · ${fmt(jobValue(j))} · contract signed, deposit invoiced. Everything sales knows is below. Drag the phases onto the calendar around the work already booked.</p></div>
     <button class="btn" onclick="go('pm')">← My day</button></div>
   <div class="grid g2">
     <div class="card" id="kickClient"><h2>Client</h2>
@@ -1726,29 +1727,46 @@ PAGES.kickoff = () => { const j=jobs.find(x=>x.id===KICK.jid); if(!j) return PAG
       ${contact('Selections',sels?`${sels} still open in the client portal`:'Started in the client portal')}${contact('Signed',`Contract + 30% deposit invoice · ${fmt(jobValue(j)*0.3)}`)}</div>
   </div>
   <div class="card mt"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">Phases to schedule <span class="muted" style="font-weight:500">· ${open.length} left</span></h2>
-    <div class="row" style="gap:6px"><button class="btn sm" onclick="kickAuto()">Fill the next open days</button><button class="btn sm" onclick="KICK.ph.forEach(p=>p.start=null);KICK.sel=null;render()">Clear</button></div></div>
+    <div class="row" style="gap:6px;align-items:center"><label class="small" for="kfrom"><strong>Start on</strong></label><select id="kfrom" class="txt" style="width:auto;padding:5px 8px;border:1px solid var(--line);border-radius:8px" onchange="kickFrom(this.value)">${Array.from({length:15},(_,k)=>16+k).map(d=>`<option value="${d}" ${d===(KICK.from||16)?'selected':''}>Nov ${d}</option>`).join('')}</select><button class="btn sm" onclick="kickAuto()">Fill the next open days</button><button class="btn sm" onclick="KICK.ph.forEach(p=>p.start=null);KICK.sel=null;render()">Clear</button></div></div>
     <p class="small muted" style="margin:6px 0 0">Drag a phase onto a day (or click it, then click a day). Drag a crew onto a phase to swap who does it. Click × to take a phase off.</p>
     <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px">${KICK.ph.map((p,i)=>`<span class="kph ${p.start!=null?'kdone':''} ${KICK.sel&&KICK.sel[0]==='ph'&&KICK.sel[1]===i?'ksel':''}" draggable="true" data-kph="${i}" onclick="kickSel('ph',${i})"><i style="background:${crewColor(p.crew)}"></i><b>${p.n}</b> · ${p.crew} · ${p.d} day${p.d>1?'s':''}${p.start!=null?` · Nov ${p.start}${p.d>1?'–'+(p.start+p.d-1):''}`:''}</span>`).join('')}</div>
     <div class="small muted" style="margin:12px 0 4px">Crews</div><div class="row" style="gap:6px;flex-wrap:wrap">${CREWS.map(([n,c])=>`<span class="kcrew ${KICK.sel&&KICK.sel[0]==='crew'&&KICK.sel[1]===n?'ksel':''}" draggable="true" data-kcrew="${n}" onclick="kickSel('crew','${n}')"><i style="background:${c}"></i>${n}${subOf(n)&&!subOf(n).inhouse?` <span class="muted">(${subOf(n).co.replace(' (sample)','')})</span>`:''}</span>`).join('')}</div></div>
   <div class="card mt" style="padding:12px"><div class="row" style="gap:14px;margin:0 4px 8px"><span class="small"><span class="kold" style="display:inline-block;width:22px;background:#64748b">&nbsp;</span> Already booked (shaded)</span><span class="small"><span style="display:inline-block;width:22px;height:12px;border-radius:3px;background:${KICK_COLOR};vertical-align:-1px"></span> ${j.name}</span></div>
     <div class="tablewrap"><div class="cal">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dh">${x}</div>`).join('')}${cells.join('')}</div></div></div>
   ${clashes.length?`<div class="card mt" style="border-color:#f3b4ad;background:var(--bad-soft)"><strong class="neg">⚠ ${clashes.length} crew conflict${clashes.length>1?'s':''}</strong>${clashes.map(c=>`<div class="small" style="margin-top:4px">${c}. Move the phase or drop a different crew on it.</div>`).join('')}</div>`:''}
-  <div class="row mt" style="justify-content:flex-end;gap:8px"><span class="small muted">${open.length?`${open.length} phase${open.length>1?'s':''} still to place`:clashes.length?'Fix the conflicts first':'Ready: crews and the client get the dates'}</span>
-    <button class="btn primary" ${open.length||clashes.length?'disabled':''} onclick="kickConfirm()">Confirm schedule + notify everyone</button></div>`; };
+  <div class="card mt"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">Installers <span class="muted" style="font-weight:500">· who's on each phase</span></h2><button class="btn sm" onclick="kickFillPpl()">Fill installers</button></div>
+    <p class="small muted" style="margin:6px 0 0">The crew lead is already on each phase. Add the installers it needs; the list shows skills, and warns about time off or anyone booked elsewhere. Subcontractors bring their own people.</p>
+    ${ppl.map(([p,i])=>{ const need=fmNeed({label:p.n}), have=(p.ppl||[]).length; return `<div class="row between" style="gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)"><div style="min-width:180px"><strong>${p.n}</strong><div class="small muted">${p.crew} · ${p.start!=null?`Nov ${p.start}${p.d>1?'–'+(p.start+p.d-1):''}`:'not placed yet'} · needs ${need}</div></div>
+      <div class="row" style="gap:6px;flex-wrap:wrap;flex:1;justify-content:flex-end">${(p.ppl||[]).map(n=>{ const iss=kickPplIssue(p,n); return `<span class="pill ${iss?'p-red':'p-grey'}" title="${iss||''}" style="padding:4px 10px">${n===LEAD_OF[p.crew]?'⭐ ':''}${n}${n===LEAD_OF[p.crew]?'':` <a href="#" style="color:inherit;text-decoration:none;margin-left:4px" aria-label="Remove ${n}" onclick="kickDelPpl(${i},'${n}');return false">×</a>`}</span>`; }).join('')}
+        <select class="txt" style="width:auto;max-width:100%;padding:5px 8px;border:1px dashed #9fb0c2;border-radius:999px;font-size:13px;background:#f8fafc" aria-label="Add an installer to ${p.n}" onchange="kickAddPpl(${i},this.value)"><option value="">+ Add an installer</option>${PEOPLE.filter(x=>!(p.ppl||[]).includes(x.n)).map(x=>`<option value="${x.n}">${x.n} · ${x.r}${x.sk.includes(fmSkill({label:p.n}))?' · ✓ '+fmSkill({label:p.n}):''}</option>`).join('')}</select>
+        <span class="pill ${have>=need?'p-green':'p-amber'}">${have}/${need}</span></div></div>`; }).join('')}</div>
+  <div class="row mt" style="justify-content:flex-end;gap:8px;flex-wrap:wrap"><span class="small muted">${open.length?`${open.length} phase${open.length>1?'s':''} still to place`:clashes.length?'Fix the crew conflicts first':pBad?'Fix the installer warnings first':short?`${short} phase${short>1?'s':''} still short of installers (Diego can fill them later)`:'Ready: dates, crews and installers set'}</span>
+    <button class="btn primary" ${open.length||clashes.length||pBad?'disabled':''} onclick="kickConfirm()">Confirm + start the job →</button></div>`; };
 function kickSel(t,v){ KICK.sel = KICK.sel&&KICK.sel[0]===t&&KICK.sel[1]===v ? null : [t,v]; render(); if(KICK.sel) toast(t==='ph'?'Now click a day to place it.':'Now click a phase on the calendar to give it this crew.'); }
 function kickPlace(i,day){ const p=KICK.ph[i]; p.start=Math.max(1,Math.min(day,NOV_DAYS-p.d+1)); KICK.sel=null; render(); const c=kickClash(i); toast(c?`⚠ ${c}. Try another day or crew.`:`${p.n}: ${p.crew}, Nov ${p.start}${p.d>1?'–'+(p.start+p.d-1):''}. No conflicts.`); }
-function kickCrew(i,crew){ const p=KICK.ph[i]; p.crew=crew; KICK.sel=null; render(); const c=kickClash(i); toast(c?`⚠ ${c}.`:`${p.n} now goes to ${crew}.`); }
+function kickCrew(i,crew){ const p=KICK.ph[i]; p.crew=crew; p.ppl=LEAD_OF[crew]?[LEAD_OF[crew]]:[]; KICK.sel=null; render(); const c=kickClash(i); toast(c?`⚠ ${c}.`:`${p.n} now goes to ${crew}.`); }
 function kickCell(day){ if(!KICK.sel) return; if(KICK.sel[0]==='ph') kickPlace(KICK.sel[1],day); else { const i=KICK.ph.findIndex(p=>p.start!=null&&day>=p.start&&day<=p.start+p.d-1); if(i>=0) kickCrew(i,KICK.sel[1]); } }
 function kickEv(i){ if(KICK.sel&&KICK.sel[0]==='crew') return kickCrew(i,KICK.sel[1]); kickSel('ph',i); }
 function kickUn(i){ KICK.ph[i].start=null; render(); }
-async function kickAuto(slow){ let cur=16; for(let i=0;i<KICK.ph.length;i++){ const p=KICK.ph[i]; if(p.start!=null){ cur=Math.max(cur,p.start+p.d); continue; }
+async function kickAuto(slow){ let cur=KICK.from||16; for(let i=0;i<KICK.ph.length;i++){ const p=KICK.ph[i]; if(p.start!=null){ cur=Math.max(cur,p.start+p.d); continue; }
     let s=cur; while(s<=NOV_DAYS && !kickFree(p.crew,s,p.d,i)) s++; p.start=Math.min(s,NOV_DAYS-p.d+1); cur=p.start+p.d; if(slow){ render(); await wait(450); } }
   KICK.sel=null; render(); if(!slow) toast('Phases placed on the next open days, around the jobs already booked.'); }
 function kickConfirm(){ const j=jobs.find(x=>x.id===KICK.jid); if(!j||KICK.ph.some(p=>p.start==null)||KICK.ph.some((p,i)=>kickClash(i))) return;
   CAL.splice(0,CAL.length,...CAL.filter(e=>e.jid!==j.id)); let nx=Math.max(0,...CAL.map(e=>e.id))+1;
-  KICK.ph.forEach(p=>CAL.push({id:nx++, jid:j.id, job:j.name, label:p.n, crew:p.crew, start:p.start, len:p.d, c:KICK_COLOR}));
-  const a=Math.min(...KICK.ph.map(p=>p.start)), b=Math.max(...KICK.ph.map(p=>p.start+p.d-1)); j.kicked=true; KICK={jid:null,ph:[],sel:null};
-  go('pm'); toast(`${j.name} scheduled Nov ${a}–${b}. Each crew got its dates and ${j.client.split(' ')[0]} got the start date (demo: nothing was sent).`); }
+  KICK.ph.forEach(p=>{ const id=nx++; CAL.push({id, jid:j.id, job:j.name, label:p.n, crew:p.crew, start:p.start, len:p.d, c:KICK_COLOR}); if(p.ppl&&p.ppl.length) FM.asg[id]=[...p.ppl]; });
+  const a=Math.min(...KICK.ph.map(p=>p.start)), b=Math.max(...KICK.ph.map(p=>p.start+p.d-1)), ppl=new Set(KICK.ph.flatMap(p=>p.ppl||[])).size; j.kicked=true; j.handed=true; j.status='In progress'; KICK={jid:null,ph:[],sel:null};
+  go('pm'); toast(`${j.name} is In progress: Nov ${a}–${b}, ${ppl} installers assigned. Crews, installers and ${j.client.split(' ')[0]} got their dates (demo: nothing was sent).`); }
+// installers per phase on the start screen (same rules as the foreman's Assignments: skills, time off, no double-booking)
+function kickPplIssue(p,n){ if(p.start==null) return null; const pe=PEOPLE.find(x=>x.n===n), days=Array.from({length:p.d},(_,i)=>p.start+i); if(!pe) return null;
+  const off=days.filter(d=>pe.off.includes(d)); if(off.length) return `${n} is off Nov ${off.join(', ')}`;
+  const o=fmEvents().find(e=>e.jid!==KICK.jid && fmPeople(e).includes(n) && fmDays(e).some(d=>days.includes(d))); if(o) return `${n} is on ${o.job} (${o.label}) those days`;
+  const q=KICK.ph.find(x=>x!==p && x.start!=null && (x.ppl||[]).includes(n) && Array.from({length:x.d},(_,i)=>x.start+i).some(d=>days.includes(d))); return q?`${n} is also on ${q.n} those days`:null; }
+function kickAddPpl(i,n){ if(!n) return; const p=KICK.ph[i]; p.ppl=[...(p.ppl||[]),n]; render(); const iss=kickPplIssue(p,n); toast(iss?`⚠ ${iss}.`:`${n} added to ${p.n}.`); }
+function kickDelPpl(i,n){ const p=KICK.ph[i]; p.ppl=(p.ppl||[]).filter(x=>x!==n); render(); }
+function kickFillPpl(){ const leads=Object.values(LEAD_OF); let added=0; KICK.ph.forEach(p=>{ if(!LEAD_OF[p.crew]||p.start==null) return; p.ppl=(p.ppl||[]).filter(n=>leads.includes(n)||!kickPplIssue(p,n)); const sk=fmSkill({label:p.n});
+    while(p.ppl.length<fmNeed({label:p.n})){ const f=PEOPLE.filter(x=>!p.ppl.includes(x.n)&&!leads.includes(x.n)).map(x=>{ p.ppl.push(x.n); const bad=kickPplIssue(p,x.n); p.ppl.pop(); return bad?null:x; }).filter(Boolean).sort((a,b)=>(b.sk.includes(sk))-(a.sk.includes(sk)))[0]; if(!f) break; p.ppl.push(f.n); added++; } });
+  render(); toast(added?`${added} installers placed by skill and who's free.`:'Every phase already has its people.'); }
+function kickFrom(d){ KICK.from=+d; KICK.ph.forEach(p=>p.start=null); kickAuto(); }
 document.addEventListener('dragstart', e=>{ const t=e.target.closest&&e.target.closest('[data-kph],[data-kcrew],[data-kev]'); if(!t) return;
   e.dataTransfer.setData('text/plain', t.dataset.kph!=null?'ph:'+t.dataset.kph : t.dataset.kcrew!=null?'crew:'+t.dataset.kcrew : 'ph:'+t.dataset.kev); });
 document.addEventListener('dragover', e=>{ if(page==='kickoff' && e.target.closest&&e.target.closest('[data-kday]')) e.preventDefault(); });
@@ -3076,7 +3094,7 @@ const STEPS = [
     teamOn(); go('handoff'); await wait(300); if(document.getElementById('ho_'+TOUR_ID)) await typeIn('ho_'+TOUR_ID,'Gate code 4417 · dog in the yard · client works from home');
     await wait(300); handOff(TOUR_ID); await wait(600); teamOn('production'); go('pm'); await wait(200); flash('#soldAlert'); toast('🔔 New job landed on Justin’s My day: Reyes Backyard.'); }},
   {t:'Justin starts the job', who:'Justin Butler · project manager', d:'The alert opens the kickoff screen: client contact, the sales notes and the phases. Justin drops them on the calendar around the jobs already booked, then confirms.', run: async()=>{
-    teamOn('production'); schedKickoff(TOUR_ID); await wait(700); flash('#kickClient'); await wait(500); await kickAuto(true); await wait(500); kickConfirm(); }},
+    teamOn('production'); schedKickoff(TOUR_ID); await wait(700); flash('#kickClient'); await wait(500); await kickAuto(true); await wait(400); kickFillPpl(); await wait(600); kickConfirm(); }},
   {t:'Order materials', who:'Justin Butler · project manager', d:'The POs drafted from the signed quote go to vendors against the job, so every dollar lands in the right cost group.', run: async()=>{
     teamOn('production'); useJob(TOUR_ID); pos.forEach(p=>{ if(p.status==='draft') p.status='sent'; }); go('schedule'); await wait(200); flash('main .card.mt:last-child'); toast(`${pos.length} purchase orders sent to vendors.`); }},
   {t:'A change order mid-job', who:'Justin Butler · PM + Austin + Taylor · client', d:'Taylor asks for a seat wall and 2 palm uplights. Justin prices it; it’s over $2,500, so Austin OKs it first. Taylor approves on their phone and the contract updates.', run: async()=>{
@@ -3303,8 +3321,8 @@ const JUSTIN_STEPS = [
     asJustin('pm'); await wait(200); flash('#soldAlert'); toast('🔔 New job landed: Ellis Backyard, $34,800, sold by Austin. Ready to start.'); }},
   {t:'Start the new job', who:'12:20 PM · kickoff', d:'The alert opens the kickoff screen: client contact, the gate code from sales, the scope and the phases to schedule.', run: async()=>{
     closeModal(); if(role!=='production'){ role='production'; view='team'; document.getElementById('roleSel').value='production'; } schedKickoff(77); await wait(300); flash('#kickClient'); }},
-  {t:'Drop the phases on the calendar', who:'12:25 PM · kickoff', d:'Jobs already booked show shaded; the new job shows in its own color. Each phase goes on the next open days for its crew, then one click tells the crews and the client.', run: async()=>{
-    if(page!=='kickoff') schedKickoff(77); await kickAuto(true); await wait(600); kickConfirm(); }},
+  {t:'Schedule it, staff it, start it', who:'12:25 PM · kickoff', d:'Jobs already booked show shaded; the new job shows in its own color. Each phase goes on the next open days, the installers are added by skill and who is free, and one click moves the job to In progress.', run: async()=>{
+    if(page!=='kickoff') schedKickoff(77); await kickAuto(true); await wait(500); kickFillPpl(); await wait(700); kickConfirm(); }},
   {t:'Nudge the slow ones', who:'1:30 PM · Change orders', d:'CO-2 has waited 12 days for a signature and 3 selections are still open. One click reminds the client by email and text.', run: async()=>{
     asJustin('changes'); await wait(300); const w=[...document.querySelectorAll('#main h2')].find(x=>x.textContent.startsWith('Waiting on the client')); if(w) flash(w.parentElement.nextElementSibling||w);
     toast('Reminder sent to the Hendersons: CO-2 to sign and 3 selections to pick.'); }},
