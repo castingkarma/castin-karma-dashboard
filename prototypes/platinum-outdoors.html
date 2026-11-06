@@ -896,7 +896,8 @@ function mailerModal(){
 }
 function sendMailer(){
   const b=document.getElementById('mailBtn'); b.disabled=true; b.textContent='Sending…';
-  setTimeout(()=>{ const n=leadPick.size; leads.forEach(l=>{if(leadPick.has(l.id)) l.st='mailed'}); leadPick.clear(); closeModal(); render(); toast(`Demo: ${n} postcards marked as mailed. Nothing was actually sent.`); },700);
+  const done=()=>{ const n=leadPick.size; leads.forEach(l=>{if(leadPick.has(l.id)) l.st='mailed'}); leadPick.clear(); closeModal(); render(); toast(`Demo: ${n} postcards marked as mailed. Nothing was actually sent.`); };
+  if(TOUR_FAST) done(); else setTimeout(done,700);
 }
 function leadTo(id,st){ const l=leads.find(x=>x.id===id); l.st=st; render(); toast(`${l.o} marked as responded.`); }
 function bookLead(id){
@@ -1489,9 +1490,12 @@ PAGES.handoff = () => {
   ${done.length?`<h2 class="mt2">Handed off</h2><div class="card"><div class="tablewrap"><table><thead><tr><th>Job</th><th>With</th><th>Status</th></tr></thead><tbody>${done.map(j=>`<tr><td><strong>${j.name}</strong><div class="small muted">${j.client}</div></td><td class="small">Justin Butler</td><td><span class="pill ${j.status==='Sold'&&!j.kicked?'p-amber':'p-green'}">${j.status==='Sold'?(j.kicked?'Kickoff scheduled':'Kickoff to schedule'):j.status}</span></td></tr>`).join('')}</tbody></table></div></div>`:''}`;
 };
 function salesOpen(id){ const q=QUOTES.find(x=>x.jobRef===id); if(q){ selQ=q.id; go('quotes'); } else pickJob(id); }
-function handOff(id){ const j=jobs.find(x=>x.id===id), n=document.getElementById('ho_'+id); j.handed=true; j.hoNote=(n&&n.value.trim())||''; render(); toast(`${j.name} handed to Justin. It's on Justin's My day to schedule the kickoff.`); }
+function handOff(id){ const j=jobs.find(x=>x.id===id), n=document.getElementById('ho_'+id); j.handed=true; j.handedAt=Date.now(); j.hoNote=(n&&n.value.trim())||''; render(); toast(`${j.name} handed to Justin. It's on Justin's My day to schedule the kickoff.`); }
 // ---------- new-job kickoff (Justin): everything sales knows + drag the phases onto the calendar around booked work ----------
 let KICK = {jid:null, ph:[], sel:null};
+// sample: a job Austin sold and handed off, waiting for Justin to start (demo opens with it on My day, the Jobs board and the crew calendar)
+const ELLIS = {id:77, name:'Ellis Backyard', client:'Morgan Ellis', city:'Queen Creek', phone:'(480) 555-0174', email:'morgan.ellis@example.com', addr:'Sample address', scope:'Pavers, turf, lighting', status:'Sold', value:34800, handed:true, handedAt:1, hoNote:'Gate code 2210 · two dogs', thumb:'linear-gradient(135deg,#e2c7c9,#a8737c)'};
+if(!jobs.some(j=>j.id===77)) jobs.push(ELLIS);
 const KICK_PH = {DEMO:['Demo + base','Crew A',2], PAV:['Pavers + walls','Crew B',4], KIT:['Outdoor kitchen','Masonry sub',4], FIRE:['Fire feature','Masonry sub',2], PERG:['Pergola','Crew B',2], TURF:['Turf + planting','Crew C',3], LITE:['Lighting','Electrical sub',1]};
 const KICK_COLOR = '#be185d';
 function kickPhases(j){ const L=DATA[j.id]?.est?.lines||[], codes=L.length?[...new Set(L.map(l=>l.code))]:['DEMO','PAV','TURF','LITE'];
@@ -1574,9 +1578,9 @@ PAGES.pm = () => {
   ];
   const next = [...CAL].sort((a,b)=>a.start-b.start).slice(0,5);
   const keep = curJob; useJob(1); const t = totals(); useJob(keep);
-  const fresh = jobs.filter(j=>j.handed&&j.status==='Sold'&&!j.kicked);
+  const fresh = jobs.filter(j=>j.handed&&j.status==='Sold'&&!j.kicked).sort((a,b)=>(b.handedAt||0)-(a.handedAt||0));
   const alert = fresh.length?`<div class="card" id="soldAlert" style="background:#0b3b2e;color:#fff;border:0;margin-bottom:14px"><div class="row between" style="gap:10px;flex-wrap:wrap"><div><div class="small" style="color:#9ff0d2;font-weight:700;letter-spacing:.5px">🔔 NEW JOB LANDED · SOLD BY AUSTIN</div>
-    <strong style="font-size:17px">${fresh[0].name} · ${fmt(jobValue(fresh[0]))}</strong><div class="small" style="color:#cfe9df">${fresh[0].client} · ${fresh[0].city} · contract signed, deposit invoiced${fresh[0].hoNote?' · '+fresh[0].hoNote:''}</div></div>
+    <strong style="font-size:17px">${fresh[0].name} · ${fmt(jobValue(fresh[0]))}</strong><div class="small" style="color:#cfe9df">${fresh[0].client} · ${fresh[0].city} · contract signed, deposit invoiced${fresh[0].hoNote?' · '+fresh[0].hoNote:''}${fresh.length>1?` · +${fresh.length-1} more waiting`:''}</div></div>
     <button class="btn" style="background:#5fe0b5;border-color:#5fe0b5;color:#06281f" onclick="schedKickoff(${fresh[0].id})">Start this job →</button></div></div>`:'';
   return `${alert}<div class="row between"><div><h1>Good morning, Justin</h1><p class="sub">Project manager · everything on your jobs that needs you, on one screen. No calls, texts or spreadsheets to piece it together.</p></div></div>
   <div class="grid g4">
@@ -1760,6 +1764,9 @@ PAGES.calendar = () => {
   }
   while(cells.length%7) cells.push(`<div class="dc blank"></div>`);
   return `<div class="row between"><div><h1>Crew calendar · November 2026</h1><p class="sub">Drag a job to move it. Drag its right edge to make it longer or shorter. Crews and clients are notified automatically.</p></div><button class="btn" onclick="go('subs')">👷 Add / edit crews</button></div>
+  ${(()=>{ const w=jobs.filter(j=>j.handed&&j.status==='Sold'&&!j.kicked); return w.length?`<div class="card" style="background:#0b3b2e;color:#fff;border:0;margin-bottom:12px"><div class="small" style="color:#9ff0d2;font-weight:700;letter-spacing:.5px">🔔 NEW JOB${w.length>1?'S':''} TO SCHEDULE</div>
+    ${w.map(j=>`<div class="row between" style="gap:10px;flex-wrap:wrap;margin-top:8px"><div><strong>${j.name} · ${fmt(jobValue(j))}</strong><div class="small" style="color:#cfe9df">${j.client} · ${j.city} · sold by Austin. Open it to see the client details and drag its phases onto this calendar.</div></div>
+      <button class="btn" style="background:#5fe0b5;border-color:#5fe0b5;color:#06281f" onclick="schedKickoff(${j.id})">Start this job →</button></div>`).join('')}</div>`:''; })()}
   ${calCoiWarn()}
   ${conf.length?`<div class="card" style="border-color:#f3b4ad;background:var(--bad-soft)"><strong class="neg">⚠ ${conf.length} crew conflict${conf.length>1?'s':''}</strong>${conf.map(([a,b])=>`<div class="small" style="margin-top:4px">${a.crew} is on <strong>${a.job}</strong> (${a.label}) and <strong>${b.job}</strong> (${b.label}) at the same time. Drag one to fix it.</div>`).join('')}</div>`
     :`<div class="card" style="border-color:#9fd8c6;background:var(--accent-soft)"><strong>✓ No crew conflicts</strong><div class="small muted">Every crew is booked on one job at a time.</div></div>`}
@@ -2547,7 +2554,7 @@ PAGES['c-changes'] = () => {
     ${c.status==='sent'?`<div class="row mt" style="justify-content:flex-end"><button class="btn" onclick="decCO(${i})">Decline</button><button class="btn primary" onclick="apprCO(${i},this)">Approve ${fmt(coPriceOf(c))}</button></div>`:''}
   </div>`}).join('')}`;
 };
-function apprCO(i,b){ b.disabled=true; b.textContent='Approving…'; setTimeout(()=>{cos[i].status='approved';cos[i].date='Oct 21';render();toast(`CO-${cos[i].n} approved. Your contract total is updated.`)},600); }
+function apprCO(i,b){ b.disabled=true; b.textContent='Approving…'; const done=()=>{cos[i].status='approved';cos[i].date='Oct 21';render();toast(`CO-${cos[i].n} approved. Your contract total is updated.`)}; if(TOUR_FAST) done(); else setTimeout(done,600); }
 function decCO(i){ cos[i].status='declined'; render(); toast(`CO-${cos[i].n} declined. Platinum Outdoors will follow up.`); }
 
 // ---------- modal + toast ----------
@@ -2558,7 +2565,8 @@ let tt; function toast(m){ const t=document.getElementById('toast'); t.textConte
 
 // ---------- guided walkthrough: one click per step, fields fill themselves ----------
 const TOUR_ID = 99;
-const wait = ms => new Promise(r=>setTimeout(r,ms));
+let TOUR_FAST = false;
+const wait = ms => TOUR_FAST ? Promise.resolve() : new Promise(r=>setTimeout(r,ms));
 async function typeIn(id,text){ const el=document.getElementById(id); if(!el) return; el.focus(); el.value=''; for(const ch of text){ el.value+=ch; await wait(12); } el.dispatchEvent(new Event('input',{bubbles:true})); }
 function flash(sel){ const el=typeof sel==='string'?document.querySelector(sel):sel; if(!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); el.scrollIntoView({behavior:'smooth',block:'center'}); }
 function teamOn(r='owner'){ if(role!==r){ role=r; view='team'; document.getElementById('roleSel').value=r; } closeModal(); }
@@ -2617,9 +2625,11 @@ function renderTour(){
     <button class="btn treset" onclick="startTour('job')">Or: one job, start to finish</button>`;
   else if(tourStep>n) el.innerHTML = `<div class="tstep"><b>${T.done}</b><span>${T.doneSub}</span><div class="tbar"><i style="width:100%"></i></div></div>
     <button class="btn tnext" onclick="startTour('${other}')">Now: ${TOURS[other].title.toLowerCase()}</button>
+    <button class="btn treset" onclick="tourBack()">← Back</button>
     <button class="btn treset" onclick="startOver()">↺ Start over</button>`;
   else { const st=T.steps[tourStep-1];
     el.innerHTML = `<div class="tstep"><b>Step ${tourStep} of ${n}: ${st.t} <span class="twho">👤 ${st.who}</span></b><span>${st.d}</span><div class="tbar"><i style="width:${tourStep/n*100}%"></i></div></div>
+    <button class="btn treset" onclick="tourBack()" ${tourBusy?'disabled':''} title="${tourStep>1?'Go back to step '+(tourStep-1):'Back to the start of this demo'}">← Back</button>
     <button class="btn tnext" id="tourNext" onclick="nextStep()" ${tourBusy?'disabled':''}>${tourBusy?'Working…':tourStep===n?'Finish':'Next step →'}</button>
     <button class="btn treset" onclick="startOver()">↺ Start over</button>`; }
 }
@@ -2653,6 +2663,10 @@ document.addEventListener('click', e=>{
   else if(el.id==='fin_code'){ el.value='482913'; const pw=document.getElementById('fin_pw'); if(!pw.value) pw.value='demo-password'; }
 });
 function startOver(){ location.href = location.pathname + '?start=' + Date.now(); }
+function tourBack(){ if(tourBusy) return; const n=Math.min(tourStep,TOURS[tourKind].steps.length+1)-1; location.href = location.pathname + '?tour=' + tourKind + '&upto=' + Math.max(0,n); }
+async function tourReplay(k,n){ tourKind=k; tourStep=0; if(n<=0){ renderTour(); toast('Back to the start of this demo.'); return; }
+  TOUR_FAST=true; const S=TOURS[k].steps; try{ for(let i=0;i<n&&i<S.length;i++){ await nextStep(); } } finally { TOUR_FAST=false; tourBusy=false; }
+  closeModal(); renderTour(); toast(`Back on step ${tourStep}: ${S[tourStep-1].t}.`); }
 // ---------- sign-in for any role (demo: fields fill themselves; the real app = password + a 6-digit code) ----------
 const ROLE_LOGIN = {
   production:['justin@yourcompany.com','Justin Butler · project manager'], owner:['austin@yourcompany.com','Austin · sales'],
@@ -2747,6 +2761,7 @@ const CLIENT_STEPS = [
 function asJustin(p){ closeModal(); if(role!=='production'){ role='production'; view='team'; document.getElementById('roleSel').value='production'; } useJob(1); go(p); }
 const JUSTIN_STEPS = [
   {t:'Justin signs in', who:'6:45 AM · Justin Butler', d:'Password plus a 6-digit code by phone. Justin lands on a personal screen, not a menu of everything.', run: async()=>{
+    const e=jobs.find(j=>j.id===77); if(e){ e.handed=false; e.kicked=false; }
     await loginStep('production'); }},
   {t:'One list of what needs Justin', who:'6:50 AM · My day', d:'Overnight the app gathered everything on Justin’s jobs that needs a decision: a double-booked crew, a sub\'s insurance, change orders, selections and POs.', run: async()=>{
     asJustin('pm'); await wait(200); flash('main .grid.g2 .card'); toast(`${document.querySelectorAll('#main .grid.g2 .card:first-child .todo').length} things need Justin today. Each one opens the screen to fix it.`); }},
@@ -2765,6 +2780,7 @@ const JUSTIN_STEPS = [
     asJustin('changes'); const C=DATA[1].cos, c=[...C].reverse().find(x=>x.status==='sent'&&x.title.startsWith('Soft spot'))||C.find(x=>x.status==='sent'); if(!c) return;
     const i=C.indexOf(c); coSigned(i); await wait(700); coOrder(i); await wait(500); coSched(i); coTell(i); flash('main'); toast(`CO-${c.n} signed, materials on a draft PO, crew told. About 30 minutes, start to finish.`); }},
   {t:'A new job lands', who:'12:15 PM · alert from sales', d:'Austin just closed the Ellis backyard and handed it off. It pops up at the top of Justin\'s My day with the contract, deposit and sales notes.', run: async()=>{
+    { const e=jobs.find(j=>j.id===77); if(e){ e.handed=true; e.kicked=false; e.handedAt=Date.now(); } }
     if(!jobs.some(j=>j.id===77)) jobs.push({id:77, name:'Ellis Backyard', client:'Morgan Ellis', city:'Queen Creek', phone:'(480) 555-0174', email:'morgan.ellis@example.com', addr:'Sample address', scope:'Pavers, turf, lighting', status:'Sold', value:34800, handed:true, hoNote:'Gate code 2210 · two dogs', thumb:'linear-gradient(135deg,#e2c7c9,#a8737c)'});
     asJustin('pm'); await wait(200); flash('#soldAlert'); toast('🔔 New job landed: Ellis Backyard, $34,800, sold by Austin. Ready to start.'); }},
   {t:'Start the new job', who:'12:20 PM · kickoff', d:'The alert opens the kickoff screen: client contact, the gate code from sales, the scope and the phases to schedule.', run: async()=>{
@@ -2801,7 +2817,7 @@ function syncTop(){ document.documentElement.style.setProperty('--hdr', document
 window.addEventListener('resize', syncTop);
 
 populateRoles(); render(); renderTour(); syncTop();
-{ const k=new URLSearchParams(location.search).get('tour'); if(k&&TOURS[k]){ history.replaceState(null,'',location.pathname); startTour(k); } }
+{ const qs=new URLSearchParams(location.search), k=qs.get('tour'), up=qs.get('upto'); if(k&&TOURS[k]){ history.replaceState(null,'',location.pathname); if(up!=null) tourReplay(k,+up); else startTour(k); } }
 // logo + name: back to the start with every flow reset (the demo keeps no saved state, so a fresh load is a clean slate)
 function resetDemo(){ location.replace(location.pathname + '#reset'); location.reload(); }
 if(location.hash==='#reset'){ history.replaceState(null,'',location.pathname); toast('Back to the start. Every flow in the demo is reset.'); }
