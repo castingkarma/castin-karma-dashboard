@@ -1686,9 +1686,9 @@ function coTell(i){ DATA[1].cos[i].told=true; render(); toast('Crew notified on 
 const TRADES = ['Hardscape + install','Masonry','Electrical','Gas lines','Turf + planting','Irrigation','Pools + water features','Other'];
 const SUBS = [
   {id:1, co:'Platinum Outdoors install crews', inhouse:true, trade:'Hardscape + install', who:'Justin (production)', ph:'(480) 555-0100', em:'crews@yourcompany.com', coi:null, crews:[['Crew A','Marco T.',3],['Crew B','Luis P.',3],['Crew C','Sam D.',2]], jobs:41, ontime:96, punch:1.2, callbacks:1, rating:4.8},
-  {id:2, co:'Desert Stoneworks (sample)', trade:'Masonry', who:'Ray M. (sample)', ph:'(480) 555-0142', em:'office@example.com', coi:'Nov 4, 2026', crews:[['Masonry sub','Ray M.',4]], jobs:12, ontime:88, punch:2.6, callbacks:2, rating:4.3},
-  {id:3, co:'Bright Line Electric (sample)', trade:'Electrical', who:'Dee K. (sample)', ph:'(602) 555-0177', em:'dispatch@example.com', coi:'Aug 30, 2027', crews:[['Electrical sub','Dee K.',2]], jobs:18, ontime:97, punch:0.6, callbacks:0, rating:4.9},
-  {id:4, co:'Valley Gas Pros (sample)', trade:'Gas lines', who:'Tom H. (sample)', ph:'(480) 555-0119', em:'jobs@example.com', coi:'Mar 15, 2027', crews:[['Gas sub','Tom H.',2]], jobs:9, ontime:74, punch:3.1, callbacks:3, rating:3.6},
+  {id:2, co:'Desert Stoneworks (sample)', trade:'Masonry', who:'Leo', ph:'(480) 555-0142', em:'office@example.com', coi:'Nov 4, 2026', crews:[['Masonry sub','Leo',4]], jobs:12, ontime:88, punch:2.6, callbacks:2, rating:4.3},
+  {id:3, co:'Bright Line Electric (sample)', trade:'Electrical', who:'Leo', ph:'(602) 555-0177', em:'dispatch@example.com', coi:'Aug 30, 2027', crews:[['Electrical sub','Leo',2]], jobs:18, ontime:97, punch:0.6, callbacks:0, rating:4.9},
+  {id:4, co:'Valley Gas Pros (sample)', trade:'Gas lines', who:'Leo', ph:'(480) 555-0119', em:'jobs@example.com', coi:'Mar 15, 2027', crews:[['Gas sub','Leo',2]], jobs:9, ontime:74, punch:3.1, callbacks:3, rating:3.6},
 ];
 const TODAY_D = new Date(2026,9,26);
 const coiDays = x => x.coi ? Math.round((new Date(x.coi)-TODAY_D)/864e5) : 9999;
