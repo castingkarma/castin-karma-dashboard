@@ -2664,7 +2664,7 @@ document.addEventListener('click', e=>{
 });
 function startOver(){ location.href = location.pathname + '?start=' + Date.now(); }
 function tourBack(){ if(tourBusy) return; const n=Math.min(tourStep,TOURS[tourKind].steps.length+1)-1; location.href = location.pathname + '?tour=' + tourKind + '&upto=' + Math.max(0,n); }
-async function tourReplay(k,n){ tourKind=k; tourStep=0; if(n<=0){ renderTour(); toast('Back to the start of this demo.'); return; }
+async function tourReplay(k,n){ tourKind=k; tourStep=0; if(n<=0){ const r=Object.keys(ROLE_TOUR).find(x=>ROLE_TOUR[x]===k); if(r) setRole(r); else renderTour(); toast('Back to the start of this demo.'); return; }
   TOUR_FAST=true; const S=TOURS[k].steps; try{ for(let i=0;i<n&&i<S.length;i++){ await nextStep(); } } finally { TOUR_FAST=false; tourBusy=false; }
   closeModal(); renderTour(); toast(`Back on step ${tourStep}: ${S[tourStep-1].t}.`); }
 // ---------- sign-in for any role (demo: fields fill themselves; the real app = password + a 6-digit code) ----------
