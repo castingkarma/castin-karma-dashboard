@@ -29,6 +29,9 @@ header.top{background:var(--brand);color:#fff;display:flex;align-items:center;ga
 .hdr-btn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:7px 14px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;white-space:nowrap}
 .hdr-btn:hover,.hdr-btn.on{background:#fff;color:var(--brand)}
 .layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 90px)}
+/* header pages (overview, costs, offer, big question) are full width: no workflow menu */
+body.fullpg .layout{grid-template-columns:1fr}
+body.fullpg nav.side{display:none}
 nav.side{background:var(--panel);border-right:1px solid var(--line);padding:16px 10px}
 nav.side .jobpick{padding:0 8px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
 nav.side label{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
@@ -553,7 +556,8 @@ function setRole(r){
   if(typeof tourStep!=='undefined' && tourStep===0) renderTour();
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'||page==='offer'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',page==='bigq'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+const FULL_PAGES = new Set(['company','overview','infra','trad','reqdoc','offer','bigq']);
+function render(){ document.body.classList.toggle('fullpg', FULL_PAGES.has(page)); renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'||page==='offer'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',page==='bigq'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
