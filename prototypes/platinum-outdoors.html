@@ -355,7 +355,7 @@ td input[type=checkbox]{width:17px;height:17px}
   <button class="hdr-btn" id="coBtn" onclick="go('company')">Company Overview</button>
   <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
   <button class="hdr-btn" id="tradBtn" onclick="go('trad')">Traditional Development</button>
-  <button class="hdr-btn gold" id="adBtn" onclick="setRole('admin')">Master Admin</button>
+  <button class="hdr-btn gold" id="adBtn" onclick="go('bigq')">The Big Question</button>
   <label class="rolewrap"><span>View as</span><select id="roleSel" class="rolesel" onchange="roleChanged(this.value)"></select></label>
 </header>
 <div class="tour" id="tour"></div>
@@ -552,7 +552,7 @@ function setRole(r){
   if(typeof tourStep!=='undefined' && tourStep===0) renderTour();
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
-function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'||page==='offer'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
+function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'||page==='offer'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',page==='bigq'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
 
 // ---------- pages ----------
 const PAGES = {};
@@ -2371,6 +2371,37 @@ const phasesPage = () => `${infraHead()}
       <div><strong>A one-time project</strong><div class="small" style="margin-top:4px">The MVP list above is the scope, and it stays fixed. Anything new is quoted on its own as a change, so the price and the date hold.</div></div>
       <div><strong>A long-term partner (monthly plans)</strong><div class="small" style="margin-top:4px">More flexible. The phases are a plan, not a contract: priorities can move between them as the business learns what it needs most.</div></div>
     </div></div>`;
+// ---------- The Big Question: Platinum owns the app, so it could become its own product ----------
+PAGES.bigq = () => { const price=299, rows=[[25,'Year 2 · a few friendly companies'],[100,'Year 3 · word of mouth + a few trade shows'],[300,'Year 4–5 · a real product with its own sales']];
+  return `<div class="card" style="background:#0b3b2e;color:#fff;border:0"><div class="small" style="color:#9ff0d2;font-weight:700;letter-spacing:.6px">THE BIG QUESTION</div>
+    <h1 style="color:#fff;margin:6px 0 8px">You'll own this software. Should other landscapers pay to use it?</h1>
+    <p style="margin:0;color:#dfe5ec">Platinum Outdoors owns the code and the accounts. That means it can do something JobTread's customers never can: give the system its own name and web address, run your own business on it, and sell it to other landscape companies as a second revenue stream.</p></div>
+  <div class="grid g3 mt">
+    <div class="card"><div style="font-size:22px">🏷️</div><strong style="display:block;margin-top:6px">Its own brand</strong><p class="small muted" style="margin:6px 0 0">A product name and URL of its own, e.g. <strong>PlatinumPM</strong> at platinumpm.com (name and domain to check). Platinum stays the first and biggest customer.</p></div>
+    <div class="card"><div style="font-size:22px">🧰</div><strong style="display:block;margin-top:6px">Built by a landscaper</strong><p class="small muted" style="margin:6px 0 0">Quotes from AutoCAD, crews and subs with scores, change orders crews can't start early, company cards. It's proven on real jobs before anyone else pays for it.</p></div>
+    <div class="card"><div style="font-size:22px">💵</div><strong style="display:block;margin-top:6px">A second income</strong><p class="small muted" style="margin:6px 0 0">Monthly subscriptions from other companies, on top of the landscaping business, and it adds to what the company is worth.</p></div>
+  </div>
+  <div class="card mt"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">What it could bring in</h2><span class="pill p-blue">Illustration · not a forecast</span></div>
+    <p class="small muted" style="margin:6px 0 10px">At an example price of ${fmt(price)} per company per month. Tools like JobTread and Jobber charge roughly $100–$600+ a month.</p>
+    <div class="tablewrap"><table><thead><tr><th>Companies paying</th><th>When it could happen</th><th class="r">Per year</th></tr></thead><tbody>
+      ${rows.map(([n,w])=>`<tr><td><strong>${n}</strong></td><td class="small">${w}</td><td class="r"><strong>${fmt(n*price*12)}</strong></td></tr>`).join('')}</tbody></table></div>
+    <p class="small muted" style="margin:10px 0 0">There are tens of thousands of design-build landscape companies in the US. Even a small share is a real business. Hosting costs stay small per company; the real costs are support, sales and marketing.</p></div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>What it takes</h2>
+      <div class="todo"><div class="ic" style="background:var(--accent-soft)">1</div><div><strong>Prove it at Platinum first</strong><div class="small muted">Run your own jobs on it for about a year. Real numbers are the best sales pitch.</div></div></div>
+      <div class="todo"><div class="ic" style="background:var(--accent-soft)">2</div><div><strong>Make it multi-company</strong><div class="small muted">Each company's data kept fully separate, its own logo and settings, sign-up and billing. A few months of extra build.</div></div></div>
+      <div class="todo"><div class="ic" style="background:var(--accent-soft)">3</div><div><strong>Pilot with 3–5 friendly companies</strong><div class="small muted">Landscapers you know in other markets, at a founding price, to shake out what's Platinum-only.</div></div></div>
+      <div class="todo"><div class="ic" style="background:var(--accent-soft)">4</div><div><strong>Support, onboarding and sales</strong><div class="small muted">Moving each company over from JobTread or Jobber, answering questions, and someone selling it.</div></div></div></div>
+    <div class="card"><h2>Worth thinking through</h2>
+      <ul class="small" style="margin:0;padding-left:18px;line-height:1.7">
+        <li><strong>Your edge stays yours.</strong> Your cost book, prices and leads are your data and never ship with the product.</li>
+        <li><strong>It's a second business.</strong> Customers expect support and updates. It needs an owner, even a part-time one.</li>
+        <li><strong>Competitors could buy it.</strong> Decide early whether to sell in the East Valley or only outside your market.</li>
+        <li><strong>How we'd work together.</strong> Casting Karma can build and run the product side with you, as a development partner with a share of the product's revenue or equity in it. That's a conversation for later, once the MVP is live.</li>
+      </ul></div>
+  </div>
+  <p class="small muted" style="margin:12px 0 0">Nothing here changes the MVP or the offer. It's an option that ownership opens up, to decide on once the system is running Platinum day to day.</p>`; };
+
 PAGES.infra = () => {
   const sum = (groups,i) => groups.reduce((a,[,rows])=>a+rows.reduce((b,r)=>b+r[i],0),0);
   const req = INFRA.slice(0,2), lo=sum(req,3), hi=sum(req,4);
