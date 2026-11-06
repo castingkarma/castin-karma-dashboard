@@ -334,7 +334,7 @@ td input[type=checkbox]{width:17px;height:17px}
 <body>
 <div class="demo-bar">Demo prototype · sample data only · built by Casting Karma for Platinum Outdoors</div>
 <header class="top">
-  <div class="logo"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
+  <div class="logo" role="button" tabindex="0" title="Back to the start (resets the demo)" onclick="resetDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();resetDemo()}" style="cursor:pointer"><div class="mark">P</div><div>Platinum Outdoors<small>Job Hub</small></div></div>
   <div class="spacer"></div>
   <button class="hdr-btn" id="coBtn" onclick="go('company')">Company Overview</button>
   <button class="hdr-btn" id="ovBtn" onclick="go('overview')">Project Overview</button>
@@ -1931,12 +1931,13 @@ const phasesPage = () => `${infraHead()}
   <div class="card mt"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">Third-party tools it replaces</h2><span class="pill p-green">Fewer subscriptions, one system</span></div>
     <div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Tool today</th><th>What it's used for</th><th>Cost today</th><th>Replaced in</th></tr></thead><tbody>
       <tr><td><strong>JobTread</strong></td><td class="small">Estimates, proposals, jobs, scheduling, job costing</td><td class="small">~$4.5k / yr</td><td><span class="mvpb" style="margin:0">MVP</span></td></tr>
+      <tr><td><strong>Jobber</strong></td><td class="small">Scheduling, quotes and invoicing (exact use confirmed in discovery)</td><td class="small">Plan + seats to confirm</td><td><span class="mvpb" style="margin:0">MVP</span></td></tr>
       <tr><td><strong>Google Forms + Sheets</strong></td><td class="small">Crew time cards and pay</td><td class="small">Free, but hours of re-typing</td><td><span class="pill p-blue">Phase 2</span></td></tr>
       <tr><td><strong>Receipts by text + paper</strong></td><td class="small">Getting field purchases onto the job and into the books</td><td class="small">Office time chasing them</td><td><span class="pill p-blue">Phase 2</span></td></tr>
       <tr><td><strong>GoHighLevel</strong></td><td class="small">Lead follow-up and marketing</td><td class="small">$97–$497 / mo</td><td><span class="pill p-blue">Phase 2–3</span><div class="small muted">once the lead + marketing features are built</div></td></tr>
     </tbody></table></div>
     <p class="small" style="margin:10px 0 0"><strong>Stays, and connects:</strong> QuickBooks Online stays your books (connected in Phase 2). Card payments run through Stripe or QuickBooks Payments, pay-per-use with no monthly fee.</p>
-    <p class="small muted" style="margin:6px 0 0">The same goes for similar job-management tools like Jobber, Buildertrend or Houzz Pro: the system does that job without a per-seat subscription. Your exact tool list gets confirmed in discovery.</p>
+    <p class="small muted" style="margin:6px 0 0">Discovery will likely turn up more tools and subscriptions we can retire. Each one gets added here with its cost.</p>
   </div>
   <div class="grid g2 mt">${PHASES.map(ph=>`<div class="card"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">${ph.n} · ${ph.t}</h2><span class="pill ${ph.n==='Phase 2'?'p-blue':'p-grey'}">${ph.when}</span></div>
     ${ph.items.map(([t,d])=>`<div class="todo"><div class="ic" style="background:${ph.n==='Phase 2'?'var(--info-soft)':'#eef0f3'}">+</div><div><strong>${t}</strong><div class="small muted">${d}</div></div></div>`).join('')}</div>`).join('')}</div>
@@ -2332,6 +2333,9 @@ function syncTop(){ document.documentElement.style.setProperty('--hdr', document
 window.addEventListener('resize', syncTop);
 
 populateRoles(); render(); renderTour(); syncTop();
+// logo + name: back to the start with every flow reset (the demo keeps no saved state, so a fresh load is a clean slate)
+function resetDemo(){ location.replace(location.pathname + '#reset'); location.reload(); }
+if(location.hash==='#reset'){ history.replaceState(null,'',location.pathname); toast('Back to the start. Every flow in the demo is reset.'); }
 </script>
 </body>
 </html>
