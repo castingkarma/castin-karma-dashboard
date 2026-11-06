@@ -1300,7 +1300,7 @@ PAGES.quotes = () => {
     </div>
     <div class="card" id="qdetail"><div class="row between"><div><div class="small muted">${q.id} · ${q.city}, AZ</div><h2 style="margin:2px 0 0">${q.client}: ${q.scope}</h2></div><strong>${qVal(q)?fmt(qVal(q)):''}</strong></div>
       <div class="qsteps">${QSTAGES.map((s,i)=>`<span class="${i<si?'done':i===si?'now':''}">${i<si?'✓ ':''}${s}</span>`).join('')}</div>
-      ${act?`<div class="row mt">${si>0?`<button class="btn" id="qBack" onclick="stepBackQ('${q.id}')">← Back a step</button>`:''}<button class="btn primary" id="qAct" onclick="${act[1]}('${q.id}',this)">${act[0]}</button><span class="small muted">${q.stage==='Request'?'Site-visit notes + photos go to the designer':q.stage==='Design'?'Quantities are read from the drawing layers':q.stage==='Pricing'?'Quantities × your cost book + markups':q.stage==='Review'?'Austin reviews margin before it goes out':q.stage==='Sent'?'Client e-signs from their phone':'Creates the job, budget, schedule and POs'}</span></div>`:''}
+      ${act?`<div class="row mt">${si>0?`<button class="btn" onclick="startOverQ('${q.id}')" title="Clear this quote and go back to the request">↺ Start over</button><button class="btn" id="qBack" onclick="stepBackQ('${q.id}')">← Back a step</button>`:''}<button class="btn primary" id="qAct" onclick="${act[1]}('${q.id}',this)">${act[0]}</button><span class="small muted">${q.stage==='Request'?'Site-visit notes + photos go to the designer':q.stage==='Design'?'Quantities are read from the drawing layers':q.stage==='Pricing'?'Quantities × your cost book, then you set the price':q.stage==='Review'?'Set your prices below and check the margin before it goes out':q.stage==='Sent'?'Client e-signs from their phone':'Creates the job, budget, schedule and POs'}</span></div>`:''}
       ${q.designer?`<div class="small mt">Designer: <strong>${q.designer}</strong></div>`:''}
       <div class="field" style="margin-top:14px"><label for="q_budget">Client's anticipated budget</label>
         <div class="row"><input class="txt" id="q_budget" type="number" min="0" step="500" placeholder="Click to fill (demo)" value="${q.budget||''}" style="max-width:200px" onchange="setBudget('${q.id}',this.value)">
@@ -1309,14 +1309,31 @@ PAGES.quotes = () => {
       ${q.specs.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design specs</h3><ul class="small" style="margin:0;padding-left:18px;line-height:1.7">${q.specs.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
       ${q.files.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design files</h3>${q.files.map(f=>`<div class="file clickable" role="button" tabindex="0" onclick="openDrawing('${q.id}','${f.t}')"><span class="ext">${f.t}</span>${f.n}<span class="small muted" style="margin-left:auto">${f.t==='DWG'?'AutoCAD drawing':'Plan set'} · click to open</span></div>`).join('')}`:''}
       ${q.takeoff.length?`<h3 style="font-size:14px;margin:16px 0 4px">Takeoff pulled from the drawing</h3><div class="tablewrap"><table><thead><tr><th>From layer</th><th class="r">Qty</th><th>Unit</th></tr></thead><tbody>${q.takeoff.map(t=>`<tr><td>${t.item}</td><td class="r">${t.q.toLocaleString()}</td><td>${t.u}</td></tr>`).join('')}</tbody></table></div>`:''}
-      ${q.lines.length?`<h3 style="font-size:14px;margin:16px 0 4px">Priced quote</h3><div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Cost</th><th class="r">Price</th></tr></thead><tbody>${q.lines.map(l=>`<tr><td>${l.d}<div class="small muted">${CODES[l.code]}</div></td><td class="r">${l.q.toLocaleString()} ${l.u}</td><td class="r">${fmt(lineCost(l))}</td><td class="r">${fmt(linePrice(l))}</td></tr>`).join('')}
-        <tr class="tot"><td colspan="2">Total · margin ${pct((qVal(q)-q.lines.reduce((a,l)=>a+lineCost(l),0))/qVal(q)*100)}</td><td class="r">${fmt(q.lines.reduce((a,l)=>a+lineCost(l),0))}</td><td class="r">${fmt(qVal(q))}</td></tr></tbody></table></div>`:''}
+      ${q.lines.length?qPriceTable(q):''}
       ${q.jobId?`<h3 style="font-size:14px;margin:16px 0 4px">Pushed to production</h3>${q.made.map(m=>`<div class="check"><b>✓</b>${m}</div>`).join('')}
         <div class="row mt"><button class="btn sm" onclick="setRole('owner');go('jobs')">See it on the Jobs board</button><button class="btn sm" onclick="setRole('production');go('calendar')">See it on the crew calendar</button></div>`:''}
       <p class="small muted" style="margin:16px 0 0">AutoCAD: the app reads quantities from the DWG/DXF the designer saves (areas and counts by layer). Which layers and blocks to read is set with your designer in discovery.</p>
     </div>
   </div>`;
 };
+// priced quote: one cost per line from the cost book (labor + materials), you type your price, margin updates as you type
+const qMargin = (p,c) => p>0 ? (p-c)/p : 0;
+function qPriceTable(q){ const edit = q.stage==='Review', C=q.lines.reduce((a,l)=>a+lineCost(l),0), P=qVal(q), m=qMargin(P,C);
+  const mcell = (p,c) => { const v=qMargin(p,c); return `<span class="${v<0?'neg':v<TARGET_M?'':'pos'}" style="${v>=0&&v<TARGET_M?'color:var(--warn)':''}">${pct(v*100)}</span>`; };
+  return `<div class="row between" style="margin:16px 0 4px;gap:8px;flex-wrap:wrap"><h3 style="font-size:14px;margin:0">Priced quote</h3><span class="small muted">${edit?'Type your price on any line. Margin updates as you type.':'Locked once it\'s sent to the client.'}</span></div>
+  <div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Your cost</th><th class="r">Your price</th><th class="r">Margin</th></tr></thead><tbody>
+    ${q.lines.map((l,i)=>{ const c=lineCost(l), p=linePrice(l); return `<tr><td>${l.d}<div class="small muted">${CODES[l.code]}</div></td><td class="r">${l.q.toLocaleString()} ${l.u}</td><td class="r">${fmt(c)}</td>
+      <td class="r">${edit?`<input class="num" style="width:96px;text-align:right" type="number" min="0" step="50" value="${Math.round(p)}" aria-label="Price for ${l.d}" oninput="qPriceLive('${q.id}',${i},this.value)" onchange="qPriceSet('${q.id}',${i},this.value)">`:fmt(p)}</td>
+      <td class="r" id="qm_${i}">${mcell(p,c)}</td></tr>`; }).join('')}
+    <tr class="tot"><td colspan="2">Total</td><td class="r">${fmt(C)}</td><td class="r" id="qP">${fmt(P)}</td><td class="r" id="qM">${mcell(P,C)}</td></tr></tbody></table></div>
+  <div class="small muted" style="margin-top:6px">Your cost is one number per item from the cost book (labor + materials together). Target margin ${Math.round(TARGET_M*100)}%: green at or above, amber below, red is a loss.</div>`; }
+function qPriceSet(id,i,v){ const q=QUOTES.find(x=>x.id===id), l=q.lines[i], base=l.q*l.c, p=Math.max(0,parseFloat(v)||0); l.m = base? (p/base-1)*100 : 0; }
+function qPriceLive(id,i,v){ qPriceSet(id,i,v); const q=QUOTES.find(x=>x.id===id), l=q.lines[i], C=q.lines.reduce((a,x)=>a+lineCost(x),0), P=qVal(q);
+  const m=(p,c)=>{ const x=qMargin(p,c); return `<span class="${x<0?'neg':x<TARGET_M?'':'pos'}" style="${x>=0&&x<TARGET_M?'color:var(--warn)':''}">${pct(x*100)}</span>`; };
+  const set=(k,h)=>{ const el=document.getElementById(k); if(el) el.innerHTML=h; };
+  set('qm_'+i, m(linePrice(l),lineCost(l))); set('qP', fmt(P)); set('qM', m(P,C)); clearTimeout(qPriceLive.t); qPriceLive.t=setTimeout(()=>{ const a=document.activeElement, ai=a&&a.getAttribute('aria-label'); render(); if(ai){ const f=[...document.querySelectorAll('#qdetail input.num')].find(x=>x.getAttribute('aria-label')===ai); if(f){ f.focus(); const n=f.value.length; try{ f.setSelectionRange(n,n); }catch(e){} } } }, 900); }
+function startOverQ(id){ const q=QUOTES.find(x=>x.id===id); if(!q||q.stage==='In production') return;
+  Object.assign(q,{stage:'Request', specs:[], designer:null, files:[], takeoff:[], lines:[]}); render(); toast(`${q.id} is back at step 1: Request. The client and budget are kept.`); }
 function stepBackQ(id){
   const q=QUOTES.find(x=>x.id===id), i=QSTAGES.indexOf(q.stage); if(i<=0||q.stage==='In production') return;
   const to=QSTAGES[i-1];
@@ -1334,8 +1351,8 @@ async function attachDwg(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,
   q.takeoff=[{item:'PAVERS (area)',q:524,u:'sf'},{item:'WALLS (length)',q:18,u:'lf'},{item:'TURF (area)',q:710,u:'sf'},{item:'DEMO (area)',q:1240,u:'sf'},{item:'PERGOLA (block)',q:1,u:'ea'},{item:'FIREPIT (block)',q:1,u:'ea'},{item:'LIGHT (blocks)',q:12,u:'ea'}];
   q.stage='Pricing'; render(); toast('Design attached. 7 quantities pulled from the drawing layers.'); }
 async function priceIt(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Pricing…');
-  q.lines=[TL('Site prep','DEMO','Demo + base prep',1240,'sf',1.6,35),TL('Patio','PAV','Concrete pavers, Belgard Catalina',524,'sf',9.75,38),TL('Patio','PAV','Seat wall, stacked stone',18,'lf',140,35),
-    TL('Turf','TURF','Artificial turf + dog run',710,'sf',5.2,40),TL('Shade','PERG','Attached pergola 14×16',1,'ea',7800,30),TL('Fire feature','FIRE','Gas fire pit, 42" round',1,'ea',3600,35),TL('Lighting','LITE','Low-voltage lighting',12,'ea',165,45)];
+  q.lines=[TL('Site prep','DEMO','Demo + base prep',1240,'sf',1.6,45),TL('Patio','PAV','Concrete pavers, Belgard Catalina',524,'sf',9.75,50),TL('Patio','PAV','Seat wall, stacked stone',18,'lf',140,40),
+    TL('Turf','TURF','Artificial turf + dog run',710,'sf',5.2,45),TL('Shade','PERG','Attached pergola 14×16',1,'ea',7800,35),TL('Fire feature','FIRE','Gas fire pit, 42" round',1,'ea',3600,45),TL('Lighting','LITE','Low-voltage lighting',12,'ea',165,60)];
   q.stage='Review'; render(); toast(`Priced at ${fmt(qVal(q))} from your cost book.`); }
 async function approveQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…'); q.stage='Sent'; render(); toast(`Approved by Austin and emailed to ${q.client.split(' ')[0]}.`); }
 async function signQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Signing…'); q.stage='Signed'; render(); toast(`${q.client} signed. Ready to push to production.`); }
