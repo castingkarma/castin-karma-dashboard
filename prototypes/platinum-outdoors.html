@@ -1214,14 +1214,14 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
-const MVP_PAGES = new Set(['pm','changes','sales','handoff','costbook','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
+const MVP_PAGES = new Set(['pm','changes','sales','handoff','costbook','c-schedule','c-walk','c-sign','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'sales', nav:[['sales','Sales home'],['leads','Leads'],['quotes','Quotes & design'],['proposal','Proposals'],['handoff','Sold → handoff'],['jobs','Jobs board'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costbook','Cost book'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
   field:{l:'Field crew lead (Leo)', who:'Leo', sub:'Crew lead · Crew A · phone app', home:'field', nav:[['field','Today'],['crewsched','My schedule'],['crewjob','Job details'],['crewtime','My hours'],FLOW]},
-  client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
+  client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-schedule','Schedule'],['c-selections','Selections'],['c-changes','Change orders'],['c-pay','Payments'],['c-photos','Photos + updates'],['c-walk','Final walkthrough'],['c-proposal','Proposal (new job)'],['c-start','Request a design visit']]},
 };
 function populateRoles(){ document.getElementById('roleSel').innerHTML = Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${r.l}</option>`).join(''); document.getElementById('roleSel').value=role; }
 const roleLink = (r,p,label) => `<a href="#" onclick="setRole('${r}');go('${p}');return false">${label} →</a>`;
@@ -2617,7 +2617,7 @@ PAGES.portal = () => {
   const todos = [
     ...sentCO.map(c=>`<div class="todo"><div class="ic" style="background:var(--info-soft)">📝</div><div style="flex:1"><strong>Approve change order CO-${c.n}</strong><div class="small muted">${c.title} · ${fmt(coPriceOf(c))}</div></div><button class="btn sm" onclick="go('c-changes')">Review</button></div>`),
     ...openSel.map(s=>`<div class="todo"><div class="ic" style="background:var(--warn-soft)">🎨</div><div style="flex:1"><strong>Choose your ${s.title.toLowerCase()}</strong><div class="small muted">Due ${s.due}</div></div><button class="btn sm" onclick="go('c-selections')">Choose</button></div>`),
-    `<div class="todo"><div class="ic" style="background:var(--accent-soft)">💳</div><div style="flex:1"><strong>Payment 3 of 4: ${fmt(t.contract*.3)}</strong><div class="small muted">Due when the kitchen &amp; hardscape are complete</div></div><button class="btn sm" onclick="toast('Online card/ACH payment is an option for v1. We would decide that with you in discovery.')">Pay</button></div>`
+    `<div class="todo"><div class="ic" style="background:var(--accent-soft)">💳</div><div style="flex:1"><strong>Payment 3 of 4: ${fmt(t.contract*.3)}</strong><div class="small muted">Due when the kitchen &amp; hardscape are complete</div></div><button class="btn sm" onclick="go('c-pay')">Pay</button></div>`
   ];
   return `<h1>Hi Dana, here's your backyard</h1><p class="sub">Henderson Backyard · Scottsdale · managed by Platinum Outdoors</p>
   <div class="card"><div class="steps">${stages.map((s,i)=>`<div class="${i<3?'done':i===3?'now':''}">${s}</div>`).join('')}</div>
@@ -2636,6 +2636,76 @@ PAGES.portal = () => {
     ${schedule.filter(s=>s.st!=='done').slice(0,4).map(s=>`<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${s.n}</span><span class="small muted">${s.crew}</span></div>`).join('')}
   </div>`;
 };
+// ---------- client journey: from asking for a design visit to the final walkthrough and review ----------
+// per-job client state; Henderson (job 1) starts mid-build with the existing payment schedule
+const CL = {1:{visit:'Done Sep 2', pays:null, updates:[
+  {d:'Oct 22', t:'Seat wall veneer delivered. Kitchen island framing starts next week.', n:2},
+  {d:'Oct 20', t:'Patio pavers finished and sealed.', n:4},
+  {d:'Oct 13', t:'Paver install started. Base is graded and compacted.', n:3}], walk:null}};
+const clOf = jid => (CL[jid] = CL[jid] || {visit:null, pays:null, updates:[], walk:null, review:false});
+const clQuote = jid => QUOTES.find(q=>q.jobRef===jid||q.jobId===jid);
+const clPays = jid => jid===1 ? payments : clOf(jid).pays;
+const CL_STAGES = ['Design visit','Proposal','Signed','Selections','Building','Walkthrough','Complete'];
+function clStage(j){ const c=clOf(j.id), q=clQuote(j.id);
+  if(j.status==='Complete') return 6; if(c.walk&&!c.walk.signed) return 5; if(j.status==='In progress'||j.kicked) return 4;
+  if(j.status==='Sold') return (DATA[j.id]?.selections||[]).some(s=>s.status==='open')?3:2; if(q&&q.stage==='Sent') return 1; return 0; }
+function clTodos(j){ const c=clOf(j.id), q=clQuote(j.id), t=totals(), P=clPays(j.id)||[], out=[];
+  const row=(i,bg,h,d,btn,on)=>`<div class="todo"><div class="ic" style="background:${bg}">${i}</div><div style="flex:1"><strong>${h}</strong><div class="small muted">${d}</div></div><button class="btn sm" onclick="${on}">${btn}</button></div>`;
+  if(q&&q.stage==='Sent') out.push(row('✍️','var(--info-soft)','Review and sign your proposal',`${fmt(qVal(q))} · from Austin`,'Review','go(\'c-sign\')'));
+  P.forEach((p,i)=>{ if(p.st==='due') out.push(row('💳','var(--accent-soft)',`${p.l}: ${fmt(t.contract*p.p)}`,'Card or bank transfer','Pay',`go('c-pay')`)); });
+  selections.filter(s=>s.status==='open').forEach(s=>out.push(row('🎨','var(--warn-soft)',`Choose your ${s.title.toLowerCase()}`,`Due ${s.due}`,'Choose','go(\'c-selections\')')));
+  cos.filter(c=>c.status==='sent').forEach(c=>out.push(row('📝','var(--info-soft)',`Approve change order CO-${c.n}`,`${c.title} · ${fmt(coPriceOf(c))}`,'Review','go(\'c-changes\')')));
+  if(c.walk&&!c.walk.signed) out.push(row('✅','var(--accent-soft)','Sign off your final walkthrough','Check the punch list with Justin','Open','go(\'c-walk\')'));
+  if(j.status==='Complete'&&!c.review) out.push(row('⭐','var(--warn-soft)','How did we do?','A 30-second review helps neighbors find us','Review','clReview()'));
+  return out; }
+const clHead = j => `<h1>Hi ${ROLES.client.who.split(' ')[0]}, here's your backyard</h1><p class="sub">${j.name} · ${j.city} · managed by Platinum Outdoors</p>`;
+const PORTAL_HENDERSON = PAGES.portal;
+PAGES.portal = () => { const j=J(); if(j.id===1) return PORTAL_HENDERSON(); const c=clOf(j.id), st=clStage(j), q=clQuote(j.id), t=totals(), todos=clTodos(j), P=clPays(j.id);
+  const msg = ['Your design visit is booked'+(c.visit?': '+c.visit:'')+'. Austin will walk the yard with you and send the specs to the designer.','Your proposal is ready. Review it, ask questions, and sign when you\'re happy.','Signed. Thank you! Next: the deposit and your finish choices.','Pick your finishes so materials can be ordered.','Your crews are scheduled. Updates and photos show up here as the work happens.','The work is done. Walk the punch list with Justin and sign off.','All done. Enjoy your new backyard!'][st];
+  return `${clHead(j)}<div class="card"><div class="steps">${CL_STAGES.map((s,i)=>`<div class="${i<st?'done':i===st?'now':''}">${s}</div>`).join('')}</div><p class="small muted" style="margin:14px 0 0">${msg}</p></div>
+  <div class="grid g2 mt"><div class="card"><h2>Needs your attention</h2>${todos.join('')||'<p class="small pos" style="margin:0">✓ Nothing waiting on you.</p>'}</div>
+    <div class="card"><h2>Your project</h2>${q&&qVal(q)?`<div class="row between"><span class="muted">${st>=2?'Contract':'Proposal'}</span><strong>${fmt(st>=2?t.contract:qVal(q))}</strong></div>`:'<p class="small muted" style="margin:0">Your price comes with the proposal after the design visit.</p>'}
+      ${P?`<h2 class="mt2">Payments</h2>${P.map(p=>`<div class="row between" style="margin-top:6px"><span>${p.l}</span><span class="row" style="gap:8px">${fmt(t.contract*p.p)} <span class="pill ${p.st==='paid'?'p-green':p.st==='due'?'p-amber':'p-grey'}">${p.st}</span></span></div>`).join('')}`:''}</div></div>`; };
+PAGES['c-start'] = () => `<h1>Get a free design visit</h1><p class="sub">Tell us about your yard. Austin calls you within a day to book a visit. No account needed yet.</p>
+  <div class="card" style="max-width:620px"><div class="grid g2" style="gap:10px"><div class="field"><label for="cs_name">Your name</label><input class="txt" id="cs_name" placeholder="First and last name"></div><div class="field"><label for="cs_phone">Phone</label><input class="txt" id="cs_phone" placeholder="(480) 555-0100"></div></div>
+    <div class="grid g2" style="gap:10px"><div class="field"><label for="cs_email">Email</label><input class="txt" id="cs_email" placeholder="you@email.com"></div><div class="field"><label for="cs_city">City</label><input class="txt" id="cs_city" placeholder="City"></div></div>
+    <div class="field"><label for="cs_want">What would you like?</label><input class="txt" id="cs_want" placeholder="Pavers, turf, a fire pit…"></div>
+    <div class="field"><label for="cs_budget">Rough budget (optional)</label><input class="txt" id="cs_budget" placeholder="e.g. $40,000"></div>
+    <div class="small muted" style="margin-top:8px">📷 You can add photos of the yard after Austin calls.</div>
+    <button class="btn primary mt" id="csBtn" style="width:100%" onclick="clientRequest()">Request my design visit</button></div>`;
+function clientRequest(id){ const v=k=>(document.getElementById('cs_'+k)||{}).value?.trim()||''; if(!v('name')||!v('city')){ toast('Add your name and city.'); return; }
+  const nid=id||Math.max(...jobs.map(j=>j.id))+1, last=v('name').split(' ').pop();
+  if(!jobs.some(j=>j.id===nid)) jobs.push({id:nid, name:`${last} Backyard`, client:v('name'), email:v('email'), phone:v('phone'), addr:'Sample address', scope:v('want'), city:v('city'), status:'Lead', thumb:'linear-gradient(135deg,#e0cfae,#a88d5f)'});
+  DATA[nid]=DATA[nid]||{est:{status:'draft', lines:[]}, cos:[], selections:[], pos:[], schedule:[], otherActual:{DEMO:0,PAV:0,TURF:0,KIT:0,FIRE:0,LITE:0}};
+  if(!QUOTES.some(q=>q.jobRef===nid)) QUOTES.unshift({id:'Q-2'+String(100+nid).slice(-3), jobRef:nid, client:v('name'), city:v('city'), scope:v('want')||'New backyard', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:parseFloat(v('budget').replace(/\D/g,''))||null, hint:42000});
+  clOf(nid).visit='Thu Oct 29 · 10:00 AM with Austin'; useJob(nid); go('portal'); toast(`Request sent. Austin booked your design visit for Thu Oct 29 at 10 AM, and a sign-in code is on its way to ${v('email')||'your email'}.`); return nid; }
+PAGES['c-sign'] = () => { const j=J(), q=clQuote(j.id); if(!q||!q.lines.length) return `${clHead(j)}<div class="card empty">Your proposal shows here after the design visit.</div>`;
+  const P=qVal(q), signed=['Signed','In production'].includes(q.stage);
+  return `<h1>Your proposal</h1><p class="sub">${j.name} · from Austin at Platinum Outdoors · ${q.id}</p><div class="card"><div class="tablewrap"><table><thead><tr><th>What we'll build</th><th class="r">Price</th></tr></thead><tbody>
+    ${q.lines.map(l=>`<tr><td>${l.d}<div class="small muted">${l.q.toLocaleString()} ${l.u}</div></td><td class="r">${fmt(linePrice(l))}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td class="r">${fmt(P)}</td></tr></tbody></table></div>
+    <p class="small muted" style="margin:10px 0 0">Payments: 30% to start (${fmt(P*.3)}), 30% when materials arrive, 30% when the hardscape is done, 10% at the final walkthrough.</p>
+    ${signed?`<div class="small pos" style="margin-top:10px">✓ Signed. Thank you!</div>`:`<div class="field"><label for="cs_sig">Type your full name to accept</label><input class="txt" id="cs_sig" placeholder="Full name"></div><button class="btn primary mt" id="csSign" onclick="clientSign(this)">Accept &amp; sign</button>`}</div>`; };
+async function clientSign(b){ const j=J(), q=clQuote(j.id), n=(document.getElementById('cs_sig')||{}).value||j.client; if(!q) return; b.disabled=true; b.textContent='Signing…';
+  await signQ(q.id,null); await pushProd(q.id,null); useJob(j.id); clOf(j.id).pays=[{l:'Deposit at signing',p:.3,st:'due'},{l:'Materials delivered',p:.3,st:'upcoming'},{l:'Hardscape complete',p:.3,st:'upcoming'},{l:'Final walkthrough',p:.1,st:'upcoming'}];
+  go('portal'); toast(`Signed by ${n}. Your deposit invoice is ready.`); }
+PAGES['c-pay'] = () => { const j=J(), P=clPays(j.id), t=totals();
+  return `${clHead(j)}<div class="card"><h2>Payments</h2>${P?P.map((p,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line);gap:8px;flex-wrap:wrap"><span>${p.l}</span><span class="row" style="gap:8px">${fmt(t.contract*p.p)} <span class="pill ${p.st==='paid'?'p-green':p.st==='due'?'p-amber':'p-grey'}">${p.st}</span>${p.st==='due'?`<button class="btn sm primary" onclick="clPay(${i})">Pay</button>`:''}</span></div>`).join('')
+    :'<p class="small muted">Your payment schedule shows here once the proposal is signed.</p>'}
+    <p class="small muted" style="margin:10px 0 0">Card or bank transfer (ACH). Demo: nothing is charged. Online payments come with Phase 2; until then the invoice is emailed.</p></div>`; };
+function clPay(i){ const j=J(), p=clPays(j.id)[i], amt=totals().contract*p.p; p.st='paid'; QBO_LOG.unshift({t:'Today', type:'Payment', ref:`${j.name} · ${p.l}`, job:j.name, amt:Math.round(amt), st:'Synced'}); render(); toast(`Paid ${fmt(amt)} (demo: nothing charged). Receipt emailed and recorded on the job.`); }
+PAGES['c-schedule'] = () => { const j=J(), ev=CAL.filter(e=>e.jid===j.id).sort((a,b)=>a.start-b.start);
+  return `${clHead(j)}<div class="card"><h2>When the crews come</h2>${ev.length?ev.map(e=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line);gap:8px;flex-wrap:wrap"><div><strong>${e.label}</strong><div class="small muted">${e.crew}${subOf(e.crew)&&!subOf(e.crew).inhouse?' · '+subOf(e.crew).co.replace(' (sample)',''):''}</div></div><span class="small">Nov ${e.start}${e.len>1?'–'+(e.start+e.len-1):''}</span></div>`).join('')
+    :'<p class="small muted" style="margin:0">Justin is scheduling your crews. The dates show here, and you get a text the day before each crew arrives.</p>'}</div>`; };
+PAGES['c-photos'] = () => { const j=J(), u=clOf(j.id).updates;
+  return `${clHead(j)}<div class="card"><h2>Photos + updates</h2>${u.length?u.map(x=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="small muted">${x.d}</div><div>${x.t}</div><div class="row" style="gap:6px;margin-top:6px">${Array.from({length:x.n},(_,k)=>`<span style="width:56px;height:42px;border-radius:6px;background:${['linear-gradient(135deg,#d9c3a1,#a9865c)','linear-gradient(135deg,#bcd3a8,#6f8f55)','linear-gradient(135deg,#a9c7d6,#5f8aa3)','linear-gradient(135deg,#c9c2b8,#7b7268)'][k%4]}"></span>`).join('')}</div></div>`).join('')
+    :'<p class="small muted" style="margin:0">The crew adds photos from their phones as the work happens. They show here.</p>'}</div>`; };
+PAGES['c-walk'] = () => { const j=J(), w=clOf(j.id).walk;
+  if(!w) return `${clHead(j)}<div class="card"><h2>Final walkthrough</h2><p class="small muted" style="margin:0">When the work is done, you walk the yard with Justin. Anything to fix goes on a punch list here, and you sign off once it's done.</p></div>`;
+  return `${clHead(j)}<div class="card"><h2>Final walkthrough</h2>${w.items.map(x=>`<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)">${x.fixed?'✅':'⬜'} ${x.t}${x.fixed?' <span class="muted">· fixed by the crew</span>':''}</div>`).join('')}
+    ${w.signed?`<div class="small pos" style="margin-top:10px">✓ Signed off. Thank you!</div>`:`<button class="btn primary mt" ${w.items.every(x=>x.fixed)?'':'disabled'} onclick="clSignOff()">Everything looks good: sign off</button>`}</div>`; };
+function clSignOff(){ const j=J(), c=clOf(j.id); c.walk.signed=true; j.status='Complete'; const P=clPays(j.id); if(P) P.forEach(p=>{ if(p.st!=='paid') p.st='due'; }); render(); toast('Signed off. Your final invoice is ready, and Justin closes out the job.'); }
+function clReview(){ const c=clOf(J().id); c.review=true; render(); toast('Thank you! This opens your Google review page (demo: nothing is posted).'); }
+
 PAGES['c-selections'] = () => `<h1>Your selections</h1><p class="sub">Tap the option you want. Anything above your allowance shows the difference before you choose.</p>${selections.map(s=>selCard(s,true)).join('')}`;
 PAGES['c-changes'] = () => {
   if(!cos.length) return `<h1>Change orders</h1><div class="card empty">No change orders on your project.</div>`;
@@ -2714,7 +2784,7 @@ function renderTour(){
   if(tourStep===0) tourKind=roleTour();
   const el=document.getElementById('tour'), T=TOURS[tourKind], n=T.steps.length, other=tourKind==='job'?roleTour():'job';
   if(tourStep===0) el.innerHTML = `<div class="tstep"><b>▶ Guided demo: ${T.title}</b><span>${n} clicks, starting at sign-in. ${T.blurb}</span></div>
-    <button class="btn tnext" onclick="startTour('${tourKind}')">Start ${T.name==='Dana'?'Dana\'s evening':T.name+'\'s day'}</button>
+    <button class="btn tnext" onclick="startTour('${tourKind}')">${tourKind==='client'?'Start Taylor\'s project':'Start '+T.name+'\'s day'}</button>
     <button class="btn treset" onclick="startTour('job')">Or: one job, start to finish</button>`;
   else if(tourStep>n) el.innerHTML = `<div class="tstep"><b>${T.done}</b><span>${T.doneSub}</span><div class="tbar"><i style="width:100%"></i></div></div>
     <button class="btn tnext" onclick="startTour('${other}')">Now: ${TOURS[other].title.toLowerCase()}</button>
@@ -2851,14 +2921,45 @@ const FIELD_STEPS = [
     asRole('field','crewtime'); await wait(200); flash('main .phone'); toast('Leo’s week: clocked, paid, photos and receipts in, nothing on paper.'); }},
 ];
 const CLIENT_STEPS = [
-  {t:'Dana signs in to the portal', who:'7:30 PM · Dana Henderson · client', d:'No password: a 6-digit code by email. Dana sees only Dana’s own project.', run: async()=>{ await loginStep('client'); }},
-  {t:'See the project', who:'7:31 PM · My project', d:'Progress, the schedule, payments and new photos from the crew, in one place.', run: async()=>{ asRole('client','portal'); await wait(200); flash('main .card'); }},
-  {t:'Pick a finish', who:'7:35 PM · Selections', d:'Dana picks natural brass lighting. The price difference shows right away, before anything is ordered.', run: async()=>{
-    asRole('client','c-selections'); await wait(300); const s=selections.find(x=>x.id==='s4'); if(s&&s.chosen==null) pickSel('s4',2); flash('main'); }},
-  {t:'Approve a change order', who:'7:40 PM · Change orders', d:'The grill upgrade has waited 12 days. Dana approves it on the phone, and the contract updates.', run: async()=>{
-    asRole('client','c-changes'); await wait(300); const i=cos.findIndex(c=>c.status==='sent'); if(i>=0){ apprCO(i,document.createElement('button')); await wait(800); } flash('main'); }},
-  {t:'Back to the project', who:'7:45 PM · My project', d:'Everything Dana approved is already on Justin’s screen. No phone tag.', run: async()=>{ asRole('client','portal'); await wait(200); flash('main .card'); toast('Dana’s evening: two decisions made in five minutes.'); }},
+  {t:'Taylor asks for a design visit', who:'Sep 30 · Taylor Reyes · homeowner', d:'From the website or a postcard: one short form, no account. It lands in Austin’s pipeline as a lead with a quote request.', run: async()=>{
+    closeModal(); ROLES.client.who='Taylor Reyes'; ROLES.client.sub='Reyes Backyard'; ROLE_LOGIN.client=['taylor.reyes@example.com','Taylor Reyes · client portal'];
+    role='client'; view='client'; document.getElementById('roleSel').value='client'; go('c-start'); await wait(300);
+    for(const [k,v] of [['name','Taylor Reyes'],['phone','(480) 555-0131'],['email','taylor.reyes@example.com'],['city','Queen Creek'],['want','Pavers, turf + putting green, fire pit, lighting'],['budget','$40,000']]) await typeIn('cs_'+k,v);
+    await wait(300); clientRequest(TOUR_ID); }},
+  {t:'Sign in with a code', who:'Oct 1 · client portal', d:'No password: Taylor signs in with a 6-digit code by email and sees the design visit on the timeline.', run: async()=>{ await loginStep('client'); useJob(TOUR_ID); go('portal'); }},
+  {t:'The proposal arrives', who:'Oct 6 · client portal', d:'After the visit, Mia designed it and Austin priced it. The proposal lands in the portal with every line and the total.', run: async()=>{
+    const q=clQuote(TOUR_ID); const keep=TOUR_FAST; TOUR_FAST=true; try{ if(q.stage==='Request') await specsOut(q.id,null); if(q.stage==='Design') await attachDwg(q.id,null); if(q.stage==='Pricing') await approveQ(q.id,null); } finally { TOUR_FAST=keep; }
+    useJob(TOUR_ID); go('portal'); await wait(200); flash('main .grid.g2 .card'); toast('🔔 Your proposal from Platinum Outdoors is ready to review.'); }},
+  {t:'Sign the proposal', who:'Oct 7 · Proposal', d:'Taylor reads every line, types their name and signs. The deposit invoice comes with it.', run: async()=>{
+    useJob(TOUR_ID); go('c-sign'); await wait(300); const b=document.getElementById('csSign'); if(b){ await typeIn('cs_sig','Taylor Reyes'); await wait(200); await clientSign(b); } }},
+  {t:'Pay the deposit', who:'Oct 7 · Payments', d:'Card or bank transfer from the portal. The receipt is emailed and recorded on the job.', run: async()=>{
+    useJob(TOUR_ID); go('c-pay'); await wait(300); const i=(clPays(TOUR_ID)||[]).findIndex(p=>p.st==='due'); if(i>=0) clPay(i); }},
+  {t:'Pick the finishes', who:'Oct 10 · Selections', d:'Pavers and turf, with the price difference shown before choosing. Materials get ordered from these picks.', run: async()=>{
+    useJob(TOUR_ID); if(!selections.some(s=>s.id==='r1')) selections.push(
+      {id:'r1', cat:'Pavers', title:'Patio paver color', allowance:4680, due:'Oct 14', status:'open', chosen:null, opts:[
+        {n:'Catalina Grana, Sand', v:'Belgard', p:4680, sw:'linear-gradient(135deg,#e6d5b5,#c7ad80)'}, {n:'Catalina Grana, Toscana', v:'Belgard', p:4990, sw:'linear-gradient(135deg,#c9a27a,#8f6a45)'}, {n:'Catalina Grana, Charcoal', v:'Belgard', p:4680, sw:'linear-gradient(135deg,#6b6b6b,#383838)'}]},
+      {id:'r2', cat:'Turf', title:'Turf style', allowance:3380, due:'Oct 14', status:'open', chosen:null, opts:[
+        {n:'Pet-friendly 85oz', v:'SYNLawn', p:3380, sw:'linear-gradient(135deg,#7fb069,#4c7a3b)'}, {n:'Premium Spring 92oz', v:'SYNLawn', p:3640, sw:'linear-gradient(135deg,#8cc26f,#567f3c)'}]});
+    go('c-selections'); await wait(500); pickSel('r1',1); await wait(400); pickSel('r2',0); }},
+  {t:'See when the crews come', who:'Oct 14 · Schedule', d:'Justin booked the crews. Every phase, every crew and the dates, with a text the day before each one arrives.', run: async()=>{
+    const j=jobs.find(x=>x.id===TOUR_ID); const keep=TOUR_FAST; TOUR_FAST=true;
+    try{ if(!j.handed){ j.handed=true; j.handedAt=Date.now(); } if(!j.kicked){ schedKickoff(TOUR_ID); await kickAuto(); kickConfirm(); } j.status='In progress'; } finally { TOUR_FAST=keep; }
+    role='client'; view='client'; document.getElementById('roleSel').value='client'; useJob(TOUR_ID); go('c-schedule'); await wait(200); flash('main .card');
+    const ev=CAL.filter(e=>e.jid===TOUR_ID); toast(`Your crews are booked: Nov ${Math.min(...ev.map(e=>e.start))}–${Math.max(...ev.map(e=>e.start+e.len-1))}. You get a text the day before each one arrives.`); }},
+  {t:'Watch the progress', who:'Nov 18 · Photos + updates', d:'The crew adds photos from their phones as the work happens. No chasing anyone for an update.', run: async()=>{
+    const c=clOf(TOUR_ID); if(!c.updates.length) c.updates.push({d:'Nov 18', t:'Pavers are down and the seat wall is up. Turf goes in Friday.', n:4},{d:'Nov 17', t:'Base graded and compacted.', n:2},{d:'Nov 16', t:'Crew A started demo. Old grass and rock hauled off.', n:3});
+    const P=clPays(TOUR_ID); if(P&&P[1].st==='upcoming') P[1].st='due';
+    useJob(TOUR_ID); go('c-photos'); await wait(200); flash('main .card'); toast('New photos from Crew A. Materials are delivered, so payment 2 is now due.'); }},
+  {t:'Approve a change', who:'Nov 19 · Change orders', d:'Taylor wants two palm uplights added. The change and its price come to the portal, and nothing extra starts until it’s approved.', run: async()=>{
+    useJob(TOUR_ID); if(!cos.length) cos.push({n:1, title:'Add 2 palm uplights', status:'sent', date:'Nov 19', lines:[TL('','LITE','2 palm uplights',2,'ea',165,45)]});
+    go('c-changes'); await wait(500); const i=cos.findIndex(c=>c.status==='sent'); if(i>=0){ apprCO(i,document.createElement('button')); await wait(800); } }},
+  {t:'Final walkthrough sign-off', who:'Nov 30 · Final walkthrough', d:'Taylor walks the yard with Justin. The punch list items were fixed by the crew, and Taylor signs off from the phone.', run: async()=>{
+    const c=clOf(TOUR_ID); c.walk=c.walk||{items:[{t:'Re-level 2 pavers by the gate',fixed:true},{t:'Touch up the seat wall cap',fixed:true},{t:'Aim the palm uplights',fixed:true}], signed:false};
+    useJob(TOUR_ID); go('c-walk'); await wait(600); if(!c.walk.signed) clSignOff(); }},
+  {t:'Final payment and a review', who:'Nov 30 · Payments', d:'The last payment from the portal, then a short review request that helps the next neighbor find Platinum.', run: async()=>{
+    useJob(TOUR_ID); go('c-pay'); await wait(300); (clPays(TOUR_ID)||[]).forEach((p,i)=>{ if(p.st==='due') clPay(i); }); await wait(400); go('portal'); await wait(300); if(!clOf(TOUR_ID).review) clReview(); }},
 ];
+
 
 // ---------- Justin's day: the default walkthrough ----------
 function asJustin(p){ closeModal(); if(role!=='production'){ role='production'; view='team'; document.getElementById('roleSel').value='production'; } useJob(1); go(p); }
@@ -2905,7 +3006,7 @@ const TOURS = {
   admin:{title:'A day in the life of Joel (Master Admin)', name:'Joel', blurb:'Joel signs in with 2-step, approves pay and a card purchase, fixes QuickBooks and checks the reports.', done:'✓ Joel\'s day, done', doneSub:'Payroll, QuickBooks, spending and reports handled from one portal.', steps:ADMIN_STEPS},
   designer:{title:'A day in the life of Mia (designer)', name:'Mia', blurb:'Mia picks up a design, attaches the AutoCAD drawing and helps with selections.', done:'✓ Mia\'s day, done', doneSub:'Designs in, quantities ready for Austin to price.', steps:DESIGNER_STEPS},
   field:{title:'A day in the life of Leo (crew lead)', name:'Leo', blurb:'Leo confirms a new job, checks the job details, clocks in, works the checklist, finishes the phase and closes out a job.', done:'✓ Leo\'s day, done', doneSub:'No paper, no texts to the office, no receipts in the truck.', steps:FIELD_STEPS},
-  client:{title:'An evening with Dana (client)', name:'Dana', blurb:'Dana signs in with a code, picks a finish and approves a change order from the couch.', done:'✓ Dana\'s evening, done', doneSub:'Two decisions made in five minutes, already on Justin\'s screen.', steps:CLIENT_STEPS},
+  client:{title:'A client from first ask to final walkthrough', name:'Taylor', blurb:'Taylor asks for a design visit, signs the proposal, pays, picks finishes, follows the build, approves a change and signs off the walkthrough.', done:'✓ Taylor\'s project, done', doneSub:'From one short form to a finished backyard, every step in the portal.', steps:CLIENT_STEPS},
   justin:{title:'A day in the life of Justin (project manager)', name:'Justin', blurb:'Justin Butler, project manager, signs in and runs the day from one screen.', done:'✓ Justin\'s day, done', doneSub:'Crews, subs, change orders and POs handled without a single call or spreadsheet.', steps:JUSTIN_STEPS},
   job:{title:'One job, start to finish', name:'the job', blurb:'Each click fills in the forms and shows where the work lands.', done:'✓ Done: first call to final invoice', doneSub:'Every screen you saw shared the same job record. Nothing was typed twice.', steps:STEPS},
 };
