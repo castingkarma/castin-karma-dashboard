@@ -265,6 +265,7 @@ body.dragging{cursor:grabbing;user-select:none}
 .oplans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
 .oplan.mvp{border:2px solid #9fb0c2}
 .otag.mvpt{background:#1f2a37;color:#f3dc9b}
+.navsec{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:14px 10px 4px;border-top:1px solid var(--line);margin-top:8px}
 .navkey{padding:12px 10px 0;margin-top:8px;border-top:1px solid var(--line);line-height:1.5}
 .segtog{display:inline-flex;background:#eef0f3;border-radius:999px;padding:3px;gap:2px}
 .segtog button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
@@ -323,7 +324,7 @@ td input[type=checkbox]{width:17px;height:17px}
   .rolewrap span{display:none}
   nav.side a{flex:none;padding:7px 12px;font-size:14px;background:var(--bg)}
   nav.side a .n{display:none}
-  nav.side .navkey{display:none}
+  nav.side .navkey,nav.side .navsec{display:none}
   main{padding:18px 16px 60px}
   .proposal .body{padding:18px}
   .proposal .hero{padding:20px}
@@ -504,7 +505,7 @@ const coPriceOf = c => c.lines.reduce((b,l)=>b+linePrice(l),0);
 const selDiff = s => s.chosen==null ? 0 : s.opts[s.chosen].p - s.allowance;
 
 // ---------- app state + nav ----------
-let view = 'team', page = 'jobs', role = 'owner';
+let view = 'team', page = 'pm', role = 'production';
 const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['costing','Job costing'],['schedule','Schedule & POs']];
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
@@ -521,7 +522,7 @@ function renderNav(){
   const pick = ['owner','production'].includes(role) ? `<div class="jobpick"><label>Current job</label><select onchange="pickJob(this.value)">${jobs.map(j=>`<option value="${j.id}" ${j.id===curJob?'selected':''}>${j.name}</option>`).join('')}</select></div>`
     : `<div class="rolecard"><label>Signed in as</label><div style="margin-top:6px;font-weight:600">${ROLES[role].who}</div><div class="small muted">${ROLES[role].sub}</div></div>`;
   const anyMvp = items.some(([k])=>MVP_PAGES.has(k));
-  document.getElementById('nav').innerHTML = pick + items.map(([k,l])=>`<a class="${page===k?'on':''}" onclick="go('${k}')">${l}${MVP_PAGES.has(k)?'<span class="mvpb">MVP</span>':''}${badge(k)}</a>`).join('')
+  document.getElementById('nav').innerHTML = pick + items.map(([k,l])=>k==='-'?`<div class="navsec">${l}</div>`:`<a class="${page===k?'on':''}" onclick="go('${k}')">${l}${MVP_PAGES.has(k)?'<span class="mvpb">MVP</span>':''}${badge(k)}</a>`).join('')
     + (anyMvp?`<div class="navkey small muted"><span class="mvpb" style="margin:0 4px 0 0">MVP</span> in the first release (3–4 months). The rest comes after, by month 6 or in a later phase.</div>`:'');
 }
 function go(p){page=p;render();window.scrollTo({top:0})}
@@ -1188,12 +1189,12 @@ function advPO(i){ const p=pos[i]; p.status=PO_FLOW[PO_FLOW.indexOf(p.status)+1]
 // ---------- user roles: each role sees only the screens it touches ----------
 const FLOW = ['flow','Who does what'];
 // menu items that ship in the core MVP (matches the offer: quotes + design, estimates, proposals, portal, selections, calendar, crew + sub accounts, job costing). QuickBooks goes with Master Admin.
-const MVP_PAGES = new Set(['jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
+const MVP_PAGES = new Set(['pm','jobs','quotes','estimate','selections','proposal','calendar','subs','schedule','costing','portal','c-selections','c-changes','c-proposal']);
 const ROLES = {
   owner:{l:'Owner / Sales (Austin)', who:'Austin', sub:'Owner · sales', home:'jobs', nav:[['leads','Leads'],['jobs','Jobs'],['quotes','Quotes & design'],['estimate','Estimate & COs'],['selections','Selections'],['proposal','Proposal'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['costing','Job costing'],['time','Time & pay'],['cards','Company cards'],['qbo','QuickBooks'],FLOW]},
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
-  production:{l:'Production manager (Justin)', who:'Justin', sub:'Production manager', home:'calendar', nav:[['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['time','Time & pay'],['cards','Company cards'],['costing','Job costing'],FLOW]},
+  production:{l:'Project manager (Justin)', who:'Justin', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['estimate','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
   field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
 };
@@ -1355,6 +1356,37 @@ async function pushProd(id,b){
 function newQuote(){ const n=QUOTES.length; const c=SAMPLE_CUSTOMERS[sampleIdx++ % SAMPLE_CUSTOMERS.length];
   const id='Q-20'+(42+n); QUOTES.unshift({id, client:c.name, city:c.city, scope:c.scope, stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:[40000,52000,30000][n%3]});
   selQ=id; render(); toast(`Quote request ${id} created for ${c.name}.`); }
+
+// ---------- Justin's day: what a project manager sees first (MVP) ----------
+PAGES.pm = () => {
+  const run = jobs.filter(j=>j.status!=='Complete'), coSent = DATA[1].cos.filter(c=>c.status==='sent'), selOpen = DATA[1].selections.filter(s=>s.status==='open');
+  const poOpen = DATA[1].pos.filter(p=>p.status==='draft'||p.status==='sent'), conf = calConflicts();
+  const coi = CAL.map(e=>[e,subOf(e.crew)]).filter(([e,x])=>x&&!x.inhouse&&x.coi&&new Date(x.coi)<new Date(2026,10,e.start+e.len-1));
+  const todo = [
+    ...conf.map(([a,b])=>['⚠',`${a.crew} is double-booked`,`${a.job} and ${b.job} overlap in November`,'calendar','var(--bad-soft)']),
+    ...coi.map(([e,x])=>['📄',`${x.co}: insurance ends ${x.coi}`,`Booked on ${e.job} through Nov ${e.start+e.len-1}`,'subs','var(--warn-soft)']),
+    ...coSent.map(c=>['✍️',`Change order #${c.n} waiting on the client`,`Henderson · ${c.title} · sent ${c.date}`,'estimate','var(--info-soft)']),
+    ...(selOpen.length?[['🎨',`${selOpen.length} selection${selOpen.length>1?'s':''} still open`,`Henderson · next due ${selOpen[0].due} (${selOpen[0].title.toLowerCase()})`,'selections','var(--info-soft)']]:[]),
+    ...(poOpen.length?[['📦',`${poOpen.length} purchase order${poOpen.length>1?'s':''} to send or confirm`,poOpen.map(p=>`${p.n} ${p.v}`).join(' · '),'schedule','var(--accent-soft)']]:[]),
+  ];
+  const next = [...CAL].sort((a,b)=>a.start-b.start).slice(0,5);
+  const keep = curJob; useJob(1); const t = totals(); useJob(keep);
+  return `<div class="row between"><div><h1>Good morning, Justin</h1><p class="sub">Project manager · everything on your jobs that needs you, on one screen. No calls, texts or spreadsheets to piece it together.</p></div></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Jobs you're running</div><div class="v">${run.length}</div><div class="d muted">estimating to in progress</div></div>
+    <div class="card stat"><div class="k">Needs you today</div><div class="v ${todo.length?'':'pos'}">${todo.length}</div><div class="d muted">listed below</div></div>
+    <div class="card stat"><div class="k">Crews booked in November</div><div class="v">${new Set(CAL.map(e=>e.crew)).size}</div><div class="d muted">${CAL.length} phases on the calendar</div></div>
+    <div class="card stat"><div class="k">Henderson margin</div><div class="v">${Math.round((t.contract-t.budget)/t.contract*100)}%</div><div class="d muted">planned, while it runs</div></div>
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h2>Needs you today</h2>${todo.length?todo.map(([i,tt,d,pg,bg])=>`<div class="todo" role="button" tabindex="0" style="cursor:pointer" onclick="go('${pg}')"><div class="ic" style="background:${bg}">${i}</div><div style="flex:1"><strong>${tt}</strong><div class="small muted">${d}</div></div><span class="small muted">Open →</span></div>`).join(''):'<p class="small pos" style="margin:0">✓ Nothing waiting on you.</p>'}</div>
+    <div class="card"><h2>Coming up on the calendar</h2>${next.map(e=>{const x=subOf(e.crew);return `<div class="todo" role="button" tabindex="0" style="cursor:pointer" onclick="go('calendar')"><div class="ic" style="background:${e.c};color:#fff;font-size:12px;font-weight:700">${e.start}</div><div style="flex:1"><strong>${e.label}</strong><div class="small muted">${e.job} · Nov ${e.start}${e.len>1?'–'+(e.start+e.len-1):''} · ${e.crew}${x&&!x.inhouse?' ('+x.co+')':''}</div></div></div>`}).join('')}</div>
+  </div>
+  <div class="card mt"><h2>Your jobs</h2><div class="tablewrap"><table><thead><tr><th>Job</th><th>Client</th><th>Stage</th><th class="r">Value</th></tr></thead><tbody>
+    ${run.map(j=>`<tr style="cursor:pointer" onclick="pickJob(${j.id})"><td><strong>${j.name}</strong></td><td class="small">${j.client}<div class="muted">${j.city}</div></td><td><span class="pill ${j.status==='In progress'?'p-green':j.status==='Proposal sent'?'p-blue':'p-amber'}">${j.status}</span></td><td class="r">${fmt(jobValue(j))}</td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="small muted" style="margin:10px 0 0">This is how one project manager runs 8–10 jobs at once: the app gathers what needs attention, and every line opens the screen to fix it.</p></div>`;
+};
 
 // ---------- crews + subcontractors: one record per company, its crews, contact, paperwork and a score from real jobs ----------
 // sample companies only (no real businesses or people). Scores come from jobs run in this system.
@@ -1543,7 +1575,7 @@ function sendCrewDay(){ FIELD.crewSent=true; const n=Object.values(FIELD.crew).f
 const CARDS = {req:null, cards:[
     {n:'Marco T. (sample)', r:'Crew lead · Crew A', last:'4821'},
     {n:'Luis P. (sample)', r:'Crew lead · Crew B', last:'7730'},
-    {n:'Justin', r:'Production manager', last:'1196'}],
+    {n:'Justin', r:'Project manager', last:'1196'}],
   tx:[
     {t:'Oct 23 · 2:10 PM', who:'Luis P.', v:'Home Depot #2231', job:'Nguyen Front Yard', code:'Turf & Planting', amt:64.18, st:'ok'},
     {t:'Oct 22 · 6:48 PM', who:'Luis P.', v:'Circle K (fuel)', job:'None', code:'', amt:41.00, st:'declined'},
@@ -1666,7 +1698,7 @@ PAGES.finance = () => {
   <div class="card mt"><h2>Exports</h2><div class="row">${['Profit + loss by job (PDF)','Payroll summary (CSV)','Sales tax report (CSV)','Year-end 1099 totals (CSV)'].map(x=>`<button class="btn" onclick="toast('Demo: in the real app this downloads ${x}.')">${x}</button>`).join('')}</div></div>`;
 };
 const USERS = [
-  ['Austin','Owner / Sales','Everything','On','Today'],['Joel','Master Admin (finance)','Everything + finance','Required','Today'],['Justin','Production manager','Jobs, calendar, POs, time','On','Today'],
+  ['Austin','Owner / Sales','Everything','On','Today'],['Joel','Master Admin (finance)','Everything + finance','Required','Today'],['Justin','Project manager','Jobs, calendar, POs, time','On','Today'],
   ['Mia R. (sample)','Designer','Quotes + design files','On','Yesterday'],['Marco T. (sample)','Field crew lead','Crew app only','Phone code','Today'],['Clients','Client portal','Their own job only','Email code','—'],
 ];
 const PERMS = [['Leads + quotes','✓','✓','view','✓','—','—'],['Estimates + proposals','✓','✓','view','—','—','own'],['Crew calendar','✓','✓','✓','—','own jobs','—'],['Time + pay','✓','✓','approve','—','clock in','—'],
@@ -1688,7 +1720,7 @@ PAGES.flow = () => {
   const LANES = [
     ['Owner / Sales (Austin)','owner',[[['Work the leads','leads']],[['Request + review quotes','quotes']],[['Proposal + e-sign','proposal']],[['Approve change orders','estimate']],[['Job costing','costing']]]],
     ['Designer','designer',[[],[['Design queue: specs → AutoCAD → takeoff','quotes']],[['Client selections','selections']],[],[]]],
-    ['Production manager (Justin)','production',[[],[],[['Job lands on the board','jobs']],[['Drag-and-drop crew calendar','calendar'],['POs + materials','schedule']],[['Approve time cards','time']]]],
+    ['Project manager (Justin)','production',[[],[],[['Job lands on the board','jobs']],[['Drag-and-drop crew calendar','calendar'],['POs + materials','schedule']],[['Approve time cards','time']]]],
     ['Field crew lead','field',[[],[],[],[['Clock in, crew day, receipts, photos','field']],[]]],
     ['Master Admin (Joel)','admin',[[],[],[],[['QuickBooks sync','qbo']],[['Master Admin dashboard','admin'],['Finance reports + payroll','finance']]]],
     ['Client (homeowner)','client',[[],[],[['Signs proposal','c-proposal'],['Picks finishes','c-selections']],[['Approves change orders','c-changes']],[['Pays from the portal','portal']]]],
@@ -1703,7 +1735,7 @@ PAGES.flow = () => {
 const RQ_MODULES = [
   ['Accounts, roles + security','AUTH',[
     ['Users sign in with email + password. A forgotten password is reset by an emailed link that expires after 30 minutes.','Must'],
-    ['The system supports 6 roles: Owner/Sales, Master Admin (finance), Designer, Production manager, Field crew lead and Client. Each role only sees the screens and data its permissions allow.','Must'],
+    ['The system supports 6 roles: Owner/Sales, Master Admin (finance), Designer, Project manager, Field crew lead and Client. Each role only sees the screens and data its permissions allow.','Must'],
     ['Master Admin and Owner sign-ins require a second factor (a 6-digit authenticator code) every time.','Must'],
     ['Clients sign in with a one-time 6-digit email code and see only their own job.','Must'],
     ['Admins can invite, deactivate and change the role of any user. Changes take effect immediately.','Must'],
@@ -1814,7 +1846,7 @@ PAGES.reqdoc = () => {
       <tr><td>Owner / Sales</td><td>Austin</td><td>Leads, quotes, approvals, proposals, everything</td></tr>
       <tr><td>Master Admin</td><td>Joel</td><td>Finance reports, payroll approval, QuickBooks, users</td></tr>
       <tr><td>Designer</td><td>Designer</td><td>Specs, drawings, takeoffs, selections</td></tr>
-      <tr><td>Production manager</td><td>Justin</td><td>Jobs board, crew calendar, POs, time approval, costing</td></tr>
+      <tr><td>Project manager</td><td>Justin</td><td>Jobs board, crew calendar, POs, time approval, costing</td></tr>
       <tr><td>Field crew lead</td><td>Crew leads</td><td>Clock in, crew day, receipts, photos (phone)</td></tr>
       <tr><td>Client</td><td>Homeowners</td><td>Sign, choose finishes, approve changes, pay</td></tr>
     </tbody></table></div>
