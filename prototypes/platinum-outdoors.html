@@ -283,6 +283,14 @@ body.dragging{cursor:grabbing;user-select:none}
 .newjob .dot{width:12px;height:12px;border-radius:50%;background:#5fe0b5;box-shadow:0 0 0 0 rgba(95,224,181,.7);animation:njpulse 1.6s infinite}
 @keyframes njpulse{0%{box-shadow:0 0 0 0 rgba(95,224,181,.7)}70%{box-shadow:0 0 0 10px rgba(95,224,181,0)}100%{box-shadow:0 0 0 0 rgba(95,224,181,0)}}
 @media (prefers-reduced-motion:reduce){.newjob .dot{animation:none}}
+.igfire{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:linear-gradient(135deg,#1f2a37,#3b1d10);color:#fff;text-decoration:none;box-shadow:0 0 0 2px #f59e0b55;transition:transform .15s,box-shadow .15s}
+.igfire b{display:block;font-size:15px}.igfire small{color:#fcd34d;font-size:12px}
+.igfire .igem{font-size:26px;display:inline-block;transform-origin:50% 90%}
+.igfire.lit{transform:scale(1.06);box-shadow:0 0 18px 4px #f97316aa,0 0 0 2px #fbbf24}
+.igfire.lit .igem{animation:igflick .18s infinite alternate}
+@keyframes igflick{from{transform:rotate(-8deg) scale(1.1)}to{transform:rotate(8deg) scale(1.35)}}
+.fxp{position:fixed;left:0;top:0;pointer-events:none;z-index:80;will-change:transform,opacity;line-height:1}
+@media (prefers-reduced-motion:reduce){.igfire.lit .igem{animation:none}}
 .navsec{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:14px 10px 4px;border-top:1px solid var(--line);margin-top:8px}
 .navkey{padding:12px 10px 0;margin-top:8px;border-top:1px solid var(--line);line-height:1.5}
 .segtog{display:inline-flex;background:#eef0f3;border-radius:999px;padding:3px;gap:2px}
@@ -624,8 +632,9 @@ function realCard(){
 PAGES.company = () => {
   const fact = (k,v,src) => `<div style="display:grid;grid-template-columns:110px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)"><span class="muted">${k}</span><span style="text-align:right">${v}<div class="small muted">${src}</div></span></div>`;
   const est = (k,v,d) => `<div class="card stat"><div class="k">${k}</div><div class="v" style="font-size:21px">${v}</div><div class="d muted">${d}</div></div>`;
-  return `<h1>Company overview: Platinum Outdoors</h1>
-  <p class="sub">What public sources show about the business, plus our best estimates. Estimates are ranges from outside clues, not your books. Correct us and we'll update them.</p>
+  return `<div class="row between" style="gap:12px;flex-wrap:wrap;align-items:flex-start"><div style="flex:1;min-width:260px"><h1>Company overview: Platinum Outdoors</h1>
+  <p class="sub">What public sources show about the business, plus our best estimates. Estimates are ranges from outside clues, not your books. Correct us and we'll update them.</p></div>
+  <a class="igfire" href="https://www.instagram.com/platinumoutdoorsaz/" target="_blank" rel="noopener noreferrer" onmouseenter="fireStart(this)" onmouseleave="fireStop()" onfocus="fireStart(this)" onblur="fireStop()" onclick="fireStop()"><span class="igem">🔥</span><span><b>@platinumoutdoorsaz</b><small>See the work on Instagram</small></span></a></div>
   <div class="grid g2">
     <div class="card"><div class="row between"><h2 style="margin:0">What we found</h2><span class="pill p-green">Verified</span></div>
       ${fact('Legal name','Platinum Outdoors LLC','Arizona Registrar of Contractors')}
@@ -1597,6 +1606,24 @@ document.addEventListener('drop', e=>{ if(page!=='kickoff') return; const cell=e
   if(t==='ph') kickPlace(+v,day); else if(t==='crew'){ const ev=e.target.closest('[data-kev]'); const i=ev?+ev.dataset.kev:KICK.ph.findIndex(p=>p.start!=null&&day>=p.start&&day<=p.start+p.d-1); if(i>=0) kickCrew(i,v); else toast('Drop a crew onto a phase that is on the calendar.'); } });
 
 function pmOpen(pg){ const [p,id]=pg.split('@'); if(p==='kickoff'){ schedKickoff(+id); return; } if(id&&!DATA[+id]){ go('calendar'); toast(`${jobs.find(j=>j.id==id).name}: book the kickoff on the crew calendar. Its full schedule builds from the signed estimate.`); return; } if(id) useJob(+id); go(p); }
+
+// ---------- Instagram button: fire + sparks + confetti while hovered (stops on leave or click) ----------
+let FX = {on:false, el:null, parts:[], raf:0, spawn:0};
+const FX_BITS = ['🔥','🔥','🔥','✨','🎉','💥','⭐'], FX_COLORS = ['#f97316','#fbbf24','#ef4444','#22c55e','#3b82f6','#ec4899','#facc15'];
+function fireStart(el){ if(FX.on) return; FX.on=true; FX.el=el; el.classList.add('lit');
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  FX.spawn=setInterval(()=>{ for(let i=0;i<6;i++) fxAdd(); }, 60); if(!FX.raf) FX.raf=requestAnimationFrame(fxTick); }
+function fireStop(){ FX.on=false; clearInterval(FX.spawn); if(FX.el) FX.el.classList.remove('lit'); }
+function fxAdd(){ if(!FX.el||FX.parts.length>220) return; const r=FX.el.getBoundingClientRect(), d=document.createElement('span'), emoji=Math.random()<.45;
+  d.className='fxp'; if(emoji){ d.textContent=FX_BITS[Math.random()*FX_BITS.length|0]; d.style.fontSize=(14+Math.random()*16)+'px'; }
+  else { const w=4+Math.random()*6; Object.assign(d.style,{width:w+'px',height:(w*1.6)+'px',background:FX_COLORS[Math.random()*FX_COLORS.length|0],borderRadius:'2px'}); }
+  document.body.appendChild(d);
+  const a=-Math.PI/2+(Math.random()-.5)*2.4, v=4+Math.random()*7;
+  FX.parts.push({d, x:r.left+22+Math.random()*(r.width-30), y:r.top+r.height/2, vx:Math.cos(a)*v, vy:Math.sin(a)*v, rot:Math.random()*360, vr:(Math.random()-.5)*20, life:0, max:50+Math.random()*40}); }
+function fxTick(){ FX.parts=FX.parts.filter(p=>{ p.life++; p.vy+=.22; p.vx*=.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+    const o=Math.max(0,1-p.life/p.max); p.d.style.transform=`translate(${p.x}px,${p.y}px) rotate(${p.rot}deg)`; p.d.style.opacity=o;
+    if(o<=0||p.y>innerHeight+40){ p.d.remove(); return false; } return true; });
+  FX.raf = (FX.on||FX.parts.length) ? requestAnimationFrame(fxTick) : 0; }
 
 // ---------- Justin's day: what a project manager sees first (MVP) ----------
 PAGES.pm = () => {
