@@ -2386,6 +2386,21 @@ PAGES.bigq = () => { const price=299, rows=[[25,'Year 2 · a few friendly compan
     <div class="tablewrap"><table><thead><tr><th>Companies paying</th><th>When it could happen</th><th class="r">Per year</th></tr></thead><tbody>
       ${rows.map(([n,w])=>`<tr><td><strong>${n}</strong></td><td class="small">${w}</td><td class="r"><strong>${fmt(n*price*12)}</strong></td></tr>`).join('')}</tbody></table></div>
     <p class="small muted" style="margin:10px 0 0">There are tens of thousands of design-build landscape companies in the US. Even a small share is a real business. Hosting costs stay small per company; the real costs are support, sales and marketing.</p></div>
+  <div class="card mt"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">Beyond landscaping</h2><span class="pill p-blue">Illustration · not a forecast</span></div>
+    <p class="small" style="margin:6px 0 12px">The engine isn't really about landscaping. It fits any trade that <strong>designs a job, prices it from a cost book, sells it with a proposal, then runs crews and subs through change orders and selections</strong>. Each new trade needs its own cost book, phase templates and finish choices, not a rebuild.</p>
+    <div class="grid g4" style="gap:10px">${[
+      ['🏊','Pool + spa builders','Design, shell, plumbing, decking subs, finish selections'],
+      ['🪵','Deck, patio + pergola builders','Drawings to materials, crews by phase, upgrades as change orders'],
+      ['🧱','Concrete + masonry','Quantities from plans, pours scheduled by crew, subs'],
+      ['🚧','Fence + gate contractors','Linear-foot pricing, permits, material orders'],
+      ['🏡','Outdoor kitchens + living','Appliance and finish selections, gas and electrical subs'],
+      ['🔨','Home remodelers','Kitchen and bath: selections, allowances, change orders'],
+      ['☀️','Solar + outdoor lighting','System design, permits, install crews, utility sign-off'],
+      ['💧','Irrigation + drainage','Zones from drawings, parts lists, service plans'],
+    ].map(([i,t,d])=>`<div style="background:var(--bg);border-radius:10px;padding:12px"><div style="font-size:20px">${i}</div><strong class="small" style="display:block;margin-top:4px">${t}</strong><div class="small muted" style="margin-top:2px">${d}</div></div>`).join('')}</div>
+    <div class="tablewrap" style="margin-top:14px"><table><thead><tr><th>Stage</th><th>Who it's sold to</th><th class="r">Companies</th><th class="r">Per year at $299/mo</th></tr></thead><tbody>
+      ${[['1 · Landscaping','Design-build landscapers',300],['2 · + Outdoor living','+ pools, decks, patios, outdoor kitchens',650],['3 · + Home trades','+ concrete, fencing, remodelers, solar, irrigation',1500]].map(([st,w,n])=>`<tr><td><strong>${st}</strong></td><td class="small">${w}</td><td class="r">${n.toLocaleString()}</td><td class="r"><strong>${fmt(n*299*12)}</strong></td></tr>`).join('')}</tbody></table></div>
+    <p class="small muted" style="margin:10px 0 0">Each step is its own push: the trade's cost book and templates, a few pilot companies, and selling into that trade. The outdoor-living trades are the natural next step, because Platinum already works alongside them.</p></div>
   <div class="grid g2 mt">
     <div class="card"><h2>What it takes</h2>
       <div class="todo"><div class="ic" style="background:var(--accent-soft)">1</div><div><strong>Prove it at Platinum first</strong><div class="small muted">Run your own jobs on it for about a year. Real numbers are the best sales pitch.</div></div></div>
