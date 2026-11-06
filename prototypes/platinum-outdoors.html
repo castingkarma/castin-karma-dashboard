@@ -525,6 +525,7 @@ const TEAM_NAV = [['leads','Leads'],['jobs','Jobs'],['estimate','Estimate & COs'
 const CLIENT_NAV = [['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']];
 
 function badge(key){
+  if(key==='crewsched'){const n=crewNew().length;return n?`<span class="n">${n}</span>`:''}
   if(key==='costbook'){const n=vbOpen().length;return n?`<span class="n">${n}</span>`:''}
   if(key==='handoff'){const n=jobs.filter(j=>j.status==='Sold'&&!j.handed).length;return n?`<span class="n">${n}</span>`:''}
   if(key==='changes'){const n=coCount();return n?`<span class="n">${n}</span>`:''}
@@ -1219,7 +1220,7 @@ const ROLES = {
   admin:{l:'Master Admin (Joel)', who:'Joel', sub:'Owner · finance', home:'admin', nav:[['admin','Master Admin'],['finance','Finance reports'],['costbook','Cost book'],['costing','Job costing'],['time','Payroll'],['cards','Company cards'],['qbo','QuickBooks'],['subs','Crews & subs'],['users','Users & permissions'],FLOW]},
   designer:{l:'Designer', who:'Mia R. (sample)', sub:'Design + specs', home:'quotes', nav:[['quotes','Design queue'],['selections','Selections'],FLOW]},
   production:{l:'Project manager (Justin Butler)', who:'Justin Butler', sub:'Project manager', home:'pm', nav:[['pm','My day'],['jobs','Jobs'],['calendar','Crew calendar'],['subs','Crews & subs'],['schedule','Job schedule & POs'],['changes','Change orders'],['selections','Selections'],['costing','Job costing'],['-','Phase 2'],['time','Time & pay'],['cards','Company cards'],FLOW]},
-  field:{l:'Field crew lead', who:'Marco T. (sample)', sub:'Crew lead · phone app', home:'field', nav:[['field','Today'],FLOW]},
+  field:{l:'Field crew lead (Leo)', who:'Leo', sub:'Crew lead · Crew A · phone app', home:'field', nav:[['field','Today'],['crewsched','My schedule'],['crewjob','Job details'],['crewtime','My hours'],FLOW]},
   client:{l:'Client (homeowner)', who:'Dana Henderson', sub:'Henderson Backyard', home:'portal', nav:[['portal','My project'],['c-selections','Selections'],['c-changes','Change orders'],['c-proposal','Proposal (new job)']]},
 };
 function populateRoles(){ document.getElementById('roleSel').innerHTML = Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${r.l}</option>`).join(''); document.getElementById('roleSel').value=role; }
@@ -1637,7 +1638,7 @@ const CO_TODAY = 27;             // Tue Oct 27 in the demo
 Object.assign(DATA[1].cos[0], {src:'client', by:'Dana Henderson', days:1, ordered:true, scheduled:true, told:true, crewSeen:true});
 Object.assign(DATA[1].cos[1], {src:'client', by:'Mark Henderson', days:0, sentDay:15});
 const CO_REQ = [
-  {id:1, src:'crew', by:'Marco T. (crew lead)', t:'Old irrigation main under the paver area: reroute before pavers go down', photos:2, date:'Oct 26', guess:{code:'TURF', c:640, m:35, days:1}},
+  {id:1, src:'crew', by:'Leo (crew lead)', t:'Old irrigation main under the paver area: reroute before pavers go down', photos:2, date:'Oct 26', guess:{code:'TURF', c:640, m:35, days:1}},
   {id:2, src:'client', by:'Dana Henderson (portal)', t:'Add 2 uplights on the palm trees', photos:0, date:'Oct 25', guess:{code:'LITE', c:420, m:45, days:0}},
 ];
 const CO_SRC = {client:['🏠','Client asked'], crew:['🚩','Crew flagged'], selection:['🎨','Selection over allowance'], office:['🗂','Office']};
@@ -1716,7 +1717,7 @@ function coTell(i){ DATA[1].cos[i].told=true; render(); toast('Crew notified on 
 // sample companies only (no real businesses or people). Scores come from jobs run in this system.
 const TRADES = ['Hardscape + install','Masonry','Electrical','Gas lines','Turf + planting','Irrigation','Pools + water features','Other'];
 const SUBS = [
-  {id:1, co:'Platinum Outdoors install crews', inhouse:true, trade:'Hardscape + install', who:'Justin (production)', ph:'(480) 555-0100', em:'crews@yourcompany.com', coi:null, crews:[['Crew A','Marco T.',3],['Crew B','Luis P.',3],['Crew C','Sam D.',2]], jobs:41, ontime:96, punch:1.2, callbacks:1, rating:4.8},
+  {id:1, co:'Platinum Outdoors install crews', inhouse:true, trade:'Hardscape + install', who:'Justin (production)', ph:'(480) 555-0100', em:'crews@yourcompany.com', coi:null, crews:[['Crew A','Leo',3],['Crew B','Luis P.',3],['Crew C','Sam D.',2]], jobs:41, ontime:96, punch:1.2, callbacks:1, rating:4.8},
   {id:2, co:'Desert Stoneworks (sample)', trade:'Masonry', who:'Leo', ph:'(480) 555-0142', em:'office@example.com', coi:'Nov 4, 2026', crews:[['Masonry sub','Leo',4]], jobs:12, ontime:88, punch:2.6, callbacks:2, rating:4.3},
   {id:3, co:'Bright Line Electric (sample)', trade:'Electrical', who:'Leo', ph:'(602) 555-0177', em:'dispatch@example.com', coi:'Aug 30, 2027', crews:[['Electrical sub','Leo',2]], jobs:18, ontime:97, punch:0.6, callbacks:0, rating:4.9},
   {id:4, co:'Valley Gas Pros (sample)', trade:'Gas lines', who:'Leo', ph:'(480) 555-0119', em:'jobs@example.com', coi:'Mar 15, 2027', crews:[['Gas sub','Leo',2]], jobs:9, ontime:74, punch:3.1, callbacks:3, rating:3.6},
@@ -1829,7 +1830,7 @@ document.addEventListener('pointerup', ()=>{
 const JOBCODE = {HEN:'Henderson Backyard', ALV:'Alvarez Pool Deck', NGU:'Nguyen Front Yard', PAT:'Patel Outdoor Kitchen'};
 const WEEK = ['Mon 10/19','Tue 10/20','Wed 10/21','Thu 10/22','Fri 10/23','Sat 10/24'];
 const CREW_TIME = [
-  {n:'Marco T.', r:'Crew lead · 1099 sub', type:'Day rate', rate:260, days:['HEN','HEN','HEN','HEN','HEN',''], st:'Submitted'},
+  {n:'Leo', r:'Crew lead · 1099 sub', type:'Day rate', rate:260, days:['HEN','HEN','HEN','HEN','HEN',''], st:'Submitted'},
   {n:'Luis P.', r:'Installer · 1099 sub', type:'Day rate', rate:190, days:['HEN','HEN','ALV½','HEN','HEN',''], st:'Submitted'},
   {n:'Andre K.', r:'Installer · 1099 sub', type:'Day rate', rate:180, days:['HEN','HEN','HEN','','HEN','HEN½'], st:'Submitted'},
   {n:'Sam D.', r:'Installer · 1099 sub', type:'Day rate', rate:180, days:['NGU','NGU','NGU½','HEN','HEN',''], st:'Submitted'},
@@ -1870,47 +1871,108 @@ async function approveTime(b){ b.disabled=true; b.textContent='Approving…'; aw
   render(); toast('Time approved. Pay sent to QuickBooks and labor posted to each job.'); }
 
 // ---------- field crew app (phone) ----------
-const FIELD = {clocked:null, crew:{'Luis P.':true,'Andre K.':true,'Sam D.':false}, crewSent:false, receipt:null, photos:0};
-PAGES.field = () => `<div class="phone">
-  <div class="small muted">Platinum Outdoors · crew app</div>
-  <h1 style="font-size:21px;margin-top:4px">Good morning, Marco</h1>
-  <div class="card" style="margin-top:12px;padding:14px"><div class="small muted">Today · Mon Oct 26</div><strong>Henderson Backyard</strong><div class="small muted">Scottsdale · seat wall + paver cuts</div>
-    <div class="small" style="margin-top:8px">☐ Finish seat wall cap<br>☐ Paver cuts along the house<br>☐ Photos before you leave</div></div>
-  ${FIELD.clocked?`<div class="card" style="margin-top:10px;padding:12px;background:var(--accent-soft);border-color:#9fd8c6"><strong>✓ Clocked in ${FIELD.clocked}</strong><div class="small muted">Location saved at the job site</div></div>`
-    :`<button class="bigbtn go" onclick="FIELD.clocked='7:02 AM';render();toast('Clocked in at 7:02 AM on Henderson Backyard.')">Clock in</button>`}
-  ${FIELD.clocked?`<h2 style="font-size:15px;margin:16px 0 4px">Crew on site today</h2>${Object.entries(FIELD.crew).map(([n,on])=>`<label class="check" style="cursor:pointer"><input type="checkbox" ${on?'checked':''} ${FIELD.crewSent?'disabled':''} onchange="FIELD.crew['${n}']=this.checked;render()"> ${n} <span class="small muted" style="margin-left:auto">${on?'full day':'not here'}</span></label>`).join('')}
-    <button class="bigbtn alt" ${FIELD.crewSent?'disabled':''} onclick="sendCrewDay()">${FIELD.crewSent?'✓ Crew day sent':'Send crew day to Time & pay'}</button>`:''}
-  ${(()=>{ const reqs=[]; Object.entries(DATA).forEach(([jid,d])=>(d.schedule||[]).forEach((p,i)=>{ if(p.crew==='Crew A'&&p.conf==='sent') reqs.push([+jid,i,p]); }));
-    return reqs.length?`<h2 style="font-size:15px;margin:18px 0 4px">Schedule to confirm</h2>${reqs.map(([jid,i,p])=>`<div class="card" style="padding:12px;margin-top:8px"><strong>${p.n}</strong><div class="small muted">${jobs.find(j=>j.id===jid)?.name} · ${dayDate(p.s)} – ${dayDate(p.s+p.d-1)} (${p.d} days)</div>
-      <div class="row" style="margin-top:8px"><button class="btn sm primary" onclick="crewReply(${jid},${i},'confirmed')">✓ Confirm</button><button class="btn sm" onclick="crewReply(${jid},${i},'declined')">Can't make it</button></div></div>`).join('')}`:''; })()}
+// ---------- crew app (Leo, Crew A lead): today, my schedule, job details, my hours; a job from assigned to complete ----------
+const FIELD = {clocked:null, out:null, crew:{'Luis P.':true,'Andre K.':true,'Sam D.':false}, crewSent:false, receipt:null, photos:0, cur:'a1', view:'a1'};
+const ASSIGN = [
+  {id:'a1', jid:1, job:'Henderson Backyard', phase:'Seat wall cap + paver cuts', when:'Mon Oct 26 – Tue Oct 27', days:2, day:1, st:'started', city:'Scottsdale', client:'Dana Henderson',
+   gate:'Side gate code 4417 · dog in the yard · Dana works from home', scope:'Cap the seat wall, cut pavers along the house, clean up for the kitchen crew.',
+   tasks:['Finish seat wall cap','Paver cuts along the house','Blow off + clean the patio','Photos before you leave'], done:[], mats:'Cap stone delivered Oct 22 (PO-1044) · polymeric sand is on the truck', plans:'Henderson_backyard_v3.pdf'},
+  {id:'a2', jid:1, job:'Henderson Backyard', phase:'Lighting + final walkthrough', when:'Thu Nov 12 – Fri Nov 13', days:2, day:1, st:'confirmed', city:'Scottsdale', client:'Dana Henderson', last:true,
+   gate:'Side gate code 4417 · dog in the yard', scope:'Set the fixtures and transformer, test every zone at dusk, walk the punch list with Justin and Dana.',
+   tasks:['Set 14 fixtures + transformer','Test every zone at dusk','Final photos'], done:[], punch:['Touch up grout at the grill island','Re-level 2 pavers by the gate','Haul off leftover base'], punchDone:[], mats:'Fixtures + transformer on PO-1046 (FX Luminaire / Ewing)', plans:'Henderson_lighting_plan.pdf'},
+  {id:'a3', jid:77, job:'Ellis Backyard', phase:'Demo + base', when:'Mon Nov 16 – Tue Nov 17', days:2, day:1, st:'new', city:'Queen Creek', client:'Morgan Ellis',
+   gate:'Gate code 2210 · two dogs', scope:'Remove the grass and rock, grade, and compact 4 inches of base for the pavers.',
+   tasks:['Remove grass + rock','Grade + compact 4" base','Photos'], done:[], mats:'ABC base delivered the morning of Nov 16', plans:'Ellis_backyard_v1.pdf'},
+];
+const asg = id => ASSIGN.find(a=>a.id===id);
+const ASG_ST = {new:['🔔 New · confirm it','p-amber'], confirmed:['Confirmed','p-blue'], started:['Working','p-green'], done:['✓ Done','p-grey'], declined:["Can't make it",'p-red']};
+const phoneHead = sub => `<div class="small muted">Platinum Outdoors · crew app</div><h1 style="font-size:21px;margin-top:4px">${sub}</h1>`;
+const crewNew = () => ASSIGN.filter(a=>a.st==='new');
+PAGES.field = () => { const a=asg(FIELD.cur), all=a.tasks.length, n=a.done.length, last=a.day>=a.days, ready=n===all && FIELD.photos>0;
+  return `<div class="phone">${phoneHead(`Good ${FIELD.out?'evening':'morning'}, Leo`)}
+  ${crewNew().length?`<div class="card" style="margin-top:12px;padding:12px;background:#0b3b2e;color:#fff;border:0;cursor:pointer" onclick="go('crewsched')"><div class="small" style="color:#9ff0d2;font-weight:700">🔔 NEW JOB ASSIGNED</div><strong>${crewNew()[0].job} · ${crewNew()[0].phase}</strong><div class="small" style="color:#cfe9df">${crewNew()[0].when} · tap to confirm</div></div>`:''}
+  ${a.st==='done'?`<div class="card" style="margin-top:12px;padding:14px;background:var(--accent-soft);border-color:#9fd8c6"><strong>✓ ${a.phase} is done</strong><div class="small muted">${a.job} · Justin has been told. ${a.last?'The job is complete.':'See My schedule for what\'s next.'}</div></div>
+    <button class="bigbtn alt" onclick="go('crewsched')">📅 My schedule</button>`
+  :`<div class="card" style="margin-top:12px;padding:14px"><div class="row between"><span class="small muted">Today · day ${a.day} of ${a.days}</span><a href="#" class="small" onclick="FIELD.view='${a.id}';go('crewjob');return false">Job details →</a></div>
+    <strong>${a.job}</strong><div class="small muted">${a.city} · ${a.phase}</div>
+    <div class="small" style="margin-top:6px">🔑 ${a.gate}</div>
+    <button class="btn sm" style="margin-top:8px" onclick="toast('Demo: opens directions to the job in Maps.')">🧭 Directions</button></div>
+  ${FIELD.clocked?`<div class="card" style="margin-top:10px;padding:12px;background:var(--accent-soft);border-color:#9fd8c6"><strong>✓ Clocked in ${FIELD.clocked}${FIELD.out?` · out ${FIELD.out}`:''}</strong><div class="small muted">Location saved at the job site</div></div>`
+    :`<button class="bigbtn go" onclick="crewClockIn()">Clock in</button>`}
+  ${FIELD.clocked&&!FIELD.out?`<h2 style="font-size:15px;margin:16px 0 4px">Today's checklist · ${n}/${all}</h2>
+    ${a.tasks.map((t,i)=>`<label class="check" style="cursor:pointer"><input type="checkbox" ${a.done.includes(i)?'checked':''} onchange="crewTask('${a.id}',${i},this.checked)"> ${t}</label>`).join('')}
+    ${a.last&&last?`<h2 style="font-size:15px;margin:16px 0 4px">Punch list from the walkthrough · ${a.punchDone.length}/${a.punch.length}</h2>${a.punch.map((t,i)=>`<label class="check" style="cursor:pointer"><input type="checkbox" ${a.punchDone.includes(i)?'checked':''} onchange="crewPunch('${a.id}',${i},this.checked)"> ${t}</label>`).join('')}`:''}
+    <button class="bigbtn alt" onclick="FIELD.photos+=3;render();toast('3 photos added to ${a.job}. Justin and the client see them.')">🖼 Add job photos ${FIELD.photos?`(${FIELD.photos})`:''}</button>`:''}
+  ${FIELD.clocked&&!FIELD.out?`<h2 style="font-size:15px;margin:16px 0 4px">Crew on site today</h2>${Object.entries(FIELD.crew).map(([nm,on])=>`<label class="check" style="cursor:pointer"><input type="checkbox" ${on?'checked':''} onchange="FIELD.crew['${nm}']=this.checked;render()"> ${nm} <span class="small muted" style="margin-left:auto">${on?'full day':'not here'}</span></label>`).join('')}
+    ${last?`<button class="bigbtn go" ${ready&&(!a.last||a.punchDone.length===a.punch.length)?'':'disabled'} onclick="crewPhaseDone('${a.id}')">${a.last?'✓ Job complete: send to Justin':'✓ Mark this phase done'}</button>
+      <div class="small muted" style="text-align:center;margin-top:4px">${ready?(a.last&&a.punchDone.length<a.punch.length?'Finish the punch list first':'Sends photos + crew day, clocks you out'):'Check off every item and add photos first'}</div>`
+      :`<button class="bigbtn go" onclick="crewEndDay('${a.id}')">End the day: send crew day + clock out</button>`}`:''}
+  ${FIELD.out&&a.st!=='done'?`<button class="bigbtn alt" onclick="crewNextDay('${a.id}')">☀️ Next morning (day ${Math.min(a.day+1,a.days)} of ${a.days})</button>`:''}`}
   ${fieldCard()}
-  <h2 style="font-size:15px;margin:18px 0 4px">Receipts + photos</h2>
+  <h2 style="font-size:15px;margin:18px 0 4px">Receipts</h2>
   ${FIELD.receipt?`<div class="card" style="padding:12px"><div class="row between"><strong>${FIELD.receipt.v}</strong><strong>${money2(FIELD.receipt.amt)}</strong></div>
       <div class="small muted">Job: ${FIELD.receipt.job} · ${FIELD.receipt.code}</div><div class="small muted">${FIELD.receipt.note}</div>
-      ${FIELD.receipt.sent?`<div class="small pos" style="margin-top:6px">✓ In QuickBooks as an expense on this job</div>`:`<button class="bigbtn go" onclick="sendReceipt()">Send to QuickBooks</button>`}</div>`
+      ${FIELD.receipt.sent?`<div class="small pos" style="margin-top:6px">✓ On the job's costs</div>`:`<button class="bigbtn go" onclick="sendReceipt()">Send it</button>`}</div>`
     :`<button class="bigbtn alt" onclick="snapReceipt()">📷 Snap a receipt</button>`}
   ${(()=>{ const wait=[...CO_REQ.map(r=>r.t), ...DATA[1].cos.filter(c=>c.status==='draft'||c.status==='sent').map(c=>c.title)], ok=DATA[1].cos.filter(c=>c.status==='approved'&&c.told&&!c.crewSeen);
-    return `<h2 style="font-size:15px;margin:18px 0 4px">Changes on this job</h2>${wait.map(t=>`<div class="card" style="padding:10px 12px;margin-top:6px;background:var(--warn-soft);border-color:#f1d49a"><strong class="small" style="color:var(--warn)">⏸ Not signed yet: don't start</strong><div class="small">${t}</div></div>`).join('')}${ok.map(c=>`<div class="card" style="padding:10px 12px;margin-top:6px;background:var(--accent-soft);border-color:#9fd8c6"><strong class="small pos">✓ Signed: OK to start</strong><div class="small">${c.title}</div></div>`).join('')}${wait.length||ok.length?'':'<div class="small muted">No changes waiting.</div>'}`; })()}
+    return a.jid!==1?'':`<h2 style="font-size:15px;margin:18px 0 4px">Changes on this job</h2>${wait.map(t=>`<div class="card" style="padding:10px 12px;margin-top:6px;background:var(--warn-soft);border-color:#f1d49a"><strong class="small" style="color:var(--warn)">⏸ Not signed yet: don't start</strong><div class="small">${t}</div></div>`).join('')}${ok.map(c=>`<div class="card" style="padding:10px 12px;margin-top:6px;background:var(--accent-soft);border-color:#9fd8c6"><strong class="small pos">✓ Signed: OK to start</strong><div class="small">${c.title}</div></div>`).join('')}${wait.length||ok.length?'':'<div class="small muted">No changes waiting.</div>'}`; })()}
   <button class="bigbtn alt" ${FIELD.flagged?'disabled':''} onclick="fieldFlag()">${FIELD.flagged?'✓ Extra work flagged to Justin':'🚩 Flag extra work'}</button>
-  <button class="bigbtn alt" onclick="FIELD.photos+=3;render();toast('3 job photos added to Henderson Backyard. The client sees them in their portal.')">🖼 Add job photos ${FIELD.photos?`(${FIELD.photos})`:''}</button>
 </div>
-<p class="small muted" style="text-align:center;margin-top:12px">This is what the crew lead sees on their phone. No logins to QuickBooks, no paper.</p>`;
+<p class="small muted" style="text-align:center;margin-top:12px">This is what the crew lead sees on their phone. No logins to QuickBooks, no paper.</p>`; };
+PAGES.crewsched = () => `<div class="phone">${phoneHead('My schedule')}
+  <p class="small muted" style="margin:4px 0 10px">Crew A · every job Justin has booked you on. Tap one for the address, gate code and plans.</p>
+  ${ASSIGN.map(a=>`<div class="card" style="padding:12px;margin-top:8px;${a.id===FIELD.cur&&a.st!=='done'?'border-color:#9fd8c6;background:var(--accent-soft)':''}">
+    <div class="row between"><strong>${a.job}</strong><span class="pill ${ASG_ST[a.st][1]}">${ASG_ST[a.st][0]}</span></div>
+    <div class="small">${a.phase}</div><div class="small muted">${a.when} · ${a.days} days · ${a.city}${a.id===FIELD.cur&&a.st!=='done'?' · today':''}</div>
+    <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">${a.st==='new'?`<button class="btn sm primary" onclick="crewConfirm('${a.id}',true)">✓ Confirm</button><button class="btn sm" onclick="crewConfirm('${a.id}',false)">Can't make it</button>`:''}
+      <button class="btn sm" onclick="FIELD.view='${a.id}';go('crewjob')">Job details</button></div></div>`).join('')}
+  ${(()=>{ const reqs=[]; Object.entries(DATA).forEach(([jid,d])=>(d.schedule||[]).forEach((p,i)=>{ if(p.crew==='Crew A'&&p.conf==='sent') reqs.push([+jid,i,p]); }));
+    return reqs.length?`<h2 style="font-size:15px;margin:18px 0 4px">More dates to confirm</h2>${reqs.map(([jid,i,p])=>`<div class="card" style="padding:12px;margin-top:8px"><strong>${p.n}</strong><div class="small muted">${jobs.find(j=>j.id===jid)?.name} · ${dayDate(p.s)} – ${dayDate(p.s+p.d-1)} (${p.d} days)</div>
+      <div class="row" style="margin-top:8px"><button class="btn sm primary" onclick="crewReply(${jid},${i},'confirmed')">✓ Confirm</button><button class="btn sm" onclick="crewReply(${jid},${i},'declined')">Can't make it</button></div></div>`).join('')}`:''; })()}
+</div>`;
+PAGES.crewjob = () => { const a=asg(FIELD.view)||asg(FIELD.cur);
+  const row=(k,v)=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="small muted">${k}</div><div class="small">${v}</div></div>`;
+  return `<div class="phone">${phoneHead(a.job)}<div class="small muted">${a.phase} · ${a.when}</div>
+  <div class="card" style="margin-top:12px;padding:12px">
+    ${row('Address','Sample address, '+a.city+' <a href="#" onclick="toast(\'Demo: opens directions in Maps.\');return false">Directions →</a>')}
+    ${row('Getting in',`🔑 <strong>${a.gate}</strong>`)}${row('Client',a.client+' · questions go through Justin')}
+    ${row('What we\'re doing',a.scope)}${row('Materials',a.mats)}
+    ${row('Plans',`<a href="#" onclick="toast('Demo: opens ${a.plans}.');return false">📄 ${a.plans}</a>`)}
+    ${row('Project manager','Justin Butler · <a href="#" onclick="toast(\'Demo: calling Justin…\');return false">(480) 555-0100</a>')}</div>
+  <h2 style="font-size:15px;margin:16px 0 4px">Checklist for this phase</h2>${a.tasks.map((t,i)=>`<div class="small" style="padding:4px 0">${a.done.includes(i)?'✅':'⬜'} ${t}</div>`).join('')}
+  <div class="row" style="gap:6px;margin-top:12px"><button class="btn sm" onclick="go('crewsched')">← My schedule</button>${a.id===FIELD.cur?`<button class="btn sm primary" onclick="go('field')">Today →</button>`:''}</div></div>`; };
+PAGES.crewtime = () => { const w=CREW_TIME.find(x=>x.n==='Leo'), days=WEEK.map((d,i)=>[d,w.days[i]]), tot=payOf(w);
+  return `<div class="phone">${phoneHead('My hours')}<p class="small muted" style="margin:4px 0 10px">Week of Oct 19 · day rate ${fmt(w.rate)}. Filled from your clock-ins; nothing to write down.</p>
+  ${days.map(([d,x])=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="small">${d}</span><span class="small">${x?`${JOBCODE[x.replace('½','')]}${x.endsWith('½')?' · half day':''}`:'<span class="muted">off</span>'}</span></div>`).join('')}
+  <div class="row between" style="margin-top:10px"><strong>This week</strong><strong>${fmt(tot)}</strong></div>
+  <div class="small ${w.st==='Approved'?'pos':'muted'}" style="margin-top:4px">${w.st==='Approved'?'✓ Approved by Joel · paid Friday':'Waiting for Joel to approve'}</div>
+  ${FIELD.clocked?`<div class="card" style="margin-top:12px;padding:10px 12px"><div class="small"><strong>Today:</strong> Henderson Backyard · in ${FIELD.clocked}${FIELD.out?` · out ${FIELD.out}`:' · still on the clock'}</div></div>`:''}</div>`; };
+function crewClockIn(){ FIELD.clocked='7:02 AM'; FIELD.out=null; const a=asg(FIELD.cur); if(a.st==='confirmed') a.st='started'; render(); toast(`Clocked in at 7:02 AM on ${a.job}. Location saved.`); }
+function crewTask(id,i,on){ const a=asg(id); a.done=on?[...new Set([...a.done,i])]:a.done.filter(x=>x!==i); render(); }
+function crewPunch(id,i,on){ const a=asg(id); a.punchDone=on?[...new Set([...a.punchDone,i])]:a.punchDone.filter(x=>x!==i); render(); }
+function crewEndDay(id){ const a=asg(id); if(!FIELD.crewSent) sendCrewDay(); FIELD.out='3:48 PM'; render(); toast(`Day ${a.day} of ${a.days} sent: crew day to Time & pay, clocked out 3:48 PM, ${a.done.length}/${a.tasks.length} done.`); }
+function crewNextDay(id){ const a=asg(id); a.day=Math.min(a.day+1,a.days); FIELD.clocked=null; FIELD.out=null; FIELD.crewSent=false; render(); toast(`Day ${a.day} of ${a.days} on ${a.job}.`); }
+function crewPhaseDone(id){ const a=asg(id); if(!FIELD.crewSent) sendCrewDay(); FIELD.out='4:15 PM'; a.st='done';
+  if(a.last){ const j=jobs.find(x=>x.id===a.jid); if(j) j.status='Complete'; }
+  render(); toast(a.last?`${a.job} complete. Justin has the final photos and punch list; ${a.client.split(' ')[0]} gets the final walkthrough sign-off.`:`${a.phase} done. Justin has the photos; the next crew is cleared to start.`); }
+function crewConfirm(id,ok){ const a=asg(id); a.st=ok?'confirmed':'declined'; render(); toast(ok?`Confirmed ${a.job} (${a.when}). Justin sees it on the calendar.`:`Justin was told you can't make ${a.job}. It's back on Justin's list to re-book.`); }
+function crewGoTo(id){ FIELD.cur=id; FIELD.clocked=null; FIELD.out=null; FIELD.crewSent=false; FIELD.photos=0; const a=asg(id); a.day=a.days; if(a.st==='confirmed') a.st='started'; }
 async function snapReceipt(){ toast('Reading the receipt…'); await wait(700); FIELD.receipt={v:'SiteOne Landscape Supply', amt:86.42, job:'Henderson Backyard', code:'Pavers & Hardscape', note:'Read from the photo: 4 bags polymeric sand', sent:false}; render(); }
 function sendReceipt(){ FIELD.receipt.sent=true; DATA[1].otherActual.PAV=(DATA[1].otherActual.PAV||0)+86.42;
   QBO_LOG.unshift({t:'Oct 26 · 10:14 AM', type:'Expense (receipt)', ref:'SiteOne #48213 · photo attached', job:'Henderson Backyard', amt:86.42, st:'Synced'});
   render(); toast('Receipt sent. It\'s in QuickBooks and in Henderson\'s job costing.'); }
-function fieldFlag(){ FIELD.flagged=true; CO_REQ.push({id:Date.now(), src:'crew', by:'Marco T. (crew lead)', t:'Soft spot under the seat wall footing: needs 2 extra yards of base', photos:2, date:'Oct 27', guess:{code:'PAV', c:310, m:35, days:0}}); render(); toast('Sent to Justin with 2 photos. Don’t start it until the client signs.'); }
-function sendCrewDay(){ FIELD.crewSent=true; const n=Object.values(FIELD.crew).filter(Boolean).length; render(); toast(`Crew day sent: Marco + ${n} installer${n===1?'':'s'}, full day on Henderson. Pay is figured from each day rate.`); }
+function fieldFlag(){ FIELD.flagged=true; CO_REQ.push({id:Date.now(), src:'crew', by:'Leo (crew lead)', t:'Soft spot under the seat wall footing: needs 2 extra yards of base', photos:2, date:'Oct 27', guess:{code:'PAV', c:310, m:35, days:0}}); render(); toast('Sent to Justin with 2 photos. Don’t start it until the client signs.'); }
+function sendCrewDay(){ FIELD.crewSent=true; const n=Object.values(FIELD.crew).filter(Boolean).length; render(); toast(`Crew day sent: Leo + ${n} installer${n===1?'':'s'}, full day on Henderson. Pay is figured from each day rate.`); }
 
 // ---------- company cards: locked by default, unlocked for one approved purchase (demo: no real card program) ----------
 const CARDS = {req:null, cards:[
-    {n:'Marco T. (sample)', r:'Crew lead · Crew A', last:'4821'},
+    {n:'Leo', r:'Crew lead · Crew A', last:'4821'},
     {n:'Luis P. (sample)', r:'Crew lead · Crew B', last:'7730'},
     {n:'Justin', r:'Project manager', last:'1196'}],
   tx:[
     {t:'Oct 23 · 2:10 PM', who:'Luis P.', v:'Home Depot #2231', job:'Nguyen Front Yard', code:'Turf & Planting', amt:64.18, st:'ok'},
     {t:'Oct 22 · 6:48 PM', who:'Luis P.', v:'Circle K (fuel)', job:'None', code:'', amt:41.00, st:'declined'},
-    {t:'Oct 21 · 9:35 AM', who:'Marco T.', v:'SiteOne Landscape Supply', job:'Henderson Backyard', code:'Pavers & Hardscape', amt:118.60, st:'ok'}]};
+    {t:'Oct 21 · 9:35 AM', who:'Leo', v:'SiteOne Landscape Supply', job:'Henderson Backyard', code:'Pavers & Hardscape', amt:118.60, st:'ok'}]};
 const cardPill = c => { const q=CARDS.req; return q&&q.who===c.n.split(' (')[0]&&q.st==='approved' ? `<span class="pill p-green">Open for 1 purchase</span>` : `<span class="pill p-grey">🔒 Locked</span>`; };
 PAGES.cards = () => { const q=CARDS.req, ok=CARDS.tx.filter(t=>t.st==='ok'), dec=CARDS.tx.filter(t=>t.st==='declined').length;
   return `<div class="row between"><div><h1>Company cards</h1><p class="sub">Each crew lead has a company card in Apple Pay or Google Pay on their phone. It stays locked. When they need to buy something, they ask in the crew app, you approve that one purchase, and the card opens for just that: one job, one vendor type, up to the amount you set, for a few hours. After the tap it locks again.</p></div></div>
@@ -1950,10 +2012,10 @@ function fieldCard(){ const q=CARDS.req;
       <button class="bigbtn go" onclick="cardTap(this)">Hold near the reader (Apple Pay)</button>`;
   return head+`<div class="card" style="padding:12px;background:var(--accent-soft);border-color:#9fd8c6"><strong>✓ Paid ${money2(q.paid)} at ${q.vendor}</strong><div class="small muted">Card locked again · on ${q.job} · ${q.code}</div></div>
     <button class="bigbtn alt" onclick="CARDS.req=null;render()">💳 Ask for another purchase</button>`; }
-function cardRequest(){ CARDS.req={who:'Marco T.', what:'Polymeric sand + edge restraint', job:'Henderson Backyard', code:'Pavers & Hardscape', vendor:'SiteOne Landscape Supply', max:250, st:'pending'}; render(); toast('Request sent to Justin. You\'ll get a ping when it\'s approved.'); }
+function cardRequest(){ CARDS.req={who:'Leo', what:'Polymeric sand + edge restraint', job:'Henderson Backyard', code:'Pavers & Hardscape', vendor:'SiteOne Landscape Supply', max:250, st:'pending'}; render(); toast('Request sent to Justin. You\'ll get a ping when it\'s approved.'); }
 async function cardTap(b){ b.disabled=true; b.textContent='Checking the approval…'; await wait(900); const q=CARDS.req; q.st='used'; q.paid=212.40;
   DATA[1].otherActual.PAV=(DATA[1].otherActual.PAV||0)+q.paid;
-  CARDS.tx.unshift({t:'Oct 26 · 11:20 AM', who:'Marco T.', v:q.vendor, job:q.job, code:q.code, amt:q.paid, st:'ok'});
+  CARDS.tx.unshift({t:'Oct 26 · 11:20 AM', who:'Leo', v:q.vendor, job:q.job, code:q.code, amt:q.paid, st:'ok'});
   QBO_LOG.unshift({t:'Oct 26 · 11:20 AM', type:'Expense (company card)', ref:'SiteOne · card •••• 4821', job:q.job, amt:q.paid, st:'Synced'});
   render(); toast('Approved at the reader: $212.40. The card locked again and the cost is on Henderson.'); }
 
@@ -2030,7 +2092,7 @@ PAGES.finance = () => {
 };
 const USERS = [
   ['Austin','Owner / Sales','Everything','On','Today'],['Joel','Master Admin (finance)','Everything + finance','Required','Today'],['Justin','Project manager','Jobs, calendar, POs, time','On','Today'],
-  ['Mia R. (sample)','Designer','Quotes + design files','On','Yesterday'],['Marco T. (sample)','Field crew lead','Crew app only','Phone code','Today'],['Clients','Client portal','Their own job only','Email code','—'],
+  ['Mia R. (sample)','Designer','Quotes + design files','On','Yesterday'],['Leo','Field crew lead','Crew app only','Phone code','Today'],['Clients','Client portal','Their own job only','Email code','—'],
 ];
 const PERMS = [['Leads + quotes','✓','✓','view','✓','—','—'],['Estimates + proposals','✓','✓','view','—','—','own'],['Crew calendar','✓','✓','✓','—','own jobs','—'],['Time + pay','✓','✓','approve','—','clock in','—'],
   ['Job costing','✓','✓','✓','—','—','—'],['Finance reports + AR','✓','✓','—','—','—','—'],['QuickBooks settings','—','✓','—','—','—','—'],['Users + permissions','—','✓','—','—','—','—']];
@@ -2702,7 +2764,7 @@ async function tourReplay(k,n){ tourKind=k; tourStep=0; if(n<=0){ const r=Object
 const ROLE_LOGIN = {
   production:['justin@yourcompany.com','Justin Butler · project manager'], owner:['austin@yourcompany.com','Austin · sales'],
   admin:['joel@yourcompany.com','Joel · Master Admin'], designer:['mia@yourcompany.com','Mia R. · designer'],
-  field:['marco@yourcompany.com','Marco T. · crew lead'], client:['dana.h@example.com','Dana Henderson · client portal'],
+  field:['leo@yourcompany.com','Leo · crew lead'], client:['dana.h@example.com','Dana Henderson · client portal'],
 };
 let loginAs = 'production';
 PAGES.login = () => { const c=loginAs==='client', f=loginAs==='field';
@@ -2768,15 +2830,25 @@ const DESIGNER_STEPS = [
   {t:'Help with selections', who:'3:00 PM · Selections', d:'Mia sees what each client still has to pick, and what it does to the budget.', run: async()=>{ asRole('designer','selections'); await wait(200); flash('main .grid.g3'); toast('Mia’s day done: designs in, quotes ready to price.'); }},
 ];
 const FIELD_STEPS = [
-  {t:'Marco opens the crew app', who:'6:55 AM · Marco T. · crew lead', d:'On the phone, signed in once. Today’s job, the checklist and the crew are already there.', run: async()=>{ await loginStep('field'); }},
-  {t:'Clock in at the job', who:'7:02 AM · crew app', d:'One tap. The location is saved at the job site, so pay and job costing fill themselves.', run: async()=>{
-    asRole('field','field'); await wait(200); if(!FIELD.clocked){ FIELD.clocked='7:02 AM'; render(); } toast('Clocked in at 7:02 AM on Henderson Backyard.'); }},
-  {t:'Send the crew day', who:'7:05 AM · crew app', d:'Tick who is on site. Their day goes to Time & pay, figured from each person’s rate.', run: async()=>{ asRole('field','field'); if(!FIELD.crewSent) sendCrewDay(); }},
-  {t:'Snap a receipt', who:'10:10 AM · crew app', d:'A photo of the receipt. The app reads vendor and amount and puts it on the job.', run: async()=>{
+  {t:'Leo opens the crew app', who:'6:55 AM · Leo · crew lead', d:'On the phone, signed in once. Today’s job, the gate code and a new assignment from Justin are right there.', run: async()=>{ await loginStep('field'); }},
+  {t:'Confirm a new job', who:'6:57 AM · My schedule', d:'Justin booked Crew A on Ellis Backyard. Leo confirms the dates from the phone, and Justin sees it on the calendar.', run: async()=>{
+    asRole('field','crewsched'); await wait(500); flash('main .phone .card'); await wait(500); if(asg('a3').st==='new') crewConfirm('a3',true); }},
+  {t:'Check the job before heading out', who:'7:00 AM · Job details', d:'Address and directions, the gate code, what we’re doing, what materials are there, and the plans. No calling the office.', run: async()=>{
+    FIELD.view='a1'; asRole('field','crewjob'); await wait(300); flash('main .phone .card'); }},
+  {t:'Clock in at the job', who:'7:02 AM · Today', d:'One tap. The location is saved at the job site, so pay and job costing fill themselves.', run: async()=>{ asRole('field','field'); if(!FIELD.clocked) crewClockIn(); }},
+  {t:'Work the checklist', who:'9:30 AM · Today', d:'Leo ticks off the work as it’s done and adds photos. Justin and the client see progress without a phone call.', run: async()=>{
+    asRole('field','field'); const a=asg('a1'); for(const i of [0,1]){ if(!a.done.includes(i)) crewTask('a1',i,true); await wait(350); } FIELD.photos+=3; render(); toast('2 of 4 done and 3 photos added. Justin and Dana see them.'); }},
+  {t:'Snap a receipt', who:'10:10 AM · Today', d:'A photo of the receipt. The app reads vendor and amount and puts it on the job.', run: async()=>{
     asRole('field','field'); if(!FIELD.receipt) await snapReceipt(); await wait(500); if(!FIELD.receipt.sent) sendReceipt(); }},
-  {t:'Flag extra work', who:'10:20 AM · crew app', d:'A soft spot under the seat wall footing. Flag it with photos; the app says not signed yet, don’t start.', run: async()=>{ asRole('field','field'); if(!FIELD.flagged) fieldFlag(); }},
-  {t:'Ask to use the company card', who:'11:00 AM · crew app', d:'Need sand from SiteOne. Ask in the app; the card opens only once it’s approved.', run: async()=>{
-    asRole('field','field'); if(!CARDS.req) cardRequest(); await wait(300); toast('Request sent. Marco’s day: clocked, paid, receipts in, nothing on paper.'); }},
+  {t:'Flag extra work', who:'10:20 AM · Today', d:'A soft spot under the seat wall footing. Flag it with photos; the app says not signed yet, don’t start.', run: async()=>{ asRole('field','field'); if(!FIELD.flagged) fieldFlag(); }},
+  {t:'End the day', who:'3:48 PM · Today', d:'One button sends the crew day to Time & pay and clocks the crew out. Day 1 of 2 is done.', run: async()=>{ asRole('field','field'); if(!FIELD.out) crewEndDay('a1'); }},
+  {t:'Day 2: finish the phase', who:'Tue 3:30 PM · Today', d:'Next morning, the rest of the checklist and the last photos. "Mark this phase done" tells Justin, and the kitchen crew is cleared to start.', run: async()=>{
+    asRole('field','field'); const a=asg('a1'); if(a.st!=='done'){ if(a.day<a.days) crewNextDay('a1'); await wait(300); crewClockIn(); await wait(300); for(let i=0;i<a.tasks.length;i++){ if(!a.done.includes(i)) crewTask('a1',i,true); await wait(250); } FIELD.photos+=2; render(); await wait(400); crewPhaseDone('a1'); } }},
+  {t:'Final walkthrough, job complete', who:'Fri Nov 13 · Today', d:'Lighting is in. Leo works the punch list from the walkthrough with Justin, then marks the whole job complete.', run: async()=>{
+    crewGoTo('a2'); asRole('field','field'); crewClockIn(); await wait(300); const a=asg('a2');
+    for(let i=0;i<a.tasks.length;i++){ crewTask('a2',i,true); await wait(220); } for(let i=0;i<a.punch.length;i++){ crewPunch('a2',i,true); await wait(220); } FIELD.photos+=4; render(); await wait(400); crewPhaseDone('a2'); }},
+  {t:'Check the hours', who:'Fri 5:00 PM · My hours', d:'The week’s days fill themselves from the clock-ins, with the pay worked out from Leo’s day rate.', run: async()=>{
+    asRole('field','crewtime'); await wait(200); flash('main .phone'); toast('Leo’s week: clocked, paid, photos and receipts in, nothing on paper.'); }},
 ];
 const CLIENT_STEPS = [
   {t:'Dana signs in to the portal', who:'7:30 PM · Dana Henderson · client', d:'No password: a 6-digit code by email. Dana sees only Dana’s own project.', run: async()=>{ await loginStep('client'); }},
@@ -2801,7 +2873,7 @@ const JUSTIN_STEPS = [
     flash('main .card'); toast('Nguyen Front Yard moved to Nov 15–18. No crew conflicts. Crew C and the client were notified.'); }},
   {t:'Chase the sub\'s insurance', who:'7:20 AM · Crews & subs', d:'Desert Stoneworks\' insurance ends Nov 4, mid-job. Their new certificate came in, so Justin updates the date and the warning clears.', run: async()=>{
     asJustin('subs'); await wait(300); subEdit(2); await wait(300); const el=document.getElementById('s_coi'); el.value=''; await typeIn('s_coi','Jun 30, 2027'); await wait(300); subSave(2); flash('main .grid.g2 .card:nth-child(2)'); toast('Insurance good to Jun 30, 2027. The calendar warning for Henderson is gone.'); }},
-  {t:'A crew flags extra work', who:'10:20 AM · Marco, crew lead', d:'On site, Marco finds a soft spot under the seat wall footing. It gets flagged from the crew app with 2 photos. The app says: not signed yet, don\'t start.', run: async()=>{
+  {t:'A crew flags extra work', who:'10:20 AM · Leo, crew lead', d:'On site, Leo finds a soft spot under the seat wall footing. It gets flagged from the crew app with 2 photos. The app says: not signed yet, don\'t start.', run: async()=>{
     closeModal(); role='field'; view='team'; document.getElementById('roleSel').value='field'; go('field'); await wait(300); if(!FIELD.flagged) fieldFlag(); await wait(200);
     const h=[...document.querySelectorAll('#main h2')].find(x=>x.textContent.includes('Changes on this job')); if(h) flash(h.nextElementSibling||h); }},
   {t:'Price it and send it', who:'10:35 AM · Change orders', d:'Justin prices the flag from the cost book in a minute. It\'s under $2,500, so it goes straight to the client to sign.', run: async()=>{
@@ -2832,7 +2904,7 @@ const TOURS = {
   sales:{title:'A day in the life of Austin (sales)', name:'Austin', blurb:'Austin signs in, mails new leads, quotes and prices a job, and hands the sale to Justin.', done:'✓ Austin\'s day, done', doneSub:'From a postcard to a signed job on Justin\'s desk, without leaving the sales portal.', steps:SALES_STEPS},
   admin:{title:'A day in the life of Joel (Master Admin)', name:'Joel', blurb:'Joel signs in with 2-step, approves pay and a card purchase, fixes QuickBooks and checks the reports.', done:'✓ Joel\'s day, done', doneSub:'Payroll, QuickBooks, spending and reports handled from one portal.', steps:ADMIN_STEPS},
   designer:{title:'A day in the life of Mia (designer)', name:'Mia', blurb:'Mia picks up a design, attaches the AutoCAD drawing and helps with selections.', done:'✓ Mia\'s day, done', doneSub:'Designs in, quantities ready for Austin to price.', steps:DESIGNER_STEPS},
-  field:{title:'A day in the life of Marco (crew lead)', name:'Marco', blurb:'Marco clocks in, sends the crew day, snaps a receipt, flags extra work and asks for the card.', done:'✓ Marco\'s day, done', doneSub:'No paper, no texts to the office, no receipts in the truck.', steps:FIELD_STEPS},
+  field:{title:'A day in the life of Leo (crew lead)', name:'Leo', blurb:'Leo confirms a new job, checks the job details, clocks in, works the checklist, finishes the phase and closes out a job.', done:'✓ Leo\'s day, done', doneSub:'No paper, no texts to the office, no receipts in the truck.', steps:FIELD_STEPS},
   client:{title:'An evening with Dana (client)', name:'Dana', blurb:'Dana signs in with a code, picks a finish and approves a change order from the couch.', done:'✓ Dana\'s evening, done', doneSub:'Two decisions made in five minutes, already on Justin\'s screen.', steps:CLIENT_STEPS},
   justin:{title:'A day in the life of Justin (project manager)', name:'Justin', blurb:'Justin Butler, project manager, signs in and runs the day from one screen.', done:'✓ Justin\'s day, done', doneSub:'Crews, subs, change orders and POs handled without a single call or spreadsheet.', steps:JUSTIN_STEPS},
   job:{title:'One job, start to finish', name:'the job', blurb:'Each click fills in the forms and shows where the work lands.', done:'✓ Done: first call to final invoice', doneSub:'Every screen you saw shared the same job record. Nothing was typed twice.', steps:STEPS},
