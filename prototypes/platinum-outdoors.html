@@ -532,6 +532,7 @@ function setView(v){ setRole(v==='client'?'client':'owner'); }
 function setRole(r){
   role=r; view = r==='client'?'client':'team'; page = ROLES[r].home;
   document.getElementById('roleSel').value=r; render(); window.scrollTo({top:0});
+  if(typeof tourStep!=='undefined' && tourStep===0) renderTour();
 }
 function pickJob(id){ id=+id; if(id===2){useJob(1);go('proposal')} else if(DATA[id]){useJob(id);go('estimate')} else toast('In this demo, the Henderson, Alvarez and walkthrough jobs are fully built out.'); }
 function render(){ renderNav(); document.getElementById('tradBtn').classList.toggle('on',page==='trad'||page==='reqdoc'||page==='offer'); document.getElementById('ovBtn').classList.toggle('on',page==='overview'||page==='infra'); document.getElementById('coBtn').classList.toggle('on',page==='company'); document.getElementById('adBtn').classList.toggle('on',role==='admin'); document.getElementById('main').innerHTML = (PAGES[page]||PAGES.jobs)(); }
@@ -551,7 +552,7 @@ PAGES.leads = () => {
   const allPicked = newOnes.length && newOnes.every(l=>leadPick.has(l.id));
   const act = l => l.st==='new' ? `<input type="checkbox" aria-label="Select ${l.o}" ${leadPick.has(l.id)?'checked':''} onchange="toggleLead(${l.id})">`
     : l.st==='mailed' ? `<button class="btn sm" onclick="leadTo(${l.id},'responded')">They called</button>`
-    : l.st==='responded' ? `<button class="btn sm primary" onclick="bookLead(${l.id})">Book estimate</button>`
+    : l.st==='responded' ? `<button class="btn sm primary" onclick="bookLead(${l.id})">Request a design</button>`
     : l.st==='booked' ? `<button class="btn sm" onclick="go('jobs')">Open job</button>` : '';
   return `<div class="row between"><div><h1>Leads</h1><p class="sub">New homeowners in your service area, found every week from public records. You reach them first, before they start searching.</p></div>
     <span class="pill p-green">Real county records</span></div>
@@ -890,8 +891,9 @@ function sendMailer(){
 function leadTo(id,st){ const l=leads.find(x=>x.id===id); l.st=st; render(); toast(`${l.o} marked as responded.`); }
 function bookLead(id){
   const l=leads.find(x=>x.id===id); l.st='booked';
-  jobs.push({id:jobs.length+1, name:`${l.o.split(' ').pop()} Backyard`, client:l.o, city:l.city, status:'Estimating', value:l.val, thumb:'linear-gradient(135deg,#d8cdb6,#9c8a6a)'});
-  render(); toast(`Estimate booked. "${l.o.split(' ').pop()} Backyard" was added to Jobs.`);
+  jobs.push({id:Math.max(...jobs.map(j=>j.id))+1, name:`${l.o.split(' ').pop()} Backyard`, client:l.o, city:l.city, status:'Lead', value:l.val, thumb:'linear-gradient(135deg,#d8cdb6,#9c8a6a)'});
+  const qid='Q-20'+(60+id); if(!QUOTES.some(x=>x.id===qid)) QUOTES.unshift({id:qid, client:l.o+' (new homeowner)', city:l.city, scope:'New-build backyard', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:40000});
+  selQ=qid; go('quotes'); toast(`${l.o} added to your pipeline. Add the site-visit notes, then request a design.`);
 }
 
 const STAGES = ['Lead','Estimating','Proposal sent','Sold','In progress','Complete'];
@@ -1237,10 +1239,10 @@ PAGES.qbo = () => `<div class="row between"><div><h1>QuickBooks sync</h1><p clas
 function fixQbo(i){ QBO_LOG[i].st='Synced'; QBO_LOG[i].note=''; render(); toast('Cost code set to Turf & Planting. Synced to QuickBooks.'); }
 
 // ---------- quotes + design workflow ----------
-const QSTAGES = ['Request','Design','Pricing','Review','Sent','Signed','In production'];
+const QSTAGES = ['Request','Design','Pricing','Sent','Signed','In production'];
 const QUOTES = [
   {id:'Q-2041', client:'Avery Lopez', city:'Gilbert', scope:'Pergola, pavers, turf + fire pit', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:45000},
-  {id:'Q-2038', client:'Drew Carter', city:'Mesa', scope:'Pool deck pavers + shade structure', stage:'Design', designer:'Mia R.', specs:['Pool deck ~900 sf','Shade 12×20 ft','Budget around $50k'], files:[], takeoff:[], lines:[], val:49800, budget:50000},
+  {id:'Q-2038', client:'Drew Carter', city:'Mesa', scope:'Pool deck pavers + shade structure', stage:'Design', designNew:true, designer:'Mia R.', specs:['Pool deck ~900 sf','Shade 12×20 ft','Budget around $50k'], files:[], takeoff:[], lines:[], val:49800, budget:50000},
   {id:'Q-2035', client:'Riley Brooks', city:'Chandler', scope:'Front yard xeriscape + lighting', stage:'Sent', designer:'Mia R.', specs:[], files:[{n:'Brooks_frontyard_v2.pdf',t:'PDF'}], takeoff:[], lines:[], val:18400, budget:15000},
   {id:'Q-2033', client:'Jamie Ortiz', city:'Queen Creek', scope:'Turf, putting green + BBQ island', stage:'Signed', designer:'Mia R.', specs:[], files:[{n:'Ortiz_backyard_v3.dwg',t:'DWG'}], takeoff:[], lines:[], val:36900, budget:38000},
 ];
@@ -1284,32 +1286,45 @@ function budgetPanel(q){
 }
 function setBudget(id,v){ const q=QUOTES.find(x=>x.id===id); q.budget = Math.max(0,parseFloat(v)||0) || null; render(); if(q.budget) toast(`Client budget saved: ${fmt(q.budget)}.`); }
 const QACT = {
-  Request:['Send specs to designer','specsOut'], Design:['Attach AutoCAD design','attachDwg'], Pricing:['Price it from the cost book','priceIt'],
-  Review:['Owner approves + sends to client','approveQ'], Sent:['Client signs (demo)','signQ'], Signed:['Save + push to production','pushProd'],
+  Request:['Request a design','specsOut'], Design:['Attach drawing + send to sales','attachDwg'], Pricing:['Send proposal to client','approveQ'],
+  Sent:['Client signs (demo)','signQ'], Signed:['Create the sold job','pushProd'],
 };
+// who does each stage: sales owns the client and the price; the designer owns the drawing and the quantities
+const QWHO = {Request:'owner', Design:'designer', Pricing:'owner', Sent:'owner', Signed:'owner'};
+const QWHO_NAME = {owner:'Austin (sales)', designer:'Mia (design)'};
+const qCan = q => role===QWHO[q.stage] || role==='admin';
+function qAlert(){ const d=role==='designer', list=QUOTES.filter(x=>d?x.designNew:x.readyNew&&x.stage==='Pricing'); if(!list.length||!['designer','owner','admin'].includes(role)) return '';
+  const x=list[0]; return `<div class="card" id="qAlert" style="background:#0b3b2e;color:#fff;border:0;margin-bottom:14px"><div class="row between" style="gap:10px;flex-wrap:wrap"><div>
+    <div class="small" style="color:#9ff0d2;font-weight:700;letter-spacing:.5px">🔔 ${d?'NEW DESIGN REQUESTED · FROM AUSTIN':'DESIGN READY · PRICE IT AND SEND'}</div>
+    <strong style="font-size:17px">${x.client}: ${x.scope}</strong><div class="small" style="color:#cfe9df">${x.id} · ${x.city}${d?' · specs, photos and site notes attached':' · quantities and costs are in, from Mia'}${list.length>1?` · +${list.length-1} more`:''}</div></div>
+    <button class="btn" style="background:#5fe0b5;border-color:#5fe0b5;color:#06281f" onclick="selQ='${x.id}';${d?`QUOTES.find(y=>y.id==='${x.id}').designNew=false;`:''}render();document.getElementById('qdetail').scrollIntoView({behavior:'smooth'})">${d?'Start the design →':'Price it →'}</button></div></div>`; }
 PAGES.quotes = () => {
+  const mine = x => role!=='designer'||x.designer||x.designNew;
+  if(!QUOTES.some(x=>x.id===selQ&&mine(x))) selQ=(QUOTES.find(x=>x.designNew)||QUOTES.find(mine)||QUOTES[0]).id;
   const q = QUOTES.find(x=>x.id===selQ) || QUOTES[0];
   const si = QSTAGES.indexOf(q.stage);
   const act = QACT[q.stage];
   return `<div class="row between"><div><h1>${role==='designer'?'Design queue':'Quotes & design'}</h1><p class="sub">From the first site visit to a signed quote. Saving a signed quote pushes it straight into production: no retyping.</p></div>
-    <button class="btn primary" onclick="newQuote()">+ New quote request</button></div>
+    ${role==='designer'?'':'<button class="btn primary" onclick="newQuote()">+ New quote request</button>'}</div>
+  ${qAlert()}
   <div class="grid qgrid">
     <div class="card"><h2>${role==='designer'?'Assigned to design':'All quotes'}</h2>
-      ${QUOTES.map(x=>`<div class="qrow ${x.id===q.id?'on':''}" onclick="selQ='${x.id}';render();if(innerWidth<900)document.getElementById('qdetail').scrollIntoView({behavior:'smooth'})"><div class="row between"><strong>${x.client}</strong><span class="pill ${x.stage==='In production'?'p-green':x.stage==='Design'?'p-amber':'p-blue'}">${x.stage}</span></div>
-        <div class="small muted">${x.id} · ${x.city} · ${x.scope}</div><div class="row between small" style="margin-top:3px"><span>${qVal(x)?fmt(qVal(x)):'Not priced yet'}${x.budget?` · budget ${fmt(x.budget)}`:''}</span>${budgetFit(x)?`<span class="pill ${budgetFit(x).v[1]}" style="font-size:11px">${budgetFit(x).v[0].replace(' margin','')}</span>`:''}</div></div>`).join('')}
+      ${QUOTES.filter(x=>role!=='designer'||x.designer||x.designNew).map(x=>`<div class="qrow ${x.id===q.id?'on':''}" onclick="selQ='${x.id}';render();if(innerWidth<900)document.getElementById('qdetail').scrollIntoView({behavior:'smooth'})"><div class="row between"><strong>${x.client}</strong><span class="pill ${x.stage==='In production'?'p-green':x.stage==='Design'?'p-amber':'p-blue'}">${x.stage}</span></div>
+        <div class="small muted">${x.id} · ${x.city} · ${x.scope}</div><div class="row between small" style="margin-top:3px">${role==='designer'?`<span>${x.designNew?'🔔 New request':x.stage==='Design'?'In design':'Sent to sales'}</span>`:`<span>${qVal(x)?fmt(qVal(x)):'Not priced yet'}${x.budget?` · budget ${fmt(x.budget)}`:''}</span>${budgetFit(x)?`<span class="pill ${budgetFit(x).v[1]}" style="font-size:11px">${budgetFit(x).v[0].replace(' margin','')}</span>`:''}`}</div></div>`).join('')}
     </div>
-    <div class="card" id="qdetail"><div class="row between"><div><div class="small muted">${q.id} · ${q.city}, AZ</div><h2 style="margin:2px 0 0">${q.client}: ${q.scope}</h2></div><strong>${qVal(q)?fmt(qVal(q)):''}</strong></div>
+    <div class="card" id="qdetail"><div class="row between"><div><div class="small muted">${q.id} · ${q.city}, AZ</div><h2 style="margin:2px 0 0">${q.client}: ${q.scope}</h2></div><strong>${role!=='designer'&&qVal(q)?fmt(qVal(q)):''}</strong></div>
       <div class="qsteps">${QSTAGES.map((s,i)=>`<span class="${i<si?'done':i===si?'now':''}">${i<si?'✓ ':''}${s}</span>`).join('')}</div>
-      ${act?`<div class="row mt">${si>0?`<button class="btn" onclick="startOverQ('${q.id}')" title="Clear this quote and go back to the request">↺ Start over</button><button class="btn" id="qBack" onclick="stepBackQ('${q.id}')">← Back a step</button>`:''}<button class="btn primary" id="qAct" onclick="${act[1]}('${q.id}',this)">${act[0]}</button><span class="small muted">${q.stage==='Request'?'Site-visit notes + photos go to the designer':q.stage==='Design'?'Quantities are read from the drawing layers':q.stage==='Pricing'?'Quantities × your cost book, then you set the price':q.stage==='Review'?'Set your prices below and check the margin before it goes out':q.stage==='Sent'?'Client e-signs from their phone':'Creates the job, budget, schedule and POs'}</span></div>`:''}
+      ${act?`<div class="row mt">${si>0?`<button class="btn" onclick="startOverQ('${q.id}')" title="Clear this quote and go back to the request">↺ Start over</button><button class="btn" id="qBack" onclick="stepBackQ('${q.id}')">← Back a step</button>`:''}${qCan(q)?`<button class="btn primary" id="qAct" onclick="${act[1]}('${q.id}',this)">${act[0]}</button><span class="small muted">${q.stage==='Request'?'Site-visit notes, photos and budget go to the design queue':q.stage==='Design'?'Quantities are read from the drawing; costs fill in from the cost book':q.stage==='Pricing'?'Set your prices below and check the margin, then send':q.stage==='Sent'?'Client e-signs from their phone':'Creates the sold job, ready to hand to Justin'}</span>`
+        :`<span class="pill p-grey">⏳ With ${QWHO_NAME[QWHO[q.stage]]}</span>${roleLink(QWHO[q.stage],'quotes',`Do this step as ${QWHO[q.stage]==='designer'?'Mia':'Austin'}`)}`}</div>`:''}
       ${q.designer?`<div class="small mt">Designer: <strong>${q.designer}</strong></div>`:''}
-      <div class="field" style="margin-top:14px"><label for="q_budget">Client's anticipated budget</label>
+      ${role==='designer'?'':`<div class="field" style="margin-top:14px"><label for="q_budget">Client's anticipated budget</label>
         <div class="row"><input class="txt" id="q_budget" type="number" min="0" step="500" placeholder="Click to fill (demo)" value="${q.budget||''}" style="max-width:200px" onchange="setBudget('${q.id}',this.value)">
         <span class="small muted">What the client said they want to spend</span></div></div>
-      ${budgetPanel(q)}
+      ${budgetPanel(q)}`}
       ${q.specs.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design specs</h3><ul class="small" style="margin:0;padding-left:18px;line-height:1.7">${q.specs.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
       ${q.files.length?`<h3 style="font-size:14px;margin:16px 0 4px">Design files</h3>${q.files.map(f=>`<div class="file clickable" role="button" tabindex="0" onclick="openDrawing('${q.id}','${f.t}')"><span class="ext">${f.t}</span>${f.n}<span class="small muted" style="margin-left:auto">${f.t==='DWG'?'AutoCAD drawing':'Plan set'} · click to open</span></div>`).join('')}`:''}
       ${q.takeoff.length?`<h3 style="font-size:14px;margin:16px 0 4px">Takeoff pulled from the drawing</h3><div class="tablewrap"><table><thead><tr><th>From layer</th><th class="r">Qty</th><th>Unit</th></tr></thead><tbody>${q.takeoff.map(t=>`<tr><td>${t.item}</td><td class="r">${t.q.toLocaleString()}</td><td>${t.u}</td></tr>`).join('')}</tbody></table></div>`:''}
-      ${q.lines.length?qPriceTable(q):''}
+      ${q.lines.length&&role!=='designer'?qPriceTable(q):q.lines.length?'<p class="small pos" style="margin:14px 0 0">✓ Quantities sent to Austin. Costs filled in from the cost book; sales sets the price.</p>':''}
       ${q.jobId?`<h3 style="font-size:14px;margin:16px 0 4px">Pushed to production</h3>${q.made.map(m=>`<div class="check"><b>✓</b>${m}</div>`).join('')}
         <div class="row mt"><button class="btn sm" onclick="setRole('owner');go('jobs')">See it on the Jobs board</button><button class="btn sm" onclick="setRole('production');go('calendar')">See it on the crew calendar</button></div>`:''}
       <p class="small muted" style="margin:16px 0 0">AutoCAD: the app reads quantities from the DWG/DXF the designer saves (areas and counts by layer). Which layers and blocks to read is set with your designer in discovery.</p>
@@ -1362,7 +1377,7 @@ function cbSet(i,k,v){ const c=COSTBOOK[i]; c[k]=Math.max(0,parseFloat(v)||0); c
 
 // priced quote: one cost per line from the cost book (labor + materials), you type your price, margin updates as you type
 const qMargin = (p,c) => p>0 ? (p-c)/p : 0;
-function qPriceTable(q){ const edit = q.stage==='Review', C=q.lines.reduce((a,l)=>a+lineCost(l),0), P=qVal(q), m=qMargin(P,C);
+function qPriceTable(q){ const edit = q.stage==='Pricing' && qCan(q), C=q.lines.reduce((a,l)=>a+lineCost(l),0), P=qVal(q), m=qMargin(P,C);
   const mcell = (p,c) => { const v=qMargin(p,c); return `<span class="${v<0?'neg':v<TARGET_M?'':'pos'}" style="${v>=0&&v<TARGET_M?'color:var(--warn)':''}">${pct(v*100)}</span>`; };
   return `<div class="row between" style="margin:16px 0 4px;gap:8px;flex-wrap:wrap"><h3 style="font-size:14px;margin:0">Priced quote</h3><span class="small muted">${edit?'Type your price on any line. Margin updates as you type.':'Locked once it\'s sent to the client.'}</span></div>
   <div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Labor / sub</th><th class="r">Materials</th><th class="r">Your cost</th><th class="r">Your price</th><th class="r">Margin</th></tr></thead><tbody>
@@ -1382,22 +1397,22 @@ function stepBackQ(id){
   const q=QUOTES.find(x=>x.id===id), i=QSTAGES.indexOf(q.stage); if(i<=0||q.stage==='In production') return;
   const to=QSTAGES[i-1];
   if(q.stage==='Design'){ q.specs=[]; q.designer=null; }
-  if(q.stage==='Pricing'){ q.files=[]; q.takeoff=[]; }
-  if(q.stage==='Review'){ q.lines=[]; }
+  if(q.stage==='Pricing'){ q.files=[]; q.takeoff=[]; q.lines=[]; }
   q.stage=to; render(); toast(`Moved back to ${to}.`);
 }
 async function busy(b,label){ if(b){ b.disabled=true; b.textContent=label; } await wait(600); }
 async function specsOut(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…');
   q.specs=['Backyard ~42×60 ft, north-facing, gentle slope to the east','Attached pergola 14×16 ft off the patio door','Pavers about 520 sf, seat wall along the back','Turf about 700 sf including a dog run','Gas fire pit; budget around $45k','Site photos + measurements attached'];
-  q.designer='Mia R.'; q.stage='Design'; render(); toast('Specs and site photos sent to Mia. It\'s in Mia\'s design queue.'); }
+  q.designer='Mia R.'; q.stage='Design'; q.designNew=true; render(); toast('Design requested. It\'s in Mia\'s design queue as a new request.'); }
 async function attachDwg(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Reading drawing…'); const last=q.client.split(' ').pop();
   q.files=[{n:`${last}_backyard_v1.dwg`,t:'DWG'},{n:`${last}_backyard_v1.pdf`,t:'PDF'}];
   q.takeoff=[{item:'PAVERS (area)',q:524,u:'sf'},{item:'WALLS (length)',q:18,u:'lf'},{item:'TURF (area)',q:710,u:'sf'},{item:'DEMO (area)',q:1240,u:'sf'},{item:'PERGOLA (block)',q:1,u:'ea'},{item:'FIREPIT (block)',q:1,u:'ea'},{item:'LIGHT (blocks)',q:12,u:'ea'}];
-  q.stage='Pricing'; render(); toast('Design attached. 7 quantities pulled from the drawing layers.'); }
+  q.lines=[cbLine('demo',1240,45),cbLine('pav',524,50),cbLine('wall',18,40),cbLine('turf',710,45),cbLine('perg',1,35),cbLine('fire',1,45),cbLine('lite',12,60)];
+  q.stage='Pricing'; q.readyNew=true; q.designNew=false; render(); toast('Drawing attached. 7 quantities read and costs filled in from the cost book. Sent back to Austin to price.'); }
 async function priceIt(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Pricing…');
   q.lines=[cbLine('demo',1240,45),cbLine('pav',524,50),cbLine('wall',18,40),cbLine('turf',710,45),cbLine('perg',1,35),cbLine('fire',1,45),cbLine('lite',12,60)];
-  q.stage='Review'; render(); toast(`Priced at ${fmt(qVal(q))} from your cost book.`); }
-async function approveQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…'); q.stage='Sent'; render(); toast(`Approved by Austin and emailed to ${q.client.split(' ')[0]}.`); }
+  q.stage='Pricing'; render(); toast(`Priced at ${fmt(qVal(q))} from your cost book.`); }
+async function approveQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Sending…'); q.stage='Sent'; q.readyNew=false; render(); toast(`Proposal sent to ${q.client} to review and sign.`); }
 async function signQ(id,b){ const q=QUOTES.find(x=>x.id===id); await busy(b,'Signing…'); q.stage='Signed'; render(); toast(`${q.client} signed. Ready to push to production.`); }
 async function pushProd(id,b){
   const q=QUOTES.find(x=>x.id===id); await busy(b,'Pushing…');
@@ -1427,8 +1442,9 @@ PAGES.sales = () => {
   const qIn = QUOTES.filter(q=>q.stage==='Request').length, qDes = QUOTES.filter(q=>q.stage==='Design').length;
   const follow = [
     ...(leads.filter(l=>l.st==='new').length?[['📬',`${leads.filter(l=>l.st==='new').length} new homeowner leads`,'New-build closings this month, ready for a postcard','leads']]:[]),
-    ...(qIn?[['📝',`${qIn} quote request${qIn>1?'s':''} to send to the designer`,'Specs go to design in one click','quotes']]:[]),
-    ...(qDes?[['🎨',`${qDes} in design`,'You get a ping when the drawing is ready to price','quotes']]:[]),
+    ...QUOTES.filter(q=>q.stage==='Pricing').map(q=>['🔔',`Design ready to price: ${q.client}`,'Mia sent it back with quantities and costs. Set your price and send.','quotes']),
+    ...(qIn?[['📝',`${qIn} quote request${qIn>1?'s':''} waiting to request a design`,'Add the site-visit notes and send them to Mia','quotes']]:[]),
+    ...(qDes?[['🎨',`${qDes} with Mia in design`,'You get an alert when it comes back','quotes']]:[]),
     ...jobs.filter(j=>j.status==='Proposal sent').map(j=>['✉️',`${j.name}: proposal out, not signed`,`${j.client} · resend or call to close it`,'proposal']),
     ...sold.map(j=>['🤝',`${j.name} is sold: hand it to Justin`,'Contract signed, deposit invoiced','handoff']),
   ];
@@ -1440,6 +1456,8 @@ PAGES.sales = () => {
     <div class="card stat"><div class="k">Close rate (90 days)</div><div class="v">31%</div><div class="d muted">quotes sent → signed</div></div>
     <div class="card stat"><div class="k">Ready to hand off</div><div class="v ${sold.length?'':'pos'}">${sold.length}</div><div class="d muted">sold, not yet with Justin</div></div>
   </div>
+  <div class="card mt" style="border-left:4px solid var(--accent)"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">Leads engine <span class="pill p-blue">Phase 2</span></h2><button class="btn sm" onclick="go('leads')">See the leads →</button></div>
+    <p class="small" style="margin:8px 0 0">New homeowners near you every month, from public county records: <strong>${leads.filter(l=>l.st==='new').length} new</strong> · ${leads.filter(l=>l.st==='mailed').length} mailed · ${leads.filter(l=>l.st==='responded').length} called back. When one calls, click <strong>Request a design</strong> and it moves into your pipeline and Mia's queue.</p></div>
   <div class="card mt"><h2>Your pipeline</h2><div class="grid g4" style="gap:10px;margin-top:8px">${SALES_ST.map(st=>{ const js=jobs.filter(j=>j.status===st&&!(st==='Sold'&&j.handed));
     return `<div style="background:var(--bg);border-radius:10px;padding:10px;min-height:120px"><div class="row between"><strong class="small" style="text-transform:uppercase;letter-spacing:.6px">${st}</strong><span class="small muted">${js.length}</span></div>
       ${js.map(j=>`<div class="card" id="jc-${j.id}" style="padding:10px 12px;margin-top:8px;cursor:pointer" onclick="${st==='Sold'?"go('handoff')":`pickJob(${j.id})`}"><strong class="small">${j.name}</strong><div class="small muted">${j.client} · ${j.city}</div><div class="small" style="margin-top:4px"><strong>${fmt(jobValue(j))}</strong></div></div>`).join('')||'<div class="small muted" style="margin-top:8px">None</div>'}</div>`; }).join('')}</div>
@@ -2600,10 +2618,10 @@ const SALES_STEPS = [
   {t:'A customer calls', who:'9:15 AM · Quotes & design', d:'Taylor Reyes saw the postcard and called. Austin opens a quote request with the site-visit notes.', run: async()=>{
     asRole('owner','quotes'); if(!QUOTES.some(x=>x.id==='Q-2050')) QUOTES.unshift({id:'Q-2050', client:'Taylor Reyes', city:'Queen Creek', scope:'Pavers, turf, fire pit and lighting', stage:'Request', designer:null, specs:[], files:[], takeoff:[], lines:[], jobId:null, budget:null, hint:42000});
     selQ='Q-2050'; render(); await wait(200); flash('#qdetail'); toast('Quote request Q-2050 opened for Taylor Reyes.'); }},
-  {t:'Send the specs to design', who:'9:30 AM · Quotes & design', d:'Site-visit notes and photos go to the designer in one click. Austin’s part is done until the drawing is ready.', run: async()=>{
+  {t:'Request a design', who:'9:30 AM · Quotes & design', d:'Site-visit notes, photos and the budget go to Mia as a new design request. Austin’s part waits until the design comes back.', run: async()=>{
     asRole('owner','quotes'); const q=QUOTES.find(x=>x.id==='Q-2050')||QUOTES[0]; selQ=q.id; render(); await wait(300); await specsOut(q.id,document.getElementById('qAct')); flash('#qdetail'); }},
-  {t:'Price it and check the margin', who:'2:00 PM · Quotes & design', d:'The drawing came back with quantities. Austin types the pergola price higher and watches the margin turn green.', run: async()=>{
-    asRole('owner','quotes'); const q=QUOTES.find(x=>x.id===selQ); await attachDwg(q.id,null); await priceIt(q.id,null); await wait(300);
+  {t:'Design comes back: price it', who:'2:00 PM · Quotes & design', d:'Mia sent it back with quantities, and costs are already in from the cost book. Austin types the pergola price higher and watches the margin turn green.', run: async()=>{
+    asRole('owner','quotes'); const q=QUOTES.find(x=>x.id===selQ); await attachDwg(q.id,null); await wait(300);
     const el=[...document.querySelectorAll('#qdetail input.num')].find(x=>(x.getAttribute('aria-label')||'').includes('pergola'));
     if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); await wait(500); await typeNum(el,'11500'); flash(el.closest('tr')); } }},
   {t:'Send it, and the client signs', who:'2:10 PM · client e-signs', d:'Austin approves and sends it. The client signs from their phone, and the signed quote becomes a sold job with no retyping.', run: async()=>{
@@ -2631,9 +2649,9 @@ const ADMIN_STEPS = [
 ];
 const DESIGNER_STEPS = [
   {t:'Mia signs in', who:'8:30 AM · Mia R. · designer', d:'Only the design queue and selections: no prices, no payroll.', run: async()=>{ await loginStep('designer'); }},
-  {t:'Open the next design', who:'8:35 AM · Design queue', d:'Austin’s site-visit specs and photos are waiting on the quote. No email chain to dig through.', run: async()=>{
-    asRole('designer','quotes'); const q=QUOTES.find(x=>x.stage==='Design')||QUOTES[0]; selQ=q.id; render(); await wait(200); flash('#qdetail'); }},
-  {t:'Attach the AutoCAD drawing', who:'1:00 PM · Design queue', d:'Mia saves the drawing to the quote. The app reads the quantities from its layers, ready for Austin to price.', run: async()=>{
+  {t:'A new design request lands', who:'8:35 AM · Design queue', d:'An alert at the top: Austin requested a design. The specs, photos and site notes are on the quote. No email chain to dig through.', run: async()=>{
+    asRole('designer','quotes'); await wait(200); flash('#qAlert'); await wait(900); const q=QUOTES.find(x=>x.designNew)||QUOTES.find(x=>x.stage==='Design')||QUOTES[0]; q.designNew=false; selQ=q.id; render(); flash('#qdetail'); }},
+  {t:'Attach the drawing, send it back', who:'1:00 PM · Design queue', d:'Mia saves the drawing to the quote. Quantities are read from its layers, costs fill in from the cost book, and Austin gets a "design ready" alert. Mia never sees prices.', run: async()=>{
     asRole('designer','quotes'); const q=QUOTES.find(x=>x.id===selQ); if(q.stage==='Design') await attachDwg(q.id,null); flash('#qdetail'); }},
   {t:'Check the drawing', who:'1:10 PM · AutoCAD viewer', d:'Each layer (pavers, walls, turf, lights) is what the takeoff reads. Click a layer to hide it.', run: async()=>{
     asRole('designer','quotes'); openDrawing(selQ,'DWG'); await wait(600); toast('Phase 2: quantities read straight from the drawing. In the MVP they are typed in.'); }},
