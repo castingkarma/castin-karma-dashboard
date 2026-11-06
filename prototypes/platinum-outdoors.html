@@ -266,6 +266,9 @@ body.dragging{cursor:grabbing;user-select:none}
 .oplan.mvp{border:2px solid #9fb0c2}
 .otag.mvpt{background:#1f2a37;color:#f3dc9b}
 .navkey{padding:12px 10px 0;margin-top:8px;border-top:1px solid var(--line);line-height:1.5}
+.segtog{display:inline-flex;background:#eef0f3;border-radius:999px;padding:3px;gap:2px}
+.segtog button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
+.segtog button.on{background:#1f2a37;color:#fff}
 .mvpb{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;padding:1px 7px;border-radius:999px;background:#1f2a37;color:#f3dc9b;vertical-align:middle;margin-left:6px}
 tr.mvprow td{background:#fbf7ea}
 .onext{margin-top:12px;border:1px dashed #9fb0c2;border-radius:10px;padding:10px 12px;background:#f8fafc}
@@ -1875,7 +1878,7 @@ const INFRA = [
     ['Receipt + document reading (Claude AI)','Reads vendor, amount and date from receipt photos','Pay per use 💲',2,10,'About a penny or less per receipt. Turned on only with an approved budget.'],
     ['E-signature','Client accepts proposals + change orders','Built in',0,0,'Typed-name e-sign with time, IP and device recorded. DocuSign (~$25+/mo per sender) only if they want it.',1],
     ['Maps','Job addresses, clock-in location','Free tier',0,0,'Well within the free monthly allowance.'],
-    ['AutoCAD file reading','Pulls quantities from drawings','Free with DXF export',0,0,'Free if the designer exports DXF. Reading raw DWG directly may need a paid converter. Confirm in discovery.',1],
+    ['AutoCAD file reading','Pulls quantities from drawings','Free with DXF export',0,0,'Comes with design + CAD integration in Phase 2. Free if the designer exports DXF. Reading raw DWG directly may need a paid converter. Confirm in discovery.'],
   ]],
   ['Optional', [
     ['Stripe (online payments)','Card + bank (ACH) payments from the client portal','No monthly fee',0,0,'Cards about 2.9% + 30¢. Bank transfer about 0.8% (capped at $5). Fees can be passed to the client. QuickBooks Payments is the alternative.'],
@@ -1884,11 +1887,60 @@ const INFRA = [
     ['Point-in-time restore','Roll the database back to any minute','Supabase add-on',0,100,'Only if Joel wants more than daily backups.'],
   ]],
 ];
+// ---------- infra page toggle: accounts + costs, or what the MVP and each phase deliver ----------
+let infraTab = 'infra';
+const infraHead = () => `<div class="row between noprint" style="gap:10px;flex-wrap:wrap"><button class="btn" onclick="go('overview')">← Back to Project overview</button>
+  <div class="segtog" role="tablist">${[['infra','Infrastructure'],['phases','MVP + phase build']].map(([k,l])=>`<button role="tab" aria-selected="${infraTab===k}" class="${infraTab===k?'on':''}" onclick="infraTab='${k}';render();window.scrollTo({top:0})">${l}</button>`).join('')}</div></div>`;
+const PHASE_MVP = [
+  ['Quotes + design','Quote requests, specs to the designer, drawings attached to the quote'],
+  ['Estimates + change orders','Priced from your cost book and markups; client approves changes online'],
+  ['Proposals + e-sign','Branded proposal the client signs online'],
+  ['Client portal','Progress, approvals, selections and documents in one place'],
+  ['Selections','Clients pick finishes; you see the budget effect'],
+  ['Jobs board','Every job from first call to final walkthrough'],
+  ['Crew calendar + job schedule','Drag-and-drop scheduling, crew confirmations, conflict alerts'],
+  ['Crew + subcontractor accounts','Companies, crews, contacts, insurance dates and a score from real jobs'],
+  ['Purchase orders + job costing','Budget vs. actual on every job while it runs'],
+  ['Logins for team + clients','Roles for owners, production, designer, crews and clients'],
+];
+const PHASES = [
+  {n:'Phase 2', t:'Money, admin + growth', when:'Monthly plans: by month 6', items:[
+    ['Master Admin portal + QuickBooks','Joel’s finance reports, payroll approval and two-way QuickBooks sync'],
+    ['Online payments (Stripe)','Clients pay deposits and progress payments by card or bank from the portal'],
+    ['Company cards with admin approval','Crew cards in Apple / Google Pay, opened one approved purchase at a time'],
+    ['Time + pay, field app + receipts','Crews clock in on their phones, pay figures itself, receipts land on the job'],
+    ['Leads engine','New homeowners every month from public records, with mailers and tracking'],
+    ['Design + CAD integration','Quantities read straight from AutoCAD drawings into the estimate']]},
+  {n:'Phase 3', t:'Iterations', when:'Ongoing, picked together', items:[
+    ['Maintenance plans','Recurring care plans for steady monthly income'],
+    ['Reviews + referrals','Automatic asks when a job wraps up'],
+    ['Client texts + updates','"Crew on the way", phase started, decision needed'],
+    ['HOA approval packets','Generated from the estimate'],
+    ['AI-assisted estimating','Draft an estimate from site photos and notes'],
+    ['Owner dashboard + new branches','Margins, utilization and cash flow; a branch per new region']]},
+];
+const phasesPage = () => `${infraHead()}
+  <h1 class="mt">MVP + phase build</h1>
+  <p class="sub">What gets delivered first, and what follows. The MVP is a complete, working system on its own: it replaces JobTread.</p>
+  <div class="card" style="border:2px solid #1f2a37">
+    <div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0"><span class="mvpb" style="margin:0 8px 0 0;font-size:12px">MVP</span>One delivery · 3–4 months</h2><span class="pill p-green">Replaces JobTread</span></div>
+    <p class="small" style="margin:10px 0 0"><strong>When it's delivered, Platinum can</strong> take a job from the first call to the final walkthrough in one system: quote it, design it, price it, sign it, schedule the crews and subs, track the selections and change orders, and see the margin while the job runs.</p>
+    <div class="grid g2" style="gap:8px;margin-top:12px">${PHASE_MVP.map(([t,d])=>`<div class="check" style="align-items:flex-start;gap:8px;margin:0"><span class="pos" style="font-weight:700">✓</span><div><strong>${t}</strong><div class="small muted">${d}</div></div></div>`).join('')}</div>
+    <p class="small muted" style="margin:12px 0 0">Also included: your open jobs moved over from JobTread, team training, and running both side by side until you cancel JobTread.</p>
+  </div>
+  <div class="grid g2 mt">${PHASES.map(ph=>`<div class="card"><div class="row between" style="gap:8px;flex-wrap:wrap"><h2 style="margin:0">${ph.n} · ${ph.t}</h2><span class="pill ${ph.n==='Phase 2'?'p-blue':'p-grey'}">${ph.when}</span></div>
+    ${ph.items.map(([t,d])=>`<div class="todo"><div class="ic" style="background:${ph.n==='Phase 2'?'var(--info-soft)':'#eef0f3'}">+</div><div><strong>${t}</strong><div class="small muted">${d}</div></div></div>`).join('')}</div>`).join('')}</div>
+  <div class="card mt" style="border-left:4px solid var(--accent)"><h2>How the scope works</h2>
+    <div class="grid g2" style="gap:12px">
+      <div><strong>A one-time project</strong><div class="small" style="margin-top:4px">The MVP list above is the scope, and it stays fixed. Anything new is quoted on its own as a change, so the price and the date hold.</div></div>
+      <div><strong>A long-term partner (monthly plans)</strong><div class="small" style="margin-top:4px">More flexible. The phases are a plan, not a contract: priorities can move between them as the business learns what it needs most.</div></div>
+    </div></div>`;
 PAGES.infra = () => {
   const sum = (groups,i) => groups.reduce((a,[,rows])=>a+rows.reduce((b,r)=>b+r[i],0),0);
   const req = INFRA.slice(0,2), lo=sum(req,3), hi=sum(req,4);
   const mvp = INFRA.flatMap(g=>g[1]).filter(r=>r[6]), mlo=mvp.reduce((a,r)=>a+r[3],0), mhi=mvp.reduce((a,r)=>a+r[4],0);
-  return `<div class="row noprint"><button class="btn" onclick="go('overview')">← Back to Project overview</button></div>
+  if(infraTab==='phases') return phasesPage();
+  return `${infraHead()}
   <h1 class="mt">Infrastructure + monthly costs</h1>
   <p class="sub">Every account the real build needs. <strong>All of them are opened in Platinum Outdoors' name and paid on your card.</strong> We're added as a collaborator. List prices checked October 2026, confirmed again at signup.</p>
   <p class="small" style="margin:6px 0 0"><span class="mvpb" style="margin:0 4px 0 0">MVP</span> = needed to launch the MVP: <strong>${fmt(mlo)}–${fmt(mhi)} / month</strong>. Everything else is added when the feature it serves is built.</p>
